@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HouseNest — Find Your Home in Southwest Nigeria</title>
+<meta name="description" content="Nigeria's smartest rental platform for Ondo, Ekiti, Oyo, Osun and Kwara states. Verified listings, legal agreements, zero agent commission. Built for NYSC corpers and everyone relocating.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════ */
+:root {
+  --ink:       #0d1a0e;
+  --forest:    #1e3a20;
+  --moss:      #2d5c30;
+  --sage:      #4a7d4d;
+  --reed:      #7fb882;
+  --lime:      #a8d5ab;
+  --bone:      #f6f1e8;
+  --parchment: #ede5d4;
+  --sand:      #e0d4be;
+  --mist:      #f0ebe0;
+  --white:     #fdfaf4;
+  --clay:      #c2622a;
+  --copper:    #a5521f;
+  --ochre:     #d4a030;
+  --smoke:     #7a7870;
+  --ash:       #c8c4bc;
+  --error:     #dc3545;
+  --success:   #28a745;
+}
+
+/* ═══════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════ */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; }
+body {
+  font-family:'Outfit',sans-serif;
+  background:var(--white);
+  color:var(--ink);
+  line-height:1.6;
+  overflow-x:hidden;
+  min-height:100vh;
+}
+img { max-width:100%; height:auto; display:block; }
+button { font-family:inherit; cursor:pointer; }
+input, select, textarea { font-family:inherit; }
+a { color:inherit; text-decoration:none; }
+
+/* ═══════════════════════════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════════════════════════ */
+.t-display {
+  font-family:'Cormorant Garamond',serif;
+  font-weight:700; line-height:1.0;
+}
+.t-serif { font-family:'Cormorant Garamond',serif; }
+.t-mono { font-family:'Space Mono',monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.12em; }
+
+/* ═══════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════ */
+.container { max-width:1200px; margin:0 auto; padding:0 2rem; }
+.container-sm { max-width:720px; margin:0 auto; padding:0 2rem; }
+
+/* ═══════════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════════ */
+#nav {
+  position:fixed; top:0; left:0; right:0; z-index:900;
+  height:64px;
+  display:flex; align-items:center;
+  background:rgba(253,250,244,0.96);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(30,58,32,0.08);
+  transition:box-shadow 0.3s;
+}
+#nav.shadow { box-shadow:0 2px 20px rgba(13,26,14,0.1); }
+.nav-inner {
+  width:100%; max-width:1200px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 2rem;
+}
+.nav-logo {
+  display:flex; align-items:center; gap:0.5rem; cursor:pointer;
+}
+.nav-logo-mark {
+  width:32px; height:32px; border-radius:8px;
+  background:var(--forest); display:flex; align-items:center; justify-content:center;
+  font-family:'Cormorant Garamond',serif; font-size:0.95rem; font-weight:700; color:var(--bone);
+}
+.nav-logo-text {
+  font-family:'Cormorant Garamond',serif; font-size:1.3rem; font-weight:700; color:var(--forest);
+}
+.nav-logo-text span { color:var(--clay); }
+.nav-links { display:flex; align-items:center; gap:1.6rem; }
+.nav-link {
+  font-size:0.875rem; font-weight:500; color:var(--forest);
+  transition:color 0.2s; background:none; border:none; padding:0;
+}
+.nav-link:hover { color:var(--clay); }
+.nav-corper-badge {
+  background:var(--moss); color:white;
+  padding:0.25rem 0.75rem; border-radius:50px;
+  font-size:0.72rem; font-weight:700;
+}
+.nav-right { display:flex; align-items:center; gap:0.6rem; }
+.nav-btn-ghost {
+  border:1.5px solid rgba(30,58,32,0.2); background:none;
+  color:var(--forest); padding:0.45rem 1rem; border-radius:8px;
+  font-size:0.85rem; font-weight:600; transition:all 0.2s;
+}
+.nav-btn-ghost:hover { border-color:var(--clay); color:var(--clay); }
+.nav-btn-solid {
+  background:var(--forest); color:var(--bone); border:none;
+  padding:0.5rem 1.1rem; border-radius:8px;
+  font-size:0.85rem; font-weight:600; transition:all 0.2s;
+}
+.nav-btn-solid:hover { background:var(--clay); }
+.nav-avatar {
+  width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; font-size:0.9rem; color:white; cursor:pointer;
+  transition:transform 0.2s;
+}
+.nav-avatar:hover { transform:scale(1.08); }
+.nav-menu-btn {
+  display:none; background:none; border:none;
+  font-size:1.4rem; color:var(--forest); padding:0.2rem;
+}
+.nav-mobile-menu {
+  display:none; position:fixed; top:64px; left:0; right:0;
+  background:var(--white); border-bottom:1px solid var(--sand);
+  padding:1rem 2rem; flex-direction:column; gap:0.8rem;
+  z-index:899; box-shadow:0 4px 20px rgba(0,0,0,0.1);
+}
+.nav-mobile-menu.open { display:flex; }
+.mobile-nav-link {
+  font-size:0.95rem; font-weight:500; color:var(--forest);
+  background:none; border:none; text-align:left; padding:0.5rem 0;
+  border-bottom:1px solid var(--mist);
+}
+
+/* ═══════════════════════════════════════════════════
+   VIEWS (SPA routing)
+═══════════════════════════════════════════════════ */
+.view { display:none; min-height:100vh; padding-top:64px; }
+.view.active { display:block; }
+
+/* ═══════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════ */
+.hero {
+  background:var(--forest);
+  min-height:calc(100vh - 64px);
+  display:flex; flex-direction:column; justify-content:center;
+  position:relative; overflow:hidden;
+  padding:4rem 2rem 3rem;
+}
+.hero-bg-circles {
+  position:absolute; inset:0; pointer-events:none;
+}
+.hero-circle {
+  position:absolute; border-radius:50%;
+  background:radial-gradient(circle, rgba(74,125,77,0.25) 0%, transparent 70%);
+}
+.hero-circle-1 { width:600px; height:600px; top:-200px; right:-100px; }
+.hero-circle-2 { width:400px; height:400px; bottom:-100px; left:-50px; opacity:0.5; }
+.hero-dots {
+  position:absolute; inset:0;
+  background-image:radial-gradient(circle, rgba(168,213,171,0.12) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.hero-inner {
+  position:relative; z-index:1;
+  max-width:1200px; margin:0 auto; width:100%;
+  display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center;
+}
+.hero-label {
+  display:inline-flex; align-items:center; gap:0.6rem;
+  margin-bottom:1.5rem;
+  animation:fadeUp 0.6s ease both;
+}
+.hero-label-dot { width:8px; height:8px; border-radius:50%; background:var(--reed); animation:pulse 2s infinite; }
+.hero-label-text { font-family:'Space Mono',monospace; font-size:0.65rem; color:var(--reed); text-transform:uppercase; letter-spacing:0.15em; }
+.hero-h1 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2.8rem,5.5vw,5rem);
+  font-weight:700; line-height:0.95;
+  color:var(--bone);
+  animation:fadeUp 0.7s 0.08s ease both;
+}
+.hero-h1 em { font-style:italic; color:var(--reed); display:block; }
+.hero-sub {
+  margin-top:1.6rem; font-size:1rem; font-weight:300;
+  color:rgba(246,241,232,0.65); line-height:1.75; max-width:480px;
+  animation:fadeUp 0.7s 0.16s ease both;
+}
+.hero-search-wrap {
+  margin-top:2.5rem;
+  animation:fadeUp 0.7s 0.24s ease both;
+}
+.hero-search {
+  background:rgba(246,241,232,0.08);
+  border:1px solid rgba(246,241,232,0.15);
+  border-radius:14px; padding:6px;
+  display:flex; gap:4px; flex-wrap:wrap;
+  backdrop-filter:blur(10px);
+}
+.hs-field {
+  flex:1; min-width:130px; display:flex; align-items:center; gap:0.5rem;
+  padding:0.65rem 0.9rem;
+  border-right:1px solid rgba(246,241,232,0.1);
+}
+.hs-field:last-of-type { border-right:none; }
+.hs-field select, .hs-field input {
+  background:none; border:none; outline:none; width:100%;
+  color:var(--bone); font-family:'Outfit'; font-size:0.85rem; cursor:pointer;
+}
+.hs-field select option { background:var(--forest); color:var(--bone); }
+.hs-field select::placeholder,
+.hs-field input::placeholder { color:rgba(246,241,232,0.35); }
+.hs-icon { opacity:0.4; flex-shrink:0; }
+.hs-btn {
+  background:var(--clay); color:white; border:none;
+  padding:0.75rem 1.4rem; border-radius:10px;
+  font-size:0.9rem; font-weight:700; transition:all 0.2s;
+  white-space:nowrap; flex-shrink:0;
+}
+.hs-btn:hover { background:var(--copper); transform:scale(1.02); }
+.hero-stats {
+  margin-top:2.5rem; display:flex; gap:2rem; flex-wrap:wrap;
+  animation:fadeUp 0.7s 0.32s ease both;
+}
+.hero-stat-num {
+  font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:700;
+  color:var(--bone); line-height:1;
+}
+.hero-stat-label { font-size:0.72rem; color:rgba(246,241,232,0.4); margin-top:0.2rem; }
+.hero-right-visual {
+  animation:fadeIn 1s 0.3s ease both;
+  display:flex; flex-direction:column; gap:0.8rem;
+}
+.hero-card {
+  background:rgba(246,241,232,0.07);
+  border:1px solid rgba(246,241,232,0.12);
+  border-radius:16px; padding:1.2rem 1.4rem;
+  backdrop-filter:blur(10px);
+  transition:all 0.3s; cursor:pointer;
+}
+.hero-card:hover { background:rgba(246,241,232,0.11); transform:translateX(4px); }
+.hero-card-tag {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;
+  padding:0.2rem 0.6rem; border-radius:50px; margin-bottom:0.6rem;
+}
+.tag-corper { background:rgba(74,125,77,0.35); color:var(--lime); }
+.tag-verified { background:rgba(212,160,48,0.3); color:var(--ochre); }
+.tag-shortlet { background:rgba(48,96,192,0.3); color:#90b4f0; }
+.hero-card-name { font-weight:700; color:var(--bone); font-size:0.95rem; margin-bottom:0.2rem; }
+.hero-card-loc { font-size:0.78rem; color:rgba(246,241,232,0.5); margin-bottom:0.6rem; }
+.hero-card-price {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.4rem; font-weight:700; color:var(--clay);
+}
+.hero-card-price small { font-family:'Outfit'; font-size:0.72rem; color:rgba(246,241,232,0.4); font-weight:400; }
+.hero-city-ticker {
+  margin-top:1.5rem; overflow:hidden;
+  border-top:1px solid rgba(246,241,232,0.08); padding-top:1rem;
+}
+.ticker-inner {
+  display:flex; gap:2.5rem; animation:ticker 20s linear infinite;
+  white-space:nowrap;
+}
+.ticker-item { display:flex; align-items:center; gap:0.5rem; font-size:0.75rem; color:rgba(246,241,232,0.35); }
+.ticker-dot { width:5px; height:5px; border-radius:50%; background:var(--sage); flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════════
+   SECTION BASE
+═══════════════════════════════════════════════════ */
+.section { padding:5rem 0; }
+.section-alt { background:var(--parchment); }
+.section-dark { background:var(--forest); }
+.sec-eyebrow {
+  display:flex; align-items:center; gap:0.7rem; margin-bottom:0.8rem;
+}
+.sec-eyebrow-line { width:20px; height:1.5px; background:var(--clay); }
+.sec-eyebrow-text { font-family:'Space Mono'; font-size:0.65rem; color:var(--clay); text-transform:uppercase; letter-spacing:0.15em; }
+.sec-h2 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(2rem,3.5vw,3rem);
+  font-weight:700; color:var(--forest); line-height:1.05;
+}
+.sec-h2-light { color:var(--bone); }
+.sec-h2 em { font-style:italic; color:var(--clay); }
+.sec-sub { font-size:0.95rem; color:var(--smoke); line-height:1.75; max-width:540px; font-weight:300; margin-top:0.8rem; }
+.sec-sub-light { color:rgba(246,241,232,0.55); }
+
+/* ═══════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════ */
+.btn {
+  display:inline-flex; align-items:center; gap:0.5rem;
+  padding:0.7rem 1.5rem; border-radius:10px; border:none;
+  font-size:0.9rem; font-weight:700; transition:all 0.22s; cursor:pointer;
+}
+.btn-primary { background:var(--forest); color:var(--bone); }
+.btn-primary:hover { background:var(--clay); transform:translateY(-1px); box-shadow:0 6px 20px rgba(13,26,14,0.2); }
+.btn-clay { background:var(--clay); color:white; }
+.btn-clay:hover { background:var(--copper); transform:translateY(-1px); }
+.btn-outline { background:transparent; border:1.5px solid var(--forest); color:var(--forest); }
+.btn-outline:hover { background:var(--forest); color:var(--bone); }
+.btn-outline-light { background:transparent; border:1.5px solid rgba(246,241,232,0.3); color:rgba(246,241,232,0.8); }
+.btn-outline-light:hover { border-color:rgba(246,241,232,0.7); color:var(--bone); background:rgba(246,241,232,0.08); }
+.btn-ghost { background:transparent; color:var(--forest); padding-left:0; padding-right:0; }
+.btn-ghost:hover { color:var(--clay); }
+.btn-sm { padding:0.45rem 1rem; font-size:0.82rem; border-radius:8px; }
+.btn-full { width:100%; justify-content:center; }
+.btn-icon { padding:0.5rem; border-radius:8px; background:var(--mist); border:none; color:var(--smoke); transition:all 0.2s; }
+.btn-icon:hover { background:var(--sand); color:var(--forest); }
+
+/* ═══════════════════════════════════════════════════
+   FORMS
+═══════════════════════════════════════════════════ */
+.form-group { margin-bottom:1rem; }
+.form-label {
+  display:block; font-size:0.75rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.06em;
+  color:var(--forest); margin-bottom:0.45rem;
+}
+.form-input, .form-select, .form-textarea {
+  width:100%; padding:0.75rem 1rem;
+  border:1.5px solid var(--sand); border-radius:10px;
+  font-family:'Outfit'; font-size:0.9rem; color:var(--ink);
+  background:white; outline:none;
+  transition:border-color 0.2s, box-shadow 0.2s;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color:var(--moss); box-shadow:0 0 0 3px rgba(45,92,48,0.1);
+}
+.form-input.error, .form-select.error { border-color:var(--error); }
+.form-error { font-size:0.75rem; color:var(--error); margin-top:0.3rem; display:none; }
+.form-error.show { display:block; }
+.form-textarea { resize:vertical; min-height:100px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+.form-hint { font-size:0.75rem; color:var(--smoke); margin-top:0.3rem; }
+
+/* Toggles */
+.toggle-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:0.7rem 0; border-bottom:1px solid var(--mist);
+}
+.toggle-label { font-size:0.88rem; color:var(--forest); }
+.toggle-switch {
+  width:42px; height:24px; border-radius:50px;
+  position:relative; cursor:pointer; transition:background 0.2s;
+  border:none; outline:none; flex-shrink:0;
+}
+.toggle-switch.on { background:var(--moss); }
+.toggle-switch.off { background:var(--ash); }
+.toggle-switch::after {
+  content:''; position:absolute;
+  width:18px; height:18px; border-radius:50%; background:white;
+  top:3px; transition:left 0.2s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle-switch.on::after { left:21px; }
+.toggle-switch.off::after { left:3px; }
+
+/* ═══════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════ */
+.listing-card {
+  background:white; border-radius:16px;
+  border:1px solid var(--mist); overflow:hidden;
+  transition:all 0.3s; cursor:pointer;
+}
+.listing-card:hover {
+  transform:translateY(-5px);
+  box-shadow:0 16px 40px rgba(13,26,14,0.1);
+  border-color:transparent;
+}
+.listing-card-img {
+  height:190px; position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font-size:3rem;
+}
+.listing-card-img img {
+  width:100%; height:100%; object-fit:cover;
+  transition:transform 0.4s;
+}
+.listing-card:hover .listing-card-img img { transform:scale(1.05); }
+.listing-card-img .img-placeholder { font-size:3rem; }
+.listing-card-badges {
+  position:absolute; bottom:0.7rem; left:0.7rem;
+  display:flex; gap:0.4rem;
+}
+.listing-badge {
+  padding:0.18rem 0.55rem; border-radius:50px;
+  font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;
+}
+.lb-verified { background:var(--ochre); color:var(--ink); }
+.lb-corper { background:var(--moss); color:white; }
+.lb-shortlet { background:#2060c0; color:white; }
+.lb-new { background:var(--clay); color:white; }
+.listing-card-fav {
+  position:absolute; top:0.7rem; right:0.7rem;
+  width:30px; height:30px; border-radius:50%;
+  background:rgba(255,255,255,0.15); backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:0.85rem; cursor:pointer; transition:all 0.2s;
+}
+.listing-card-fav:hover { background:rgba(255,255,255,0.3); }
+.listing-card-fav.saved { background:rgba(194,98,42,0.8) !important; }
+.listing-card-body { padding:1.1rem 1.2rem; }
+.listing-card-state { font-family:'Space Mono'; font-size:0.6rem; color:var(--clay); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.3rem; }
+.listing-card-name { font-weight:700; font-size:0.95rem; color:var(--ink); margin-bottom:0.2rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.listing-card-addr { font-size:0.78rem; color:var(--smoke); margin-bottom:0.8rem; }
+.listing-card-tags { display:flex; gap:0.3rem; flex-wrap:wrap; margin-bottom:0.8rem; }
+.listing-card-tag { background:var(--mist); color:var(--forest); padding:0.15rem 0.5rem; border-radius:50px; font-size:0.65rem; font-weight:500; }
+.listing-card-footer { display:flex; justify-content:space-between; align-items:center; }
+.listing-card-price {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.25rem; font-weight:700; color:var(--clay);
+}
+.listing-card-price small { font-family:'Outfit'; font-size:0.7rem; color:var(--smoke); font-weight:400; }
+
+/* Image gradients for demo listings */
+.img-g1{background:linear-gradient(135deg,#1e3a20,#0d1a0e)}
+.img-g2{background:linear-gradient(135deg,#3a1a08,#c2622a)}
+.img-g3{background:linear-gradient(135deg,#0e1a2e,#1e3a5c)}
+.img-g4{background:linear-gradient(135deg,#2a0e1a,#5c1e3a)}
+.img-g5{background:linear-gradient(135deg,#0e2a2a,#1e5c5c)}
+.img-g6{background:linear-gradient(135deg,#2a1a0e,#5c3a1e)}
+.img-g7{background:linear-gradient(135deg,#1a2a0e,#3a5c1e)}
+.img-g8{background:linear-gradient(135deg,#1e1e3a,#3a3a6c)}
+
+/* ═══════════════════════════════════════════════════
+   BROWSE PAGE
+═══════════════════════════════════════════════════ */
+.browse-toolbar {
+  background:white; border-bottom:1px solid var(--mist);
+  padding:1rem 0; position:sticky; top:64px; z-index:100;
+}
+.browse-toolbar-inner {
+  display:flex; align-items:center; gap:0.7rem; flex-wrap:wrap;
+  max-width:1200px; margin:0 auto; padding:0 2rem;
+}
+.filter-chip {
+  padding:0.4rem 1rem; border-radius:50px;
+  border:1.5px solid var(--sand); background:white;
+  font-size:0.8rem; font-weight:500; color:var(--forest);
+  transition:all 0.2s; cursor:pointer;
+}
+.filter-chip.active, .filter-chip:hover { background:var(--forest); border-color:var(--forest); color:white; }
+.filter-chip.corper-chip { border-color:var(--moss); color:var(--moss); }
+.filter-chip.corper-chip.active, .filter-chip.corper-chip:hover { background:var(--moss); border-color:var(--moss); color:white; }
+.filter-select {
+  padding:0.4rem 0.8rem; border-radius:8px;
+  border:1.5px solid var(--sand); background:white;
+  font-family:'Outfit'; font-size:0.8rem; color:var(--forest); outline:none; cursor:pointer;
+}
+.listing-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(290px,1fr));
+  gap:1.4rem;
+}
+.empty-state {
+  grid-column:1/-1; text-align:center; padding:4rem 2rem;
+  color:var(--smoke);
+}
+.empty-state-icon { font-size:3rem; margin-bottom:1rem; }
+
+/* ═══════════════════════════════════════════════════
+   LISTING DETAIL PAGE
+═══════════════════════════════════════════════════ */
+.detail-gallery {
+  display:grid; grid-template-columns:1fr 1fr;
+  grid-template-rows:280px 150px; gap:3px;
+}
+.detail-gallery-main { grid-row:span 2; }
+.detail-gal-cell {
+  overflow:hidden; position:relative; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+}
+.detail-gal-cell img { width:100%; height:100%; object-fit:cover; transition:transform 0.3s; }
+.detail-gal-cell:hover img { transform:scale(1.04); }
+.detail-gal-cell .img-placeholder { font-size:4rem; }
+.detail-gal-cell.more-overlay::after {
+  content:attr(data-more); position:absolute; inset:0;
+  background:rgba(13,26,14,0.6); display:flex; align-items:center; justify-content:center;
+  color:white; font-size:1.2rem; font-weight:700;
+  backdrop-filter:blur(2px);
+}
+.detail-content-wrap {
+  display:grid; grid-template-columns:1fr 340px; gap:2.5rem;
+  max-width:1200px; margin:0 auto; padding:2.5rem 2rem;
+}
+.detail-main {}
+.detail-sidebar {}
+.detail-title { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:700; color:var(--ink); margin-bottom:0.4rem; line-height:1.1; }
+.detail-addr { font-size:0.9rem; color:var(--smoke); display:flex; align-items:center; gap:0.4rem; margin-bottom:1.2rem; }
+.detail-badge-row { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.det-badge { padding:0.28rem 0.75rem; border-radius:50px; font-size:0.72rem; font-weight:700; }
+.det-badge-g { background:rgba(45,92,48,0.12); color:var(--moss); border:1px solid rgba(45,92,48,0.25); }
+.det-badge-y { background:rgba(212,160,48,0.15); color:#a07010; border:1px solid rgba(212,160,48,0.3); }
+.det-badge-b { background:rgba(32,96,192,0.1); color:#2060c0; border:1px solid rgba(32,96,192,0.2); }
+
+/* Tabs */
+.detail-tabs { display:flex; border-bottom:2px solid var(--mist); margin-bottom:1.5rem; gap:0; }
+.det-tab {
+  padding:0.65rem 1.2rem; background:none; border:none;
+  font-family:'Outfit'; font-size:0.88rem; font-weight:600; color:var(--smoke);
+  cursor:pointer; position:relative; transition:color 0.2s;
+}
+.det-tab.active { color:var(--clay); }
+.det-tab.active::after {
+  content:''; position:absolute; bottom:-2px; left:0; right:0;
+  height:2px; background:var(--clay);
+}
+.det-tab-panel { display:none; }
+.det-tab-panel.active { display:block; }
+
+/* Overview */
+.det-overview-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:0.8rem; margin-bottom:1.5rem; }
+.det-ov-item { background:var(--mist); border-radius:10px; padding:0.8rem 1rem; }
+.det-ov-label { font-size:0.62rem; font-family:'Space Mono'; text-transform:uppercase; letter-spacing:0.08em; color:var(--smoke); margin-bottom:0.3rem; }
+.det-ov-val { font-weight:700; color:var(--ink); font-size:0.88rem; }
+.det-section-title { font-weight:700; color:var(--ink); font-size:0.9rem; margin-bottom:0.7rem; display:flex; align-items:center; gap:0.5rem; }
+.rules-grid { display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1.5rem; }
+.rule-item { display:flex; align-items:flex-start; gap:0.7rem; padding:0.55rem 0.8rem; background:var(--mist); border-radius:8px; font-size:0.82rem; color:var(--forest); }
+.rule-dot { width:5px; height:5px; border-radius:50%; background:var(--clay); flex-shrink:0; margin-top:5px; }
+.utils-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:1.5rem; }
+.util-item { display:flex; align-items:center; gap:0.5rem; font-size:0.82rem; color:var(--forest); padding:0.4rem; }
+.util-tick { color:var(--moss); font-weight:900; }
+
+/* Map tab */
+.map-frame-wrap { border-radius:14px; overflow:hidden; margin-bottom:1.2rem; }
+.map-frame { width:100%; height:360px; border:none; display:block; }
+.nearby-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.7rem; margin-bottom:1.5rem; }
+.nearby-item { background:var(--mist); border-radius:10px; padding:0.8rem; text-align:center; }
+.nearby-icon { font-size:1.3rem; }
+.nearby-label { font-size:0.72rem; font-weight:600; color:var(--forest); margin-top:0.3rem; }
+.nearby-dist { font-size:0.65rem; color:var(--smoke); margin-top:0.15rem; }
+.map-actions { display:flex; gap:0.7rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+
+/* Reviews */
+.review-summary { display:flex; align-items:center; gap:1.5rem; margin-bottom:1.5rem; }
+.review-big-score { font-family:'Cormorant Garamond',serif; font-size:3.5rem; font-weight:700; color:var(--ink); line-height:1; }
+.review-stars-big { font-size:1.2rem; color:var(--ochre); margin-bottom:0.2rem; }
+.review-count-txt { font-size:0.8rem; color:var(--smoke); }
+.review-bars { flex:1; display:flex; flex-direction:column; gap:0.35rem; }
+.review-bar-row { display:flex; align-items:center; gap:0.6rem; font-size:0.75rem; color:var(--smoke); }
+.review-bar-track { flex:1; height:6px; background:var(--mist); border-radius:3px; overflow:hidden; }
+.review-bar-fill { height:100%; background:var(--ochre); border-radius:3px; transition:width 0.5s; }
+.reviews-list { display:flex; flex-direction:column; gap:1.2rem; margin-top:1.5rem; }
+.review-card { background:var(--mist); border-radius:12px; padding:1.1rem; }
+.review-card-header { display:flex; align-items:center; gap:0.8rem; margin-bottom:0.7rem; }
+.review-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.88rem; color:white; flex-shrink:0; }
+.review-author-name { font-weight:700; font-size:0.88rem; color:var(--ink); }
+.review-author-role { font-size:0.72rem; color:var(--smoke); }
+.review-stars { color:var(--ochre); font-size:0.85rem; }
+.review-date { font-size:0.7rem; color:var(--smoke); margin-left:auto; }
+.review-text { font-size:0.85rem; color:var(--forest); line-height:1.65; }
+.add-review-form { background:var(--parchment); border-radius:14px; padding:1.3rem; margin-top:1.5rem; }
+.star-picker { display:flex; gap:0.3rem; margin-bottom:0.8rem; }
+.star-btn { font-size:1.4rem; background:none; border:none; cursor:pointer; color:var(--ash); transition:color 0.15s, transform 0.15s; }
+.star-btn.active, .star-btn:hover { color:var(--ochre); transform:scale(1.2); }
+
+/* Sidebar */
+.sidebar-card {
+  background:white; border:1.5px solid var(--mist); border-radius:16px;
+  padding:1.5rem; margin-bottom:1.2rem;
+  box-shadow:0 2px 12px rgba(13,26,14,0.06);
+}
+.sidebar-price { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:700; color:var(--clay); line-height:1; }
+.sidebar-period { font-size:0.78rem; color:var(--smoke); margin-top:0.2rem; }
+.sidebar-divider { border:none; border-top:1px solid var(--mist); margin:1rem 0; }
+.landlord-profile { display:flex; align-items:center; gap:0.8rem; }
+.landlord-av { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; color:white; flex-shrink:0; }
+.landlord-name { font-weight:700; color:var(--ink); font-size:0.9rem; }
+.landlord-verified { font-size:0.72rem; color:var(--moss); font-weight:600; display:flex; align-items:center; gap:0.3rem; margin-top:0.2rem; }
+
+/* ═══════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════ */
+.dash-layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 64px); }
+.dash-sidebar {
+  background:var(--forest); padding:2rem 1.2rem;
+  display:flex; flex-direction:column; gap:0.3rem;
+  position:sticky; top:64px; height:calc(100vh - 64px);
+  overflow-y:auto;
+}
+.dash-nav-label { font-family:'Space Mono'; font-size:0.58rem; color:rgba(246,241,232,0.3); text-transform:uppercase; letter-spacing:0.12em; padding:0.6rem 0.8rem 0.3rem; margin-top:0.5rem; }
+.dash-nav-item {
+  display:flex; align-items:center; gap:0.7rem;
+  padding:0.65rem 0.9rem; border-radius:10px;
+  font-size:0.88rem; font-weight:500; color:rgba(246,241,232,0.65);
+  cursor:pointer; transition:all 0.2s; background:none; border:none; width:100%; text-align:left;
+}
+.dash-nav-item:hover { background:rgba(246,241,232,0.08); color:var(--bone); }
+.dash-nav-item.active { background:rgba(246,241,232,0.12); color:var(--bone); font-weight:700; }
+.dash-nav-item .dash-icon { font-size:1.1rem; flex-shrink:0; }
+.dash-main { padding:2rem; background:var(--mist); }
+.dash-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:2rem; }
+.dash-welcome { font-family:'Cormorant Garamond',serif; font-size:1.8rem; font-weight:700; color:var(--forest); }
+.dash-sub { font-size:0.85rem; color:var(--smoke); margin-top:0.2rem; }
+.dash-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem; }
+.dash-stat {
+  background:white; border-radius:14px; padding:1.3rem;
+  border:1px solid var(--mist);
+}
+.dash-stat-num { font-family:'Cormorant Garamond',serif; font-size:2.2rem; font-weight:700; color:var(--forest); line-height:1; }
+.dash-stat-label { font-size:0.78rem; color:var(--smoke); margin-top:0.3rem; }
+.dash-section-title { font-weight:700; color:var(--forest); font-size:1rem; margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; }
+.dash-panel { background:white; border-radius:14px; padding:1.5rem; border:1px solid var(--mist); margin-bottom:1.5rem; }
+.dash-listing-row {
+  display:flex; align-items:center; gap:1rem; padding:0.8rem 0;
+  border-bottom:1px solid var(--mist); cursor:pointer;
+  transition:background 0.2s;
+}
+.dash-listing-row:last-child { border-bottom:none; }
+.dash-listing-row:hover { background:var(--mist); margin:0 -1.5rem; padding-left:1.5rem; padding-right:1.5rem; border-radius:8px; }
+.dash-listing-thumb { width:52px; height:52px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:1.4rem; overflow:hidden; }
+.dash-listing-thumb img { width:100%; height:100%; object-fit:cover; }
+.dash-listing-info { flex:1; }
+.dash-listing-name { font-weight:700; font-size:0.88rem; color:var(--ink); }
+.dash-listing-meta { font-size:0.75rem; color:var(--smoke); margin-top:0.2rem; }
+.dash-listing-status { padding:0.2rem 0.6rem; border-radius:50px; font-size:0.68rem; font-weight:700; }
+.status-active { background:rgba(45,92,48,0.12); color:var(--moss); }
+.status-pending { background:rgba(212,160,48,0.15); color:#a07010; }
+.status-draft { background:var(--mist); color:var(--smoke); }
+
+/* ═══════════════════════════════════════════════════
+   ADD LISTING FORM
+═══════════════════════════════════════════════════ */
+.add-listing-wrap { max-width:780px; margin:0 auto; padding:2rem; }
+.form-section { background:white; border-radius:16px; border:1px solid var(--mist); padding:1.8rem; margin-bottom:1.5rem; }
+.form-section-title { font-weight:700; font-size:1rem; color:var(--forest); margin-bottom:1.3rem; display:flex; align-items:center; gap:0.6rem; }
+.form-section-title span { font-size:1.2rem; }
+.image-upload-zone {
+  border:2px dashed var(--sand); border-radius:12px;
+  padding:2.5rem 1.5rem; text-align:center; cursor:pointer;
+  transition:all 0.25s; position:relative; background:var(--mist);
+}
+.image-upload-zone:hover, .image-upload-zone.drag { border-color:var(--clay); background:rgba(194,98,42,0.04); }
+.image-upload-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.upload-icon-big { font-size:2.5rem; margin-bottom:0.8rem; }
+.upload-title { font-weight:700; color:var(--forest); margin-bottom:0.3rem; }
+.upload-sub { font-size:0.8rem; color:var(--smoke); }
+.image-preview-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0.6rem; margin-top:1rem; }
+.img-preview-item {
+  aspect-ratio:4/3; border-radius:8px; overflow:hidden;
+  position:relative; background:var(--mist);
+  display:flex; align-items:center; justify-content:center;
+}
+.img-preview-item img { width:100%; height:100%; object-fit:cover; }
+.img-preview-remove {
+  position:absolute; top:3px; right:3px;
+  width:20px; height:20px; border-radius:50%;
+  background:rgba(194,98,42,0.9); color:white; font-size:0.7rem;
+  border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.rules-editor { display:flex; flex-direction:column; gap:0.5rem; }
+.rule-input-row { display:flex; gap:0.5rem; }
+.rule-input-row input { flex:1; }
+
+/* ═══════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════ */
+.modal-backdrop {
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(13,26,14,0.75); backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center; padding:1.5rem;
+}
+.modal-backdrop.open { display:flex; }
+.modal {
+  background:var(--white); border-radius:20px; padding:2rem;
+  max-width:480px; width:100%; max-height:90vh; overflow-y:auto;
+  animation:popIn 0.28s ease;
+  box-shadow:0 24px 60px rgba(0,0,0,0.3);
+}
+.modal-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; }
+.modal-title { font-family:'Cormorant Garamond',serif; font-size:1.6rem; font-weight:700; color:var(--forest); }
+.modal-close { background:var(--mist); border:none; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1rem; color:var(--smoke); cursor:pointer; transition:all 0.2s; flex-shrink:0; }
+.modal-close:hover { background:var(--clay); color:white; }
+.modal-tabs { display:flex; gap:0; border:1.5px solid var(--mist); border-radius:10px; padding:3px; margin-bottom:1.5rem; }
+.modal-tab { flex:1; padding:0.5rem; border-radius:8px; border:none; font-family:'Outfit'; font-size:0.85rem; font-weight:600; cursor:pointer; background:transparent; color:var(--smoke); transition:all 0.2s; }
+.modal-tab.active { background:var(--forest); color:white; }
+.role-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; margin-bottom:1.2rem; }
+.role-card { border:1.5px solid var(--mist); border-radius:10px; padding:0.8rem 0.5rem; text-align:center; cursor:pointer; transition:all 0.2s; background:white; }
+.role-card:hover, .role-card.active { border-color:var(--forest); background:var(--forest); }
+.role-card .role-icon { font-size:1.4rem; margin-bottom:0.3rem; }
+.role-card .role-name { font-size:0.75rem; font-weight:600; color:var(--earth); }
+.role-card.active .role-name { color:white; }
+.divider-or { display:flex; align-items:center; gap:0.8rem; margin:1rem 0; }
+.divider-or span { font-size:0.78rem; color:var(--smoke); }
+.divider-or::before, .divider-or::after { content:''; flex:1; height:1px; background:var(--mist); }
+
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+.toast-container { position:fixed; bottom:1.5rem; right:1.5rem; z-index:9999; display:flex; flex-direction:column; gap:0.5rem; }
+.toast {
+  background:var(--ink); color:white;
+  padding:0.85rem 1.3rem; border-radius:12px;
+  font-size:0.85rem; font-weight:500;
+  box-shadow:0 8px 24px rgba(0,0,0,0.3);
+  display:flex; align-items:center; gap:0.7rem;
+  animation:toastIn 0.3s ease;
+  max-width:320px; min-width:220px;
+}
+.toast.success { background:var(--moss); }
+.toast.error { background:var(--error); }
+.toast.info { background:var(--clay); }
+.toast-icon { font-size:1.1rem; flex-shrink:0; }
+
+/* ═══════════════════════════════════════════════════
+   PROFILE PAGE
+═══════════════════════════════════════════════════ */
+.profile-header {
+  background:var(--forest); padding:3rem 2rem 2rem;
+  color:var(--bone);
+}
+.profile-avatar-big {
+  width:80px; height:80px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; font-weight:700; color:white;
+  border:3px solid rgba(246,241,232,0.3);
+  margin-bottom:1rem;
+}
+.profile-name { font-family:'Cormorant Garamond',serif; font-size:2rem; font-weight:700; }
+.profile-role-badge { display:inline-flex; align-items:center; gap:0.4rem; padding:0.25rem 0.8rem; border-radius:50px; font-size:0.72rem; font-weight:700; margin-top:0.5rem; }
+
+/* ═══════════════════════════════════════════════════
+   FEATURES SECTION (home)
+═══════════════════════════════════════════════════ */
+.features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; margin-top:3rem; }
+.feature-card {
+  background:white; border-radius:16px; padding:1.8rem;
+  border:1px solid var(--mist); transition:all 0.3s;
+}
+.feature-card:hover { box-shadow:0 12px 30px rgba(13,26,14,0.08); transform:translateY(-3px); border-color:transparent; }
+.feature-icon { font-size:2rem; margin-bottom:1rem; }
+.feature-title { font-weight:700; color:var(--forest); margin-bottom:0.4rem; }
+.feature-desc { font-size:0.85rem; color:var(--smoke); line-height:1.7; }
+
+/* Verticals */
+.verticals-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.2rem; margin-top:3rem; }
+.vertical-card {
+  border-radius:20px; overflow:hidden; min-height:280px;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  position:relative; cursor:pointer; transition:transform 0.3s;
+}
+.vertical-card:hover { transform:translateY(-4px); }
+.vc-bg { position:absolute; inset:0; transition:transform 0.4s; }
+.vertical-card:hover .vc-bg { transform:scale(1.04); }
+.vc-overlay { position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 60%, transparent 100%); }
+.vc-content { position:relative; z-index:1; padding:1.5rem; }
+.vc-tag { display:inline-block; padding:0.2rem 0.7rem; border-radius:50px; font-size:0.65rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.6rem; }
+.vc-title { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:700; color:white; line-height:1.1; margin-bottom:0.4rem; }
+.vc-sub { font-size:0.78rem; color:rgba(255,255,255,0.65); }
+.vg-corper { background:linear-gradient(135deg,#1e3a20,#0d1a0e); }
+.vg-professional { background:linear-gradient(135deg,#1a2030,#2a3050); }
+.vg-student { background:linear-gradient(135deg,#301808,#602010); }
+.vg-shortlet { background:linear-gradient(135deg,#0a1a2a,#1a3050); }
+
+/* CTA */
+.cta-section {
+  background:var(--clay); padding:5rem 2rem; text-align:center; position:relative; overflow:hidden;
+}
+.cta-decor { position:absolute; font-family:'Cormorant Garamond',serif; font-size:22rem; font-weight:700; color:rgba(0,0,0,0.07); top:-4rem; right:-2rem; pointer-events:none; line-height:1; }
+.cta-title { font-family:'Cormorant Garamond',serif; font-size:clamp(2.2rem,4.5vw,3.5rem); font-weight:700; color:white; position:relative; z-index:1; }
+.cta-title em { font-style:italic; color:rgba(255,255,255,0.6); }
+.cta-sub { color:rgba(255,255,255,0.7); font-size:1rem; margin:1.2rem auto 2.5rem; max-width:480px; position:relative; z-index:1; }
+.cta-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; position:relative; z-index:1; }
+
+/* ═══════════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════════ */
+footer { background:var(--ink); padding:4rem 0 2rem; }
+.footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:3rem; margin-bottom:3rem; }
+.footer-logo-text { font-family:'Cormorant Garamond',serif; font-size:1.5rem; font-weight:700; color:var(--bone); margin-bottom:0.8rem; }
+.footer-logo-text span { color:var(--clay); }
+.footer-desc { font-size:0.82rem; color:rgba(246,241,232,0.35); line-height:1.7; max-width:250px; }
+.footer-col h5 { color:var(--bone); font-weight:700; font-size:0.85rem; margin-bottom:1rem; }
+.footer-col a { display:block; color:rgba(246,241,232,0.4); font-size:0.82rem; margin-bottom:0.55rem; transition:color 0.2s; }
+.footer-col a:hover { color:var(--reed); }
+.footer-bottom { border-top:1px solid rgba(246,241,232,0.06); padding-top:1.8rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; }
+.footer-bottom p { font-size:0.75rem; color:rgba(246,241,232,0.2); }
+.footer-badges { display:flex; gap:0.6rem; }
+.footer-badge { background:rgba(246,241,232,0.06); border:1px solid rgba(246,241,232,0.1); border-radius:6px; padding:0.35rem 0.7rem; font-size:0.68rem; color:rgba(246,241,232,0.35); }
+
+/* ═══════════════════════════════════════════════════
+   STATES SECTION
+═══════════════════════════════════════════════════ */
+.states-grid { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-top:2rem; }
+.state-pill {
+  display:flex; align-items:center; gap:0.6rem;
+  background:white; border:1.5px solid var(--mist); border-radius:50px;
+  padding:0.65rem 1.3rem; cursor:pointer; transition:all 0.25s;
+}
+.state-pill:hover { border-color:var(--clay); box-shadow:0 4px 16px rgba(194,98,42,0.15); }
+.state-pill-flag { font-size:1.2rem; }
+.state-pill-name { font-weight:700; font-size:0.85rem; color:var(--forest); }
+.state-pill-count { font-size:0.72rem; color:var(--smoke); }
+
+/* ═══════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════ */
+@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes popIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ═══════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════ */
+.hidden { display:none !important; }
+.text-center { text-align:center; }
+.text-muted { color:var(--smoke); }
+.mt-1{margin-top:0.5rem} .mt-2{margin-top:1rem} .mt-3{margin-top:1.5rem} .mt-4{margin-top:2rem}
+.mb-1{margin-bottom:0.5rem} .mb-2{margin-bottom:1rem} .mb-3{margin-bottom:1.5rem}
+.flex{display:flex} .flex-center{display:flex;align-items:center;justify-content:center}
+.gap-1{gap:0.5rem} .gap-2{gap:1rem}
+.fw-7{font-weight:700}
+.loading-spinner { border:3px solid var(--mist); border-top-color:var(--moss); border-radius:50%; width:28px; height:28px; animation:spin 0.7s linear infinite; margin:0 auto; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media(max-width:1024px) {
+  .detail-content-wrap { grid-template-columns:1fr; }
+  .detail-sidebar { order:-1; }
+  .dash-layout { grid-template-columns:1fr; }
+  .dash-sidebar { height:auto; position:static; flex-direction:row; flex-wrap:wrap; padding:1rem; gap:0.4rem; }
+  .dash-nav-label { display:none; }
+  .features-grid { grid-template-columns:1fr 1fr; }
+  .footer-grid { grid-template-columns:1fr 1fr; }
+  .hero-inner { grid-template-columns:1fr; }
+  .hero-right-visual { display:none; }
+}
+@media(max-width:768px) {
+  .container { padding:0 1.2rem; }
+  .section { padding:3.5rem 0; }
+  .hero { padding:3rem 1.5rem 2.5rem; }
+  .features-grid { grid-template-columns:1fr; }
+  .verticals-grid { grid-template-columns:1fr; }
+  .form-row { grid-template-columns:1fr; }
+  .detail-gallery { grid-template-columns:1fr; grid-template-rows:240px; }
+  .detail-gallery>*:not(.detail-gallery-main) { display:none; }
+  .detail-gallery-main { grid-row:span 1; }
+  .nav-links { display:none; }
+  .nav-menu-btn { display:block; }
+  .nav-right .nav-btn-ghost { display:none; }
+  .add-listing-wrap { padding:1rem; }
+  .overview-grid { grid-template-columns:1fr; }
+  .dash-stats { grid-template-columns:1fr 1fr; }
+  .footer-grid { grid-template-columns:1fr; }
+  .hero-search { flex-direction:column; }
+  .hs-field { border-right:none; border-bottom:1px solid rgba(246,241,232,0.1); }
+  .hs-field:last-of-type { border-bottom:none; }
+  .image-preview-grid { grid-template-columns:repeat(3,1fr); }
+  .nearby-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     NAVIGATION
+════════════════════════════════════════════════ -->
+<nav id="nav">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="navigate('home')">
+      <div class="nav-logo-mark">HN</div>
+      <div class="nav-logo-text">House<span>Nest</span></div>
+    </div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="navigate('browse')">Browse Listings</button>
+      <button class="nav-link" onclick="scrollToSection('verticals-section')">Categories</button>
+      <button class="nav-link" onclick="navigate('browse','corper')">
+        <span class="nav-corper-badge">🎓 CorperNest</span>
+      </button>
+    </div>
+    <div class="nav-right" id="navRight">
+      <button class="nav-btn-ghost" onclick="openModal('authModal','login')">Log In</button>
+      <button class="nav-btn-solid" onclick="openModal('authModal','signup')">Sign Up Free</button>
+    </div>
+    <button class="nav-menu-btn" onclick="toggleMobileMenu()" id="menuBtn">☰</button>
+  </div>
+</nav>
+<div class="nav-mobile-menu" id="mobileMenu">
+  <button class="mobile-nav-link" onclick="navigate('browse');toggleMobileMenu()">Browse Listings</button>
+  <button class="mobile-nav-link" onclick="navigate('browse','corper');toggleMobileMenu()">🎓 CorperNest</button>
+  <button class="mobile-nav-link" onclick="openModal('authModal','login');toggleMobileMenu()">Log In</button>
+  <button class="mobile-nav-link" onclick="openModal('authModal','signup');toggleMobileMenu()">Sign Up Free</button>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     VIEWS
+════════════════════════════════════════════════ -->
+
+<!-- ── HOME VIEW ─────────────────────────────────── -->
+<div class="view active" id="view-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg-circles">
+      <div class="hero-circle hero-circle-1"></div>
+      <div class="hero-circle hero-circle-2"></div>
+    </div>
+    <div class="hero-dots"></div>
+    <div class="hero-inner container">
+      <div>
+        <div class="hero-label">
+          <div class="hero-label-dot"></div>
+          <span class="hero-label-text">Southwest Nigeria — Ondo · Ekiti · Oyo · Osun · Kwara</span>
+        </div>
+        <h1 class="hero-h1">Find your home <em>in any city.</em> Zero hassle.</h1>
+        <p class="hero-sub">Verified landlords. Transparent house rules. Lawyer-drafted agreements with e-signatures. Whether you're an NYSC corper, student, or relocating professional — HouseNest sorts you out.</p>
+        <div class="hero-search-wrap">
+          <div class="hero-search" id="heroSearch">
+            <div class="hs-field">
+              <svg class="hs-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="rgba(246,241,232,0.6)"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <select id="heroState">
+                <option value="">All States</option>
+                <option value="Ondo">Ondo State</option>
+                <option value="Ekiti">Ekiti State</option>
+                <option value="Oyo">Oyo State</option>
+                <option value="Osun">Osun State</option>
+                <option value="Kwara">Kwara State</option>
+              </select>
+            </div>
+            <div class="hs-field">
+              <svg class="hs-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="rgba(246,241,232,0.6)"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+              <select id="heroType">
+                <option value="">Property type</option>
+                <option value="Self-Contain">Self-Contain</option>
+                <option value="Mini Flat">Mini Flat</option>
+                <option value="Room & Parlour">Room & Parlour</option>
+                <option value="2-Bedroom">2-Bedroom</option>
+                <option value="Shared">Shared Apartment</option>
+                <option value="Shortlet">Shortlet</option>
+              </select>
+            </div>
+            <div class="hs-field">
+              <svg class="hs-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="rgba(246,241,232,0.6)"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>
+              <select id="heroBudget">
+                <option value="">Any budget</option>
+                <option value="low">Under ₦100k/yr</option>
+                <option value="mid">₦100k–₦250k/yr</option>
+                <option value="high">₦250k–₦500k/yr</option>
+                <option value="premium">₦500k+/yr</option>
+              </select>
+            </div>
+            <button class="hs-btn" onclick="heroSearch()">Search →</button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div><div class="hero-stat-num" id="heroStatListings">0</div><div class="hero-stat-label">Active Listings</div></div>
+          <div><div class="hero-stat-num">5</div><div class="hero-stat-label">States</div></div>
+          <div><div class="hero-stat-num">₦0</div><div class="hero-stat-label">Agent Commission</div></div>
+        </div>
+      </div>
+      <div class="hero-right-visual" id="heroCards"></div>
+    </div>
+    <div class="hero-city-ticker container mt-4">
+      <div class="ticker-inner" id="cityTicker"></div>
+    </div>
+  </section>
+
+  <!-- States -->
+  <section class="section container">
+    <div class="sec-eyebrow"><div class="sec-eyebrow-line"></div><span class="sec-eyebrow-text">Coverage Area</span></div>
+    <h2 class="sec-h2">5 states, <em>hundreds of cities.</em></h2>
+    <p class="sec-sub">We're starting focused — five Southwest and North-central states where we know the market, the NYSC landscape, and the landlord communities. More states coming soon.</p>
+    <div class="states-grid" id="statesGrid"></div>
+  </section>
+
+  <!-- Featured Listings -->
+  <section class="section section-alt" id="verticals-section">
+    <div class="container">
+      <div class="sec-eyebrow"><div class="sec-eyebrow-line"></div><span class="sec-eyebrow-text">Fresh Listings</span></div>
+      <h2 class="sec-h2" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem">
+        <span>Verified. Ready. <em>Now.</em></span>
+        <button class="btn btn-outline btn-sm" onclick="navigate('browse')">View All →</button>
+      </h2>
+      <div class="listing-grid mt-4" id="featuredListings"></div>
+    </div>
+  </section>
+
+  <!-- Verticals -->
+  <section class="section container">
+    <div class="sec-eyebrow"><div class="sec-eyebrow-line"></div><span class="sec-eyebrow-text">Who We Serve</span></div>
+    <h2 class="sec-h2">Every housing need, <em>one platform.</em></h2>
+    <div class="verticals-grid">
+      <div class="vertical-card" onclick="navigate('browse','corper')">
+        <div class="vc-bg vg-corper"></div><div class="vc-overlay"></div>
+        <div class="vc-content">
+          <div class="vc-tag" style="background:rgba(127,184,130,0.3);color:#a8d5ab">🎓 CorperNest — Flagship</div>
+          <div class="vc-title">NYSC Corper<br>Housing</div>
+          <div class="vc-sub">Built for corpers. Present at all NYSC orientation camps. Zero agent markup.</div>
+        </div>
+      </div>
+      <div class="vertical-card" onclick="navigate('browse','shortlet')">
+        <div class="vc-bg vg-shortlet"></div><div class="vc-overlay"></div>
+        <div class="vc-content">
+          <div class="vc-tag" style="background:rgba(48,96,192,0.35);color:#90b4f0">🏨 Shortlets</div>
+          <div class="vc-title">Serviced & Short-Stay Apartments</div>
+          <div class="vc-sub">Furnished, flexible stays from one night. Business trips, family visits.</div>
+        </div>
+      </div>
+      <div class="vertical-card" onclick="navigate('browse','student')">
+        <div class="vc-bg vg-student"></div><div class="vc-overlay"></div>
+        <div class="vc-content">
+          <div class="vc-tag" style="background:rgba(212,160,48,0.3);color:#d4a030">📚 Students</div>
+          <div class="vc-title">University & Polytechnic Housing</div>
+          <div class="vc-sub">Off-campus, safe, verified. Close to your campus.</div>
+        </div>
+      </div>
+      <div class="vertical-card" onclick="navigate('browse')">
+        <div class="vc-bg vg-professional"></div><div class="vc-overlay"></div>
+        <div class="vc-content">
+          <div class="vc-tag" style="background:rgba(74,125,77,0.3);color:#7fb882">💼 Professionals</div>
+          <div class="vc-title">Relocating for Work</div>
+          <div class="vc-sub">New city, new job. Find quality housing fast — no middleman.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section section-alt container">
+    <div class="sec-eyebrow"><div class="sec-eyebrow-line"></div><span class="sec-eyebrow-text">Why HouseNest</span></div>
+    <h2 class="sec-h2">Built different, <em>built for Nigeria.</em></h2>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">✅</div><div class="feature-title">Verified Landlords</div><div class="feature-desc">Every landlord on HouseNest verifies their identity and property documents before they can list. No scammers, no ghost apartments.</div></div>
+      <div class="feature-card"><div class="feature-icon">⚖️</div><div class="feature-title">Lawyer-Drafted Agreements</div><div class="feature-desc">Our in-house legal team prepares a custom tenancy agreement for every listing. State-specific, enforceable, e-signed by both parties.</div></div>
+      <div class="feature-card"><div class="feature-icon">🏦</div><div class="feature-title">Escrow Payment Protection</div><div class="feature-desc">Rent is held in escrow until you confirm move-in. Neither party can be cheated. Zero agent commission.</div></div>
+      <div class="feature-card"><div class="feature-icon">🗺️</div><div class="feature-title">Google Maps on Every Listing</div><div class="feature-desc">See exactly where the property is. Get turn-by-turn directions. Know what's nearby — NYSC secretariat, market, hospital, bus stop.</div></div>
+      <div class="feature-card"><div class="feature-icon">📸</div><div class="feature-title">Real Photos, Real Properties</div><div class="feature-desc">Landlords upload actual photos of their units. We verify them. No catfishing, no surprises on move-in day.</div></div>
+      <div class="feature-card"><div class="feature-icon">🎓</div><div class="feature-title">NYSC Camp Presence</div><div class="feature-desc">HouseNest is physically at all 5 state NYSC orientation camps and weekly CDS locations. Corpers sort housing before they leave camp.</div></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-decor">HN</div>
+    <h2 class="cta-title">Your next home is <em>one search away.</em></h2>
+    <p class="cta-sub">Whether you're a corper landing in a new state, a student starting fresh, or a landlord done with unreliable agents — HouseNest was built for this exact moment.</p>
+    <div class="cta-btns">
+      <button class="btn" style="background:var(--bone);color:var(--clay);font-size:1rem;padding:0.9rem 2rem" onclick="navigate('browse')">Find a Home Today</button>
+      <button class="btn btn-outline-light" style="font-size:1rem;padding:0.9rem 2rem" onclick="openModal('authModal','signup')">List Your Property</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-logo-text">House<span>Nest</span></div>
+          <p class="footer-desc">Nigeria's smartest rental platform for Southwest and North-central Nigeria. Verified listings, legal protection, zero agent commission.</p>
+          <div class="footer-badges mt-3">
+            <span class="footer-badge">🇳🇬 Made in Nigeria</span>
+            <span class="footer-badge">⚖️ Legal Protection</span>
+            <span class="footer-badge">🏦 Escrow</span>
+          </div>
+        </div>
+        <div class="footer-col"><h5>Platform</h5><a onclick="navigate('browse')">Browse Listings</a><a onclick="openModal('authModal','signup')">List a Property</a><a onclick="navigate('browse','corper')">CorperNest</a><a onclick="navigate('browse','shortlet')">Shortlets</a></div>
+        <div class="footer-col"><h5>States</h5><a onclick="navigate('browse','','Ondo')">Ondo State</a><a onclick="navigate('browse','','Ekiti')">Ekiti State</a><a onclick="navigate('browse','','Oyo')">Oyo State</a><a onclick="navigate('browse','','Osun')">Osun State</a><a onclick="navigate('browse','','Kwara')">Kwara State</a></div>
+        <div class="footer-col"><h5>Company</h5><a href="#">About Us</a><a href="#">Our Legal Team</a><a href="#">NYSC Partnership</a><a href="#">Terms of Service</a><a href="#">Privacy Policy</a></div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2025 HouseNest Technology Limited. All rights reserved.</p>
+        <p style="color:rgba(246,241,232,0.12)">CorperNest is a vertical of HouseNest Technology Limited.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ── BROWSE VIEW ──────────────────────────────── -->
+<div class="view" id="view-browse">
+  <div class="browse-toolbar">
+    <div class="browse-toolbar-inner">
+      <button class="filter-chip corper-chip" data-filter="corper" onclick="setBrowseFilter('corper',this)">🎓 CorperNest</button>
+      <button class="filter-chip" data-filter="shortlet" onclick="setBrowseFilter('shortlet',this)">🏨 Shortlet</button>
+      <button class="filter-chip" data-filter="student" onclick="setBrowseFilter('student',this)">📚 Student</button>
+      <button class="filter-chip" data-filter="" onclick="setBrowseFilter('',this)">All Types</button>
+      <select class="filter-select" id="browseStateFilter" onchange="applyBrowseFilters()">
+        <option value="">All States</option>
+        <option value="Ondo">Ondo</option>
+        <option value="Ekiti">Ekiti</option>
+        <option value="Oyo">Oyo</option>
+        <option value="Osun">Osun</option>
+        <option value="Kwara">Kwara</option>
+      </select>
+      <select class="filter-select" id="browseTypeFilter" onchange="applyBrowseFilters()">
+        <option value="">All Types</option>
+        <option>Self-Contain</option>
+        <option>Mini Flat</option>
+        <option>Room &amp; Parlour</option>
+        <option>2-Bedroom</option>
+        <option>Shared</option>
+        <option>Shortlet</option>
+      </select>
+      <select class="filter-select" id="browseSortFilter" onchange="applyBrowseFilters()">
+        <option value="newest">Newest First</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+  <div class="container" style="padding-top:1.5rem;padding-bottom:4rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem">
+      <div>
+        <div style="font-weight:700;font-size:1.1rem;color:var(--forest)" id="browseHeading">All Listings</div>
+        <div style="font-size:0.82rem;color:var(--smoke);margin-top:0.2rem" id="browseCount">Loading...</div>
+      </div>
+      <button class="btn btn-clay btn-sm" onclick="requireAuth(()=>navigate('add-listing'))">+ List Your Property</button>
+    </div>
+    <div class="listing-grid" id="browseGrid"></div>
+  </div>
+</div>
+
+<!-- ── LISTING DETAIL VIEW ──────────────────────── -->
+<div class="view" id="view-detail">
+  <div id="detailGallery" class="detail-gallery"></div>
+  <div class="detail-content-wrap" id="detailContentWrap"></div>
+</div>
+
+<!-- ── DASHBOARD VIEW ──────────────────────────── -->
+<div class="view" id="view-dashboard">
+  <div class="dash-layout">
+    <div class="dash-sidebar" id="dashSidebar"></div>
+    <div class="dash-main" id="dashMain"></div>
+  </div>
+</div>
+
+<!-- ── ADD LISTING VIEW ─────────────────────────── -->
+<div class="view" id="view-add-listing">
+  <div class="add-listing-wrap">
+    <div style="margin-bottom:2rem">
+      <button class="btn btn-ghost" onclick="navigate('dashboard')" style="color:var(--smoke);font-size:0.85rem;margin-bottom:0.5rem">← Back to Dashboard</button>
+      <h1 class="t-display" style="font-size:2rem;color:var(--forest)">List Your Property</h1>
+      <p style="color:var(--smoke);font-size:0.9rem;margin-top:0.4rem">Fill in the details below. The more thorough you are, the faster you find a great tenant.</p>
+    </div>
+    <div id="addListingForm"></div>
+  </div>
+</div>
+
+<!-- ── PROFILE VIEW ─────────────────────────────── -->
+<div class="view" id="view-profile">
+  <div id="profileContent"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════ -->
+
+<!-- Auth Modal -->
+<div class="modal-backdrop" id="authModal" onclick="if(event.target===this)closeModal('authModal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="authModalTitle">Welcome to HouseNest</div>
+      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="loginTab" onclick="switchAuthTab('login')">Log In</button>
+      <button class="modal-tab" id="signupTab" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+
+    <!-- Login Panel -->
+    <div id="loginPanel">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com" autocomplete="email">
+        <div class="form-error" id="loginEmailErr">Please enter a valid email</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="loginPassword" type="password" placeholder="Your password" autocomplete="current-password">
+        <div class="form-error" id="loginPassErr">Incorrect password</div>
+      </div>
+      <button class="btn btn-primary btn-full mt-2" onclick="handleLogin()">Log In →</button>
+      <div class="divider-or"><span>or</span></div>
+      <p style="text-align:center;font-size:0.82rem;color:var(--smoke)">New to HouseNest? <a onclick="switchAuthTab('signup')" style="color:var(--clay);cursor:pointer;font-weight:700">Create an account</a></p>
+    </div>
+
+    <!-- Signup Panel -->
+    <div id="signupPanel" class="hidden">
+      <div class="form-group">
+        <label class="form-label">I am a...</label>
+        <div class="role-grid" id="roleGrid">
+          <div class="role-card active" data-role="corper" onclick="selectRole(this)"><div class="role-icon">🎓</div><div class="role-name">Corper</div></div>
+          <div class="role-card" data-role="tenant" onclick="selectRole(this)"><div class="role-icon">🏠</div><div class="role-name">Tenant</div></div>
+          <div class="role-card" data-role="landlord" onclick="selectRole(this)"><div class="role-icon">🏘️</div><div class="role-name">Landlord</div></div>
+          <div class="role-card" data-role="student" onclick="selectRole(this)"><div class="role-icon">📚</div><div class="role-name">Student</div></div>
+          <div class="role-card" data-role="association" onclick="selectRole(this)"><div class="role-icon">🏢</div><div class="role-name">Association</div></div>
+          <div class="role-card" data-role="agent" onclick="selectRole(this)"><div class="role-icon">🤝</div><div class="role-name">Agent</div></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-input" id="signupFirst" placeholder="Ngozi" autocomplete="given-name">
+          <div class="form-error" id="signupFirstErr">Required</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input class="form-input" id="signupLast" placeholder="Okafor" autocomplete="family-name">
+          <div class="form-error" id="signupLastErr">Required</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="signupEmail" type="email" placeholder="ngozi@email.com" autocomplete="email">
+        <div class="form-error" id="signupEmailErr">Enter a valid email</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-input" id="signupPhone" type="tel" placeholder="08012345678" autocomplete="tel">
+        <div class="form-error" id="signupPhoneErr">Enter a valid phone number</div>
+      </div>
+      <div class="form-group" id="nysc-field-wrap">
+        <label class="form-label">NYSC State Code</label>
+        <input class="form-input" id="signupNysc" placeholder="e.g. OD/24A/1234">
+        <div class="form-hint">Your 13-character NYSC call-up code</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="signupPass" type="password" placeholder="Min. 8 characters" autocomplete="new-password">
+        <div class="form-error" id="signupPassErr">Password must be at least 8 characters</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input class="form-input" id="signupPass2" type="password" placeholder="Repeat password">
+        <div class="form-error" id="signupPass2Err">Passwords do not match</div>
+      </div>
+      <button class="btn btn-primary btn-full mt-2" onclick="handleSignup()">Create My Account →</button>
+      <p style="font-size:0.72rem;color:var(--smoke);text-align:center;margin-top:0.8rem">By signing up you agree to our <a href="#" style="color:var(--clay)">Terms of Service</a> and <a href="#" style="color:var(--clay)">Privacy Policy</a>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Image Lightbox -->
+<div class="modal-backdrop" id="lightboxModal" onclick="closeModal('lightboxModal')" style="background:rgba(0,0,0,0.92)">
+  <div style="max-width:90vw;max-height:90vh;position:relative">
+    <img id="lightboxImg" style="max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain" src="" alt="">
+    <div id="lightboxCaption" style="text-align:center;color:rgba(255,255,255,0.6);margin-top:0.8rem;font-size:0.85rem"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════
+// HOUSENEST — FULL APPLICATION LOGIC
+// ════════════════════════════════════════════════════
+
+// ── STORAGE HELPERS ──────────────────────────────────
+const DB = {
+  get: (key, def=[]) => { try { return JSON.parse(localStorage.getItem('hn_'+key)) ?? def; } catch(e){ return def; } },
+  set: (key, val) => localStorage.setItem('hn_'+key, JSON.stringify(val)),
+  del: (key) => localStorage.removeItem('hn_'+key),
+};
+
+// Simple hash for demo security (NOT production — use bcrypt server-side)
+const hashPass = s => btoa(unescape(encodeURIComponent(s + 'hn_salt_2025')));
+
+// ── APP STATE ────────────────────────────────────────
+let state = {
+  currentUser: DB.get('currentUser', null),
+  currentView: 'home',
+  browseFilter: { category:'', state:'', type:'', sort:'newest' },
+  currentListingId: null,
+  pendingNavCallback: null,
+};
+
+// ── SEED DATA ────────────────────────────────────────
+const STATES_DATA = [
+  { name:'Ondo', capital:'Akure', color:'#2d5c30', count:0, emoji:'🌴' },
+  { name:'Ekiti', capital:'Ado-Ekiti', color:'#5c3020', count:0, emoji:'⛰️' },
+  { name:'Oyo', capital:'Ibadan', color:'#1e3a5c', count:0, emoji:'🏙️' },
+  { name:'Osun', capital:'Osogbo', color:'#5c4a10', count:0, emoji:'🌊' },
+  { name:'Kwara', capital:'Ilorin', color:'#2a3a5c', count:0, emoji:'🕌' },
+];
+
+const STATE_MAP_QUERIES = {
+  'Ondo': 'Akure+Ondo+State+Nigeria',
+  'Ekiti': 'Ado-Ekiti+Ekiti+State+Nigeria',
+  'Oyo': 'Ibadan+Oyo+State+Nigeria',
+  'Osun': 'Osogbo+Osun+State+Nigeria',
+  'Kwara': 'Ilorin+Kwara+State+Nigeria',
+};
+
+const NEARBY_TEMPLATES = {
+  'Ondo':  [{i:'🏕️',l:'NYSC Camp',d:'15 min'},{i:'🏥',l:'OAUTH Hospital',d:'10 min'},{i:'🛒',l:'Oja Oba Market',d:'8 min'},{i:'⛽',l:'Fuel Station',d:'3 min'},{i:'🚌',l:'Ondo Bus Park',d:'5 min'},{i:'🏫',l:'FUTA',d:'20 min'}],
+  'Ekiti': [{i:'🏕️',l:'NYSC Camp',d:'12 min'},{i:'🏥',l:'EKSUTH',d:'8 min'},{i:'🛒',l:'Oja Oba Market',d:'6 min'},{i:'⛽',l:'Fuel Station',d:'4 min'},{i:'🚌',l:'Motor Park',d:'5 min'},{i:'🏫',l:'EKSU',d:'15 min'}],
+  'Oyo':   [{i:'🏕️',l:'NYSC Camp',d:'20 min'},{i:'🏥',l:'UCH Ibadan',d:'12 min'},{i:'🛒',l:'Dugbe Market',d:'7 min'},{i:'⛽',l:'NNPC Station',d:'3 min'},{i:'🚌',l:'Challenge',d:'5 min'},{i:'🏫',l:'UI Campus',d:'10 min'}],
+  'Osun':  [{i:'🏕️',l:'NYSC Camp',d:'18 min'},{i:'🏥',l:'LAUTECH TH',d:'10 min'},{i:'🛒',l:'Oja Oba Osogbo',d:'8 min'},{i:'⛽',l:'Fuel Station',d:'5 min'},{i:'🚌',l:'Osogbo Bus Park',d:'6 min'},{i:'🏫',l:'UNIOSUN',d:'15 min'}],
+  'Kwara': [{i:'🏕️',l:'NYSC Ilorin Camp',d:'10 min'},{i:'🏥',l:'UITH',d:'8 min'},{i:'🛒',l:'Oja Oba Ilorin',d:'6 min'},{i:'⛽',l:'Fuel Station',d:'2 min'},{i:'🚌',l:'Ilorin Bus Park',d:'4 min'},{i:'🏫',l:'UNILORIN',d:'12 min'}],
+};
+
+function seedListings() {
+  const existing = DB.get('listings', []);
+  if (existing.length > 0) return;
+  const listings = [
+    { id:'l1', landlordId:'demo-landlord', category:'corper', state:'Ondo', city:'Akure', address:'14 Oyemekun Road, Akure', name:'Self-Contain Near FUTA', type:'Self-Contain', price:120000, period:'yr', bedrooms:1, bathrooms:1, desc:'Modern self-contain in a quiet, secure compound. 5 minutes from FUTA main gate. Ideal for NYSC corpers and final year students. Recently renovated with tiled floors.', rules:['No smoking','No parties after 10PM','Participate in monthly compound sanitation','No subletting without notice'], utils:['Borehole water','NEPA electricity','24hr security','Tiled floors','Separate kitchen'], corperFriendly:true, verified:true, isShortlet:false, images:[], rating:4.7, reviewCount:8, status:'active', createdAt: Date.now()-86400000*5, mapQuery:'Oyemekun+Road+Akure+Ondo+State+Nigeria', imgClass:'img-g1', emoji:'🏡' },
+    { id:'l2', landlordId:'demo-landlord', category:'shortlet', state:'Ekiti', city:'Ado-Ekiti', address:'Block 12, GRA Ado-Ekiti', name:'Executive Studio — Ekiti GRA', type:'Shortlet', price:15000, period:'night', bedrooms:1, bathrooms:1, desc:'Fully furnished executive studio in the prestigious Ekiti GRA. Air conditioned, Smart TV, strong WiFi. Perfect for business travellers and officials visiting Ado-Ekiti.', rules:['No smoking inside','Check-out by 11AM','No loud music','Register all guests'], utils:['24hr generator','High-speed WiFi','Air conditioning','Smart TV','Daily cleaning'], corperFriendly:false, verified:true, isShortlet:true, images:[], rating:4.9, reviewCount:12, status:'active', createdAt:Date.now()-86400000*3, mapQuery:'GRA+Ado-Ekiti+Ekiti+State+Nigeria', imgClass:'img-g2', emoji:'🏙️' },
+    { id:'l3', landlordId:'demo-landlord', category:'student', state:'Oyo', city:'Ibadan', address:'5 Agbowo Extension, Ibadan', name:'Off-Campus Room Near UI', type:'Room & Parlour', price:90000, period:'yr', bedrooms:1, bathrooms:1, desc:'Clean room and parlour just 8 minutes from University of Ibadan main gate. Calm, studious environment. Largely occupied by university students.', rules:['Students only — ID required','Quiet hours 10PM–6AM','No overnight visitors without notice','Join Saturday sanitation'], utils:['Municipal water','NEPA electricity','Shared kitchen (optional)','Lockable gate'], corperFriendly:false, verified:true, isShortlet:false, images:[], rating:4.4, reviewCount:6, status:'active', createdAt:Date.now()-86400000*7, mapQuery:'Agbowo+University+Ibadan+Oyo+State+Nigeria', imgClass:'img-g3', emoji:'📚' },
+    { id:'l4', landlordId:'demo-landlord', category:'corper', state:'Kwara', city:'Ilorin', address:'22 Adewole Estate, GRA, Ilorin', name:'Modern Self-Contain, Ilorin GRA', type:'Self-Contain', price:130000, period:'yr', bedrooms:1, bathrooms:1, desc:'Brand new self-contain in the prestigious Ilorin GRA. Freshly tiled throughout, excellent ventilation. 10 minutes from NYSC Kwara Secretariat.', rules:['No smoking','No guests after 10PM','No open-flame cooking','Maintain compound aesthetics'], utils:['Borehole water','NEPA + Gen backup','24hr security watchman','Off-street parking','CCTV cameras'], corperFriendly:true, verified:true, isShortlet:false, images:[], rating:4.8, reviewCount:14, status:'active', createdAt:Date.now()-86400000*2, mapQuery:'Adewole+Estate+GRA+Ilorin+Kwara+State+Nigeria', imgClass:'img-g7', emoji:'🏡' },
+    { id:'l5', landlordId:'demo-landlord', category:'corper', state:'Osun', city:'Osogbo', address:'Oranmiyan Street, Osogbo', name:'Corper Bedsitter, Osogbo', type:'Self-Contain', price:85000, period:'yr', bedrooms:0, bathrooms:1, desc:'Neat, affordable bedsitter close to UNIOSUN and the Osun NYSC Secretariat. Popular with fresh corpers every batch. Very secure neighbourhood.', rules:['No subletting','No alcohol','Join Friday compound cleaning','Report any damages promptly'], utils:['Borehole water','NEPA electricity','Secure compound','Friendly neighbours'], corperFriendly:true, verified:false, isShortlet:false, images:[], rating:4.1, reviewCount:4, status:'active', createdAt:Date.now()-86400000*9, mapQuery:'Oranmiyan+Street+Osogbo+Osun+State+Nigeria', imgClass:'img-g5', emoji:'🏠' },
+    { id:'l6', landlordId:'demo-landlord', category:'student', state:'Ekiti', city:'Ado-Ekiti', address:'Near EKSU Gate 2, Ado-Ekiti', name:'Shared Apartment — EKSU Students', type:'Shared', price:70000, period:'yr', bedrooms:1, bathrooms:1, desc:'Clean shared 3-bedroom apartment suitable for EKSU students. 3 minutes from EKSU Gate 2. Maximum 3 students. Borehole water, solar power.', rules:['EKSU students only','Solar generator — no noise','Share cleaning duties weekly','No pets allowed'], utils:['Solar power','Borehole water','Shared kitchen','Reading room'], corperFriendly:false, verified:false, isShortlet:false, images:[], rating:4.3, reviewCount:5, status:'active', createdAt:Date.now()-86400000*11, mapQuery:'Ekiti+State+University+Ado-Ekiti+Nigeria', imgClass:'img-g6', emoji:'🏘️' },
+    { id:'l7', landlordId:'demo-landlord', category:'corper', state:'Ondo', city:'Ondo City', address:'Oda Road, Ondo City', name:'Mini Flat — Ondo City', type:'Mini Flat', price:110000, period:'yr', bedrooms:1, bathrooms:1, desc:'Spacious mini flat in Ondo City. Newly painted. Quiet environment with friendly landlord. Close to Ondo NYSC LGA Secretariat. Electric borehole water supply.', rules:['No smoking','No subletting','Respectful to neighbours','Maintain compound hygiene'], utils:['Electric borehole','NEPA electricity','Parking available','Tiled'], corperFriendly:true, verified:true, isShortlet:false, images:[], rating:4.5, reviewCount:7, status:'active', createdAt:Date.now()-86400000*4, mapQuery:'Oda+Road+Ondo+City+Ondo+State+Nigeria', imgClass:'img-g4', emoji:'🏡' },
+    { id:'l8', landlordId:'demo-landlord', category:'shortlet', state:'Oyo', city:'Ibadan', address:'Old Bodija Estate, Ibadan', name:'Luxury 2-Bed Shortlet, Bodija', type:'Shortlet', price:28000, period:'night', bedrooms:2, bathrooms:2, desc:'Fully serviced luxury 2-bedroom in the prestigious Old Bodija Estate. Suitable for families, corporate guests, and weekend getaways. Fully equipped kitchen, dining set, premium mattresses.', rules:['No smoking','2-night minimum stay','Check-out by 12PM','No events without approval'], utils:['24hr inverter power','50Mbps fibre WiFi','Fully equipped kitchen','Washing machine','DSTV Premium','2 parking spots'], corperFriendly:false, verified:true, isShortlet:true, images:[], rating:4.9, reviewCount:21, status:'active', createdAt:Date.now()-86400000*1, mapQuery:'Bodija+Estate+Ibadan+Oyo+State+Nigeria', imgClass:'img-g8', emoji:'🏰' },
+  ];
+  DB.set('listings', listings);
+
+  // Seed demo landlord
+  const users = DB.get('users', []);
+  if (!users.find(u=>u.id==='demo-landlord')) {
+    users.push({ id:'demo-landlord', firstName:'Adebayo', lastName:'Olusola', email:'landlord@housenest.ng', phone:'08012345678', role:'landlord', password:hashPass('demo1234'), createdAt:Date.now()-86400000*30, verified:true });
+    DB.set('users', users);
+  }
+
+  // Seed demo reviews
+  const reviews = [
+    { id:'r1', listingId:'l1', userId:'demo-user', userName:'Amaka O.', userRole:'corper', rating:5, text:'Found this place 3 days into orientation camp. The landlord was super responsive, the agreement was ready within 24 hours. Absolutely love the apartment!', createdAt:Date.now()-86400000*3 },
+    { id:'r2', listingId:'l1', userId:'demo-user2', userName:'Emeka N.', userRole:'corper', rating:4, text:'Good value for Akure GRA area. Water supply is consistent and the compound is very clean. Only wish there was a backup generator.', createdAt:Date.now()-86400000*10 },
+    { id:'r3', listingId:'l4', userId:'demo-user3', userName:'Fatimah B.', userRole:'corper', rating:5, text:'Best corper house I\'ve seen in Ilorin. The GRA location is so peaceful. The HouseNest agreement process was seamless — e-signed on my phone!', createdAt:Date.now()-86400000*5 },
+    { id:'r4', listingId:'l8', userId:'demo-user4', userName:'Mr. & Mrs. Eze', userRole:'tenant', rating:5, text:'Used for our anniversary weekend. The apartment was spotless. WiFi worked perfectly for remote work too. Will definitely rebook!', createdAt:Date.now()-86400000*2 },
+  ];
+  DB.set('reviews', reviews);
+}
+
+// ── NAV HELPERS ──────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('shadow', window.scrollY > 20);
+});
+
+function toggleMobileMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+function updateNav() {
+  const u = state.currentUser;
+  const nr = document.getElementById('navRight');
+  if (u) {
+    const color = avatarColor(u.firstName);
+    nr.innerHTML = `
+      <button class="nav-link" onclick="navigate('dashboard')">Dashboard</button>
+      <div class="nav-avatar" style="background:${color}" onclick="navigate('profile')" title="${u.firstName} ${u.lastName}">${u.firstName[0]}${u.lastName[0]}</div>
+      <button class="nav-btn-ghost" onclick="handleLogout()">Log Out</button>`;
+  } else {
+    nr.innerHTML = `
+      <button class="nav-btn-ghost" onclick="openModal('authModal','login')">Log In</button>
+      <button class="nav-btn-solid" onclick="openModal('authModal','signup')">Sign Up Free</button>`;
+  }
+}
+
+// ── ROUTING ──────────────────────────────────────────
+function navigate(view, filterCat='', filterState='') {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el = document.getElementById('view-'+view);
+  if (!el) return;
+  el.classList.add('active');
+  state.currentView = view;
+  window.scrollTo(0,0);
+  // Close mobile menu
+  document.getElementById('mobileMenu').classList.remove('open');
+
+  if (view==='browse') renderBrowse(filterCat, filterState);
+  if (view==='dashboard') renderDashboard();
+  if (view==='add-listing') renderAddListingForm();
+  if (view==='profile') renderProfile();
+}
+
+function scrollToSection(id) {
+  navigate('home');
+  setTimeout(()=> document.getElementById(id)?.scrollIntoView({behavior:'smooth'}), 100);
+}
+
+function requireAuth(cb) {
+  if (state.currentUser) { cb(); }
+  else { state.pendingNavCallback = cb; openModal('authModal','signup'); }
+}
+
+// ── AUTH ─────────────────────────────────────────────
+let selectedRole = 'corper';
+
+function switchAuthTab(tab) {
+  document.getElementById('loginTab').classList.toggle('active', tab==='login');
+  document.getElementById('signupTab').classList.toggle('active', tab==='signup');
+  document.getElementById('loginPanel').classList.toggle('hidden', tab!=='login');
+  document.getElementById('signupPanel').classList.toggle('hidden', tab!=='signup');
+  document.getElementById('authModalTitle').textContent = tab==='login' ? 'Welcome Back' : 'Join HouseNest';
+}
+
+function selectRole(el) {
+  document.querySelectorAll('.role-card').forEach(r=>r.classList.remove('active'));
+  el.classList.add('active');
+  selectedRole = el.dataset.role;
+  document.getElementById('nysc-field-wrap').style.display = selectedRole==='corper' ? 'block' : 'none';
+}
+
+function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function validatePhone(p) { return /^0[789]\d{9}$/.test(p.replace(/\s/g,'')); }
+
+function showFieldError(id, msg='') {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg||el.textContent; el.classList.add('show'); }
+}
+function clearFieldErrors(...ids) {
+  ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('show'); });
+}
+
+function handleLogin() {
+  clearFieldErrors('loginEmailErr','loginPassErr');
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  let ok = true;
+  if (!validateEmail(email)) { showFieldError('loginEmailErr'); ok=false; }
+  if (!pass) { showFieldError('loginPassErr','Password is required'); ok=false; }
+  if (!ok) return;
+
+  const users = DB.get('users',[]);
+  const user = users.find(u=>u.email===email);
+  if (!user || user.password !== hashPass(pass)) {
+    showFieldError('loginPassErr','Incorrect email or password');
+    return;
+  }
+  state.currentUser = user;
+  DB.set('currentUser', user);
+  closeModal('authModal');
+  updateNav();
+  toast('success','✅ Welcome back, '+user.firstName+'!');
+  if (state.pendingNavCallback) { state.pendingNavCallback(); state.pendingNavCallback=null; }
+  else navigate('dashboard');
+}
+
+function handleSignup() {
+  clearFieldErrors('signupFirstErr','signupLastErr','signupEmailErr','signupPhoneErr','signupPassErr','signupPass2Err');
+  const first = document.getElementById('signupFirst').value.trim();
+  const last  = document.getElementById('signupLast').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const phone = document.getElementById('signupPhone').value.trim();
+  const pass  = document.getElementById('signupPass').value;
+  const pass2 = document.getElementById('signupPass2').value;
+  const nysc  = document.getElementById('signupNysc')?.value.trim()||'';
+  let ok=true;
+  if (!first) { showFieldError('signupFirstErr'); ok=false; }
+  if (!last)  { showFieldError('signupLastErr'); ok=false; }
+  if (!validateEmail(email)) { showFieldError('signupEmailErr'); ok=false; }
+  if (!validatePhone(phone)) { showFieldError('signupPhoneErr','Enter a valid 11-digit Nigerian number'); ok=false; }
+  if (pass.length<8) { showFieldError('signupPassErr'); ok=false; }
+  if (pass!==pass2)  { showFieldError('signupPass2Err'); ok=false; }
+  if (!ok) return;
+
+  const users = DB.get('users',[]);
+  if (users.find(u=>u.email===email)) {
+    showFieldError('signupEmailErr','This email is already registered');
+    return;
+  }
+  const user = { id:'u'+Date.now(), firstName:first, lastName:last, email, phone, role:selectedRole, nysc:selectedRole==='corper'?nysc:'', password:hashPass(pass), createdAt:Date.now(), verified:false, savedListings:[], applications:[] };
+  users.push(user);
+  DB.set('users', users);
+  state.currentUser = user;
+  DB.set('currentUser', user);
+  closeModal('authModal');
+  updateNav();
+  toast('success','🎉 Welcome to HouseNest, '+first+'!');
+  if (state.pendingNavCallback) { state.pendingNavCallback(); state.pendingNavCallback=null; }
+  else navigate('dashboard');
+}
+
+function handleLogout() {
+  state.currentUser = null;
+  DB.del('currentUser');
+  updateNav();
+  navigate('home');
+  toast('info','👋 You\'ve been logged out');
+}
+
+// ── LISTINGS ─────────────────────────────────────────
+function getListings() { return DB.get('listings',[]); }
+
+function listingCardHTML(l, showSave=true) {
+  const saved = state.currentUser?.savedListings?.includes(l.id) || false;
+  const priceStr = l.period==='night' ? `₦${l.price.toLocaleString()}<small>/night</small>` : `₦${l.price.toLocaleString()}<small>/yr</small>`;
+  const imgContent = l.images?.length>0
+    ? `<img src="${l.images[0]}" alt="${l.name}" loading="lazy">`
+    : `<div class="img-placeholder ${l.imgClass||'img-g1'}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem">${l.emoji||'🏠'}</div>`;
+  return `
+  <div class="listing-card" onclick="openListing('${l.id}')">
+    <div class="listing-card-img">
+      ${imgContent}
+      <div class="listing-card-badges">
+        ${l.verified?'<span class="listing-badge lb-verified">✓ Verified</span>':''}
+        ${l.corperFriendly?'<span class="listing-badge lb-corper">🎓 Corper</span>':''}
+        ${l.isShortlet?'<span class="listing-badge lb-shortlet">🏨 Shortlet</span>':''}
+      </div>
+      ${showSave?`<div class="listing-card-fav ${saved?'saved':''}" onclick="toggleSave(event,'${l.id}')" title="${saved?'Remove from saved':'Save listing'}">${saved?'❤️':'🤍'}</div>`:''}
+    </div>
+    <div class="listing-card-body">
+      <div class="listing-card-state">${l.state} · ${l.city}</div>
+      <div class="listing-card-name">${l.name}</div>
+      <div class="listing-card-addr">📍 ${l.address}</div>
+      <div class="listing-card-tags">
+        <span class="listing-card-tag">${l.type}</span>
+        ${l.utils?.slice(0,2).map(u=>`<span class="listing-card-tag">${u.split(' ').slice(0,2).join(' ')}</span>`).join('')}
+      </div>
+      <div class="listing-card-footer">
+        <div class="listing-card-price">${priceStr}</div>
+        <div style="display:flex;align-items:center;gap:0.3rem;font-size:0.78rem;color:var(--smoke)">
+          <span style="color:var(--ochre)">★</span>${(l.rating||4.0).toFixed(1)} (${l.reviewCount||0})
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function toggleSave(e, listingId) {
+  e.stopPropagation();
+  if (!state.currentUser) { openModal('authModal','login'); return; }
+  const users = DB.get('users',[]);
+  const user = users.find(u=>u.id===state.currentUser.id);
+  if (!user) return;
+  if (!user.savedListings) user.savedListings=[];
+  const idx = user.savedListings.indexOf(listingId);
+  if (idx>-1) { user.savedListings.splice(idx,1); toast('info','Removed from saved'); }
+  else { user.savedListings.push(listingId); toast('success','❤️ Listing saved!'); }
+  DB.set('users', users);
+  state.currentUser = user;
+  DB.set('currentUser', user);
+  // Re-render current view
+  if (state.currentView==='browse') applyBrowseFilters();
+  if (state.currentView==='home') renderFeaturedListings();
+}
+
+// ── HOME RENDER ──────────────────────────────────────
+function renderHome() {
+  renderHeroCards();
+  renderFeaturedListings();
+  renderStates();
+  renderCityTicker();
+  animateHeroStats();
+}
+
+function renderHeroCards() {
+  const listings = getListings().slice(0,3);
+  const container = document.getElementById('heroCards');
+  if (!container) return;
+  container.innerHTML = listings.map(l=>`
+    <div class="hero-card" onclick="openListing('${l.id}')">
+      <div class="hero-card-tag ${l.corperFriendly?'tag-corper':l.isShortlet?'tag-shortlet':'tag-verified'}">${l.corperFriendly?'🎓 CorperNest':l.isShortlet?'🏨 Shortlet':'✓ Verified'}</div>
+      <div class="hero-card-name">${l.name}</div>
+      <div class="hero-card-loc">📍 ${l.city}, ${l.state}</div>
+      <div class="hero-card-price">₦${l.price.toLocaleString()} <small>/${l.period}</small></div>
+    </div>`).join('');
+}
+
+function renderFeaturedListings() {
+  const grid = document.getElementById('featuredListings');
+  if (!grid) return;
+  const listings = getListings().filter(l=>l.status==='active').slice(0,6);
+  grid.innerHTML = listings.map(l=>listingCardHTML(l)).join('');
+}
+
+function renderStates() {
+  const listings = getListings();
+  const grid = document.getElementById('statesGrid');
+  if (!grid) return;
+  grid.innerHTML = STATES_DATA.map(s=>{
+    const count = listings.filter(l=>l.state===s.name && l.status==='active').length;
+    return `<div class="state-pill" onclick="navigate('browse','','${s.name}')">
+      <span class="state-pill-flag">${s.emoji}</span>
+      <div><div class="state-pill-name">${s.name} State</div><div class="state-pill-count">${count} listing${count!==1?'s':''}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderCityTicker() {
+  const ticker = document.getElementById('cityTicker');
+  if (!ticker) return;
+  const cities = ['Akure · Ondo','Ado-Ekiti · Ekiti','Ibadan · Oyo','Osogbo · Osun','Ilorin · Kwara','Ile-Ife · Osun','Ondo City · Ondo','Ijero-Ekiti · Ekiti'];
+  const doubled = [...cities,...cities];
+  ticker.innerHTML = doubled.map(c=>`<span class="ticker-item"><span class="ticker-dot"></span>${c}</span>`).join('');
+}
+
+function animateHeroStats() {
+  const el = document.getElementById('heroStatListings');
+  if (!el) return;
+  const target = getListings().filter(l=>l.status==='active').length;
+  let count=0; const step=Math.ceil(target/30);
+  const iv = setInterval(()=>{ count=Math.min(count+step,target); el.textContent=count; if(count>=target) clearInterval(iv); },40);
+}
+
+function heroSearch() {
+  const s = document.getElementById('heroState').value;
+  const t = document.getElementById('heroType').value;
+  navigate('browse');
+  if (s) document.getElementById('browseStateFilter').value=s;
+  if (t) document.getElementById('browseTypeFilter').value=t;
+  applyBrowseFilters();
+}
+
+// ── BROWSE RENDER ────────────────────────────────────
+let browseActiveChip = '';
+
+function renderBrowse(cat='', filterState='') {
+  if (cat) { browseActiveChip=cat; document.querySelectorAll('.filter-chip').forEach(c=>{ c.classList.toggle('active',c.dataset.filter===cat); }); }
+  if (filterState) document.getElementById('browseStateFilter').value=filterState;
+  applyBrowseFilters();
+}
+
+function setBrowseFilter(cat, btn) {
+  browseActiveChip=cat;
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  applyBrowseFilters();
+}
+
+function applyBrowseFilters() {
+  let listings = getListings().filter(l=>l.status==='active');
+  const cat = browseActiveChip;
+  const stateF = document.getElementById('browseStateFilter')?.value||'';
+  const typeF = document.getElementById('browseTypeFilter')?.value||'';
+  const sortF = document.getElementById('browseSortFilter')?.value||'newest';
+
+  if (cat==='corper') listings=listings.filter(l=>l.corperFriendly);
+  else if (cat==='shortlet') listings=listings.filter(l=>l.isShortlet);
+  else if (cat==='student') listings=listings.filter(l=>l.category==='student');
+  if (stateF) listings=listings.filter(l=>l.state===stateF);
+  if (typeF) listings=listings.filter(l=>l.type===typeF);
+  if (sortF==='price-asc') listings.sort((a,b)=>a.price-b.price);
+  else if (sortF==='price-desc') listings.sort((a,b)=>b.price-a.price);
+  else listings.sort((a,b)=>b.createdAt-a.createdAt);
+
+  const grid = document.getElementById('browseGrid');
+  const heading = document.getElementById('browseHeading');
+  const count = document.getElementById('browseCount');
+  if (!grid) return;
+
+  const catLabels = {corper:'🎓 CorperNest Listings',shortlet:'🏨 Shortlet Listings',student:'📚 Student Housing','':`All Listings${stateF?' in '+stateF:''}`};
+  heading.textContent = catLabels[cat]||'All Listings';
+  count.textContent = `${listings.length} listing${listings.length!==1?'s':''} found`;
+
+  if (listings.length===0) {
+    grid.innerHTML=`<div class="empty-state"><div class="empty-state-icon">🔍</div><div style="font-weight:700;color:var(--forest)">No listings found</div><p style="margin-top:0.5rem">Try adjusting your filters or <button class="btn btn-ghost" onclick="navigate('browse')">clear all filters</button></p></div>`;
+  } else {
+    grid.innerHTML = listings.map(l=>listingCardHTML(l)).join('');
+  }
+}
+
+// ── LISTING DETAIL ───────────────────────────────────
+function openListing(id) {
+  const listings = getListings();
+  const l = listings.find(x=>x.id===id);
+  if (!l) return;
+  state.currentListingId = id;
+
+  // Show detail view manually
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-detail').classList.add('active');
+  state.currentView='detail';
+  window.scrollTo(0,0);
+
+  renderDetailGallery(l);
+  renderDetailContent(l);
+}
+
+function renderDetailGallery(l) {
+  const wrap = document.getElementById('detailGallery');
+  const imgs = l.images?.length>0 ? l.images : null;
+  if (imgs && imgs.length>0) {
+    wrap.innerHTML = `
+      <div class="detail-gallery-main detail-gal-cell" onclick="openLightbox('${imgs[0]}','${l.name} — Photo 1')">
+        <img src="${imgs[0]}" alt="${l.name}">
+      </div>
+      ${imgs.slice(1,3).map((img,i)=>`
+      <div class="detail-gal-cell ${i===1&&imgs.length>3?'more-overlay':''}" data-more="${imgs.length-2} more photos" onclick="openLightbox('${img}','${l.name} — Photo ${i+2}')">
+        <img src="${img}" alt="${l.name}">
+      </div>`).join('')}`;
+  } else {
+    wrap.innerHTML = `
+      <div class="detail-gallery-main detail-gal-cell ${l.imgClass||'img-g1'}" style="background:...">
+        <div class="img-placeholder">${l.emoji||'🏠'}</div>
+      </div>
+      <div class="detail-gal-cell ${l.imgClass||'img-g1'}" style="opacity:0.7"><div style="font-size:2rem">📸</div></div>
+      <div class="detail-gal-cell ${l.imgClass||'img-g1'}" style="opacity:0.5"><div style="font-size:2rem">📷</div></div>`;
+  }
+}
+
+function renderDetailContent(l) {
+  const reviews = DB.get('reviews',[]).filter(r=>r.listingId===l.id);
+  const avgRating = reviews.length>0 ? reviews.reduce((s,r)=>s+r.rating,0)/reviews.length : l.rating||4.0;
+  const mapQ = l.mapQuery || encodeURIComponent(l.address+' '+l.state+' Nigeria');
+  const mapSrc = `https://maps.google.com/maps?q=${mapQ}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  const nearby = NEARBY_TEMPLATES[l.state]||NEARBY_TEMPLATES['Ondo'];
+  const landlord = DB.get('users',[]).find(u=>u.id===l.landlordId)||{firstName:'Landlord',lastName:'',role:'landlord'};
+
+  // Rating bars
+  const stars = [5,4,3,2,1];
+  const barData = stars.map(s=>({s,count:reviews.filter(r=>r.rating===s).length}));
+
+  document.getElementById('detailContentWrap').innerHTML = `
+  <div class="detail-main">
+    <div style="margin-bottom:1rem">
+      <button class="btn btn-ghost" onclick="navigate('browse')" style="color:var(--smoke);font-size:0.82rem;padding:0;margin-bottom:0.6rem">← Back to Listings</button>
+    </div>
+    <h1 class="detail-title">${l.name}</h1>
+    <div class="detail-addr">📍 ${l.address}, ${l.city}, ${l.state} State</div>
+    <div class="detail-badge-row">
+      ${l.verified?'<span class="det-badge det-badge-y">✓ Verified Landlord</span>':''}
+      ${l.corperFriendly?'<span class="det-badge det-badge-g">🎓 CorperNest Listed</span>':''}
+      ${l.isShortlet?'<span class="det-badge" style="background:rgba(32,96,192,0.1);color:#2060c0;border:1px solid rgba(32,96,192,0.2)">🏨 Shortlet</span>':''}
+      <span class="det-badge det-badge-g">⚖️ Agreement Included</span>
+      <span class="det-badge det-badge-y">🏦 Escrow Protected</span>
+    </div>
+
+    <div class="detail-tabs">
+      <button class="det-tab active" onclick="switchDetTab('overview',this)">Overview</button>
+      <button class="det-tab" onclick="switchDetTab('map',this)">🗺️ Map & Directions</button>
+      <button class="det-tab" onclick="switchDetTab('reviews',this)">⭐ Reviews (${reviews.length})</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="det-tab-panel active" id="dtp-overview">
+      <div class="det-overview-grid">
+        <div class="det-ov-item"><div class="det-ov-label">Property Type</div><div class="det-ov-val">${l.type}</div></div>
+        <div class="det-ov-item"><div class="det-ov-label">State / City</div><div class="det-ov-val">${l.city}, ${l.state}</div></div>
+        <div class="det-ov-item"><div class="det-ov-label">Rent</div><div class="det-ov-val">₦${l.price.toLocaleString()} / ${l.period==='night'?'night':'year'}</div></div>
+        <div class="det-ov-item"><div class="det-ov-label">Bedrooms</div><div class="det-ov-val">${l.bedrooms===0?'Studio/Bedsitter':l.bedrooms+' Bedroom'+(l.bedrooms>1?'s':'')}</div></div>
+      </div>
+      <div class="det-section-title">📋 Description</div>
+      <p style="font-size:0.88rem;color:var(--smoke);line-height:1.75;margin-bottom:1.5rem">${l.desc}</p>
+      <div class="det-section-title">🔌 Utilities & Amenities</div>
+      <div class="utils-grid mb-3">
+        ${(l.utils||[]).map(u=>`<div class="util-item"><span class="util-tick">✓</span>${u}</div>`).join('')}
+      </div>
+      <div class="det-section-title">📋 House Rules</div>
+      <div class="rules-grid mb-3">
+        ${(l.rules||[]).map(r=>`<div class="rule-item"><div class="rule-dot"></div>${r}</div>`).join('')}
+      </div>
+    </div>
+
+    <!-- MAP -->
+    <div class="det-tab-panel" id="dtp-map">
+      <div class="map-frame-wrap">
+        <iframe class="map-frame" src="${mapSrc}" loading="lazy" allowfullscreen></iframe>
+      </div>
+      <div class="map-actions">
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${mapQ}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">🧭 Get Directions</a>
+        <a href="https://www.google.com/maps/search/?api=1&query=${mapQ}" target="_blank" rel="noopener" class="btn btn-outline btn-sm">🔍 Open in Maps</a>
+        <button class="btn btn-outline btn-sm" onclick="copyText('${l.address}, ${l.city}, ${l.state} State')">📋 Copy Address</button>
+      </div>
+      <div class="det-section-title">📍 What's Nearby</div>
+      <div class="nearby-grid">
+        ${nearby.map(n=>`<div class="nearby-item"><div class="nearby-icon">${n.i}</div><div class="nearby-label">${n.l}</div><div class="nearby-dist">${n.d}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="det-tab-panel" id="dtp-reviews">
+      <div class="review-summary">
+        <div>
+          <div class="review-big-score">${avgRating.toFixed(1)}</div>
+          <div class="review-stars-big">${starStr(Math.round(avgRating))}</div>
+          <div class="review-count-txt">${reviews.length} review${reviews.length!==1?'s':''}</div>
+        </div>
+        <div class="review-bars">
+          ${barData.map(b=>`
+          <div class="review-bar-row">
+            <span>${b.s}★</span>
+            <div class="review-bar-track"><div class="review-bar-fill" style="width:${reviews.length?b.count/reviews.length*100:0}%"></div></div>
+            <span>${b.count}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="reviews-list" id="reviewsList">
+        ${reviews.length>0?reviews.map(r=>reviewCardHTML(r)).join(''):'<p style="color:var(--smoke);font-size:0.88rem">No reviews yet. Be the first to review this property!</p>'}
+      </div>
+
+      <div class="add-review-form mt-3" id="addReviewForm">
+        <div class="det-section-title">Write a Review</div>
+        ${state.currentUser ? `
+        <div style="margin-bottom:0.8rem">
+          <div style="font-size:0.8rem;color:var(--smoke);margin-bottom:0.4rem">Your rating</div>
+          <div class="star-picker" id="starPicker">
+            ${[1,2,3,4,5].map(i=>`<button class="star-btn" data-star="${i}" onclick="setReviewStar(${i})" title="${i} star${i>1?'s':''}">☆</button>`).join('')}
+          </div>
+        </div>
+        <div class="form-group">
+          <textarea class="form-textarea" id="reviewText" placeholder="Share your experience with this property. Was the landlord responsive? Is the water supply reliable? What surprised you?"></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="submitReview('${l.id}')">Submit Review</button>
+        ` : `<p style="color:var(--smoke);font-size:0.85rem">Please <button class="btn btn-ghost" onclick="openModal('authModal','login')" style="color:var(--clay);font-size:0.85rem;padding:0">log in</button> to write a review.</p>`}
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="detail-sidebar">
+    <div class="sidebar-card">
+      <div class="sidebar-price">₦${l.price.toLocaleString()}</div>
+      <div class="sidebar-period">per ${l.period==='night'?'night':'year'}</div>
+      <hr class="sidebar-divider">
+      <div class="landlord-profile">
+        <div class="landlord-av" style="background:${avatarColor(landlord.firstName)}">${landlord.firstName[0]}${landlord.lastName?landlord.lastName[0]:''}</div>
+        <div>
+          <div class="landlord-name">${landlord.firstName} ${landlord.lastName}</div>
+          <div class="landlord-verified">${landlord.verified?'✓ Verified Landlord':'Landlord'}</div>
+        </div>
+      </div>
+      <hr class="sidebar-divider">
+      <button class="btn btn-primary btn-full mt-2" onclick="requireAuth(()=>handleApply('${l.id}'))">Apply for This Property</button>
+      <button class="btn btn-outline btn-full mt-2" onclick="requireAuth(()=>handleMessage('${l.id}','${landlord.id||'demo-landlord'}'))">💬 Message Landlord</button>
+      <button class="btn btn-full mt-1" style="background:var(--mist);color:var(--smoke)" onclick="toggleSaveFromDetail('${l.id}')">🤍 Save Listing</button>
+    </div>
+    <div class="sidebar-card" style="font-size:0.82rem;color:var(--smoke);line-height:1.7">
+      <div style="font-weight:700;color:var(--forest);margin-bottom:0.5rem">🛡️ You're Protected</div>
+      Lawyer-drafted agreement · Escrow payment · Verified landlord · Dispute resolution support
+    </div>
+  </div>`;
+
+  // Animate rating bars
+  setTimeout(()=>{
+    document.querySelectorAll('.review-bar-fill').forEach(b=>{
+      b.style.width=b.style.width;
+    });
+  },100);
+}
+
+function switchDetTab(tab, btn) {
+  document.querySelectorAll('.det-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.det-tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('dtp-'+tab).classList.add('active');
+}
+
+function reviewCardHTML(r) {
+  const colors = ['#2d5c30','#5c3020','#1e3a5c','#5c4a10','#3a1e5c'];
+  const c = colors[r.userId.charCodeAt(r.userId.length-1)%colors.length];
+  return `<div class="review-card">
+    <div class="review-card-header">
+      <div class="review-avatar" style="background:${c}">${r.userName[0]}</div>
+      <div>
+        <div class="review-author-name">${r.userName}</div>
+        <div class="review-author-role">${r.userRole||'Tenant'}</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div class="review-stars">${starStr(r.rating)}</div>
+        <div class="review-date">${timeAgo(r.createdAt)}</div>
+      </div>
+    </div>
+    <div class="review-text">"${r.text}"</div>
+  </div>`;
+}
+
+let currentReviewStar = 0;
+function setReviewStar(n) {
+  currentReviewStar=n;
+  document.querySelectorAll('.star-btn').forEach(b=>{
+    b.textContent = parseInt(b.dataset.star)<=n?'★':'☆';
+    b.classList.toggle('active',parseInt(b.dataset.star)<=n);
+  });
+}
+
+function submitReview(listingId) {
+  if (!state.currentUser) { openModal('authModal','login'); return; }
+  if (currentReviewStar===0) { toast('error','Please select a star rating'); return; }
+  const text = document.getElementById('reviewText')?.value.trim()||'';
+  if (text.length<10) { toast('error','Please write at least 10 characters'); return; }
+
+  const reviews = DB.get('reviews',[]);
+  const existing = reviews.find(r=>r.listingId===listingId&&r.userId===state.currentUser.id);
+  if (existing) { toast('error','You\'ve already reviewed this property'); return; }
+
+  const review = { id:'r'+Date.now(), listingId, userId:state.currentUser.id, userName:state.currentUser.firstName+' '+state.currentUser.lastName[0]+'.', userRole:state.currentUser.role, rating:currentReviewStar, text, createdAt:Date.now() };
+  reviews.push(review);
+  DB.set('reviews', reviews);
+
+  // Update listing rating
+  const listings = getListings();
+  const listing = listings.find(l=>l.id===listingId);
+  if (listing) {
+    const listingReviews = reviews.filter(r=>r.listingId===listingId);
+    listing.rating = listingReviews.reduce((s,r)=>s+r.rating,0)/listingReviews.length;
+    listing.reviewCount = listingReviews.length;
+    DB.set('listings', listings);
+  }
+
+  toast('success','⭐ Review submitted! Thank you.');
+  openListing(listingId);
+}
+
+function toggleSaveFromDetail(id) { toggleSave({stopPropagation:()=>{}},id); }
+
+function handleApply(listingId) {
+  const users = DB.get('users',[]);
+  const user = users.find(u=>u.id===state.currentUser.id);
+  if (!user.applications) user.applications=[];
+  if (user.applications.find(a=>a.listingId===listingId)) { toast('info','You\'ve already applied for this property'); return; }
+  user.applications.push({ listingId, status:'pending', appliedAt:Date.now() });
+  DB.set('users',users);
+  state.currentUser=user;
+  DB.set('currentUser',user);
+  toast('success','✅ Application submitted! The landlord will contact you soon.');
+}
+
+function handleMessage(listingId, landlordId) {
+  toast('info','💬 Messaging feature — full implementation connects to real-time chat (Firebase). Demo coming soon!');
+}
+
+// ── DASHBOARD ────────────────────────────────────────
+function renderDashboard() {
+  if (!state.currentUser) { navigate('home'); openModal('authModal','login'); return; }
+  const u = state.currentUser;
+  const isLandlord = ['landlord','association'].includes(u.role);
+
+  // Sidebar
+  const navItems = isLandlord ? [
+    {icon:'🏠',label:'My Listings',view:'my-listings'},
+    {icon:'➕',label:'Add Listing',view:'add'},
+    {icon:'📋',label:'Applications',view:'applications'},
+    {icon:'📊',label:'Analytics',view:'analytics'},
+    {icon:'⚖️',label:'Agreements',view:'agreements'},
+    {icon:'👤',label:'My Profile',view:'profile-dash'},
+  ] : [
+    {icon:'🔍',label:'Browse',view:'browse-dash'},
+    {icon:'❤️',label:'Saved Listings',view:'saved'},
+    {icon:'📋',label:'My Applications',view:'my-applications'},
+    {icon:'⭐',label:'My Reviews',view:'my-reviews'},
+    {icon:'👤',label:'My Profile',view:'profile-dash'},
+  ];
+
+  document.getElementById('dashSidebar').innerHTML = `
+    <div style="padding:0.5rem 0.8rem 1.2rem;border-bottom:1px solid rgba(246,241,232,0.08);margin-bottom:0.5rem">
+      <div style="display:flex;align-items:center;gap:0.7rem">
+        <div class="nav-avatar" style="background:${avatarColor(u.firstName)};width:36px;height:36px;border-radius:50%;font-size:0.85rem;display:flex;align-items:center;justify-content:center;color:white;font-weight:700">${u.firstName[0]}${u.lastName[0]}</div>
+        <div>
+          <div style="color:var(--bone);font-weight:700;font-size:0.88rem">${u.firstName} ${u.lastName}</div>
+          <div style="color:rgba(246,241,232,0.4);font-size:0.7rem;text-transform:capitalize">${u.role}</div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-nav-label">Menu</div>
+    ${navItems.map((n,i)=>`<button class="dash-nav-item ${i===0?'active':''}" data-panel="${n.view}" onclick="switchDashPanel('${n.view}',this)"><span class="dash-icon">${n.icon}</span>${n.label}</button>`).join('')}
+    <div style="flex:1"></div>
+    <button class="dash-nav-item" style="margin-top:auto" onclick="handleLogout()"><span class="dash-icon">🚪</span>Log Out</button>`;
+
+  switchDashPanel(navItems[0].view, document.querySelector('.dash-nav-item'));
+}
+
+function switchDashPanel(panel, btn) {
+  document.querySelectorAll('.dash-nav-item').forEach(b=>b.classList.remove('active'));
+  btn?.classList.add('active');
+  const u = state.currentUser;
+  const isLandlord = ['landlord','association'].includes(u.role);
+  const listings = getListings();
+  const myListings = listings.filter(l=>l.landlordId===u.id);
+  const reviews = DB.get('reviews',[]);
+
+  let content='';
+
+  if (panel==='my-listings' || panel==='browse-dash') {
+    const greeting = `Good ${timeOfDay()},`;
+    content=`
+    <div class="dash-header">
+      <div><div class="dash-welcome">${greeting} ${u.firstName} 👋</div><div class="dash-sub">${isLandlord?`You have ${myListings.length} listing${myListings.length!==1?'s':''}`:''}</div></div>
+      ${isLandlord?`<button class="btn btn-clay btn-sm" onclick="navigate('add-listing')">+ Add Listing</button>`:''}
+    </div>
+    ${isLandlord?`
+    <div class="dash-stats">
+      <div class="dash-stat"><div class="dash-stat-num">${myListings.length}</div><div class="dash-stat-label">Active Listings</div></div>
+      <div class="dash-stat"><div class="dash-stat-num">${myListings.reduce((s,l)=>s+(l.reviewCount||0),0)}</div><div class="dash-stat-label">Total Reviews</div></div>
+      <div class="dash-stat"><div class="dash-stat-num">${myListings.filter(l=>l.status==='active').length}</div><div class="dash-stat-label">Live Now</div></div>
+    </div>
+    <div class="dash-panel">
+      <div class="dash-section-title">My Listings <button class="btn btn-clay btn-sm" onclick="navigate('add-listing')">+ New</button></div>
+      ${myListings.length===0?'<p style="color:var(--smoke);font-size:0.88rem">You haven\'t listed any properties yet. <button class="btn btn-ghost" onclick="navigate(\'add-listing\')" style="color:var(--clay);font-size:0.88rem;padding:0">Add your first listing →</button></p>':
+      myListings.map(l=>`
+      <div class="dash-listing-row" onclick="openListing('${l.id}')">
+        <div class="dash-listing-thumb ${l.imgClass}">${l.images?.length?`<img src="${l.images[0]}" alt="">`:l.emoji}</div>
+        <div class="dash-listing-info">
+          <div class="dash-listing-name">${l.name}</div>
+          <div class="dash-listing-meta">${l.city}, ${l.state} · ₦${l.price.toLocaleString()}/${l.period} · ⭐${(l.rating||4.0).toFixed(1)} (${l.reviewCount||0})</div>
+        </div>
+        <span class="dash-listing-status status-${l.status}">${l.status}</span>
+        <button class="btn btn-icon" onclick="event.stopPropagation();editListing('${l.id}')" title="Edit">✏️</button>
+      </div>`).join('')}
+    </div>`:
+    `<div class="dash-header"><div><div class="dash-welcome">${greeting} ${u.firstName} 👋</div><div class="dash-sub">Find your perfect home across 5 states.</div></div></div>
+    <div class="dash-panel">
+      <div class="dash-section-title">Quick Search</div>
+      <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="navigate('browse','corper')">🎓 CorperNest</button>
+        <button class="btn btn-outline btn-sm" onclick="navigate('browse','shortlet')">🏨 Shortlets</button>
+        <button class="btn btn-outline btn-sm" onclick="navigate('browse','student')">📚 Student</button>
+        <button class="btn btn-outline btn-sm" onclick="navigate('browse')">🏠 All Listings</button>
+      </div>
+    </div>`}`;
+  }
+
+  else if (panel==='add') { navigate('add-listing'); return; }
+
+  else if (panel==='saved') {
+    const savedIds = u.savedListings||[];
+    const saved = listings.filter(l=>savedIds.includes(l.id));
+    content=`<div class="dash-header"><div><div class="dash-welcome">Saved Listings</div><div class="dash-sub">${saved.length} saved propert${saved.length!==1?'ies':'y'}</div></div></div>
+    <div class="listing-grid">${saved.length>0?saved.map(l=>listingCardHTML(l)).join(''):'<p style="color:var(--smoke)">No saved listings yet. Browse and tap ♡ to save.</p>'}</div>`;
+  }
+
+  else if (panel==='my-applications') {
+    const apps = u.applications||[];
+    content=`<div class="dash-header"><div><div class="dash-welcome">My Applications</div><div class="dash-sub">${apps.length} application${apps.length!==1?'s':''}</div></div></div>
+    <div class="dash-panel">
+    ${apps.length===0?'<p style="color:var(--smoke);font-size:0.88rem">You haven\'t applied to any properties yet.</p>':
+    apps.map(a=>{
+      const l=listings.find(x=>x.id===a.listingId);
+      return l?`<div class="dash-listing-row" onclick="openListing('${l.id}')">
+        <div class="dash-listing-thumb ${l.imgClass}">${l.images?.length?`<img src="${l.images[0]}" alt="">`:l.emoji}</div>
+        <div class="dash-listing-info"><div class="dash-listing-name">${l.name}</div><div class="dash-listing-meta">${l.city}, ${l.state} · Applied ${timeAgo(a.appliedAt)}</div></div>
+        <span class="dash-listing-status status-pending">${a.status}</span>
+      </div>`:'';}).join('')}
+    </div>`;
+  }
+
+  else if (panel==='applications') {
+    // Landlord view: applications for their listings
+    const allUsers = DB.get('users',[]);
+    const applicants = allUsers.flatMap(u=>
+      (u.applications||[]).filter(a=>myListings.find(l=>l.id===a.listingId))
+        .map(a=>({...a,applicant:u}))
+    );
+    content=`<div class="dash-header"><div><div class="dash-welcome">Applications Received</div><div class="dash-sub">${applicants.length} application${applicants.length!==1?'s':''}</div></div></div>
+    <div class="dash-panel">
+    ${applicants.length===0?'<p style="color:var(--smoke);font-size:0.88rem">No applications yet. Share your listings to get tenants.</p>':
+    applicants.map(a=>{
+      const l=listings.find(x=>x.id===a.listingId);
+      return `<div class="dash-listing-row">
+        <div class="dash-listing-thumb" style="background:${avatarColor(a.applicant.firstName)};display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem">${a.applicant.firstName[0]}${a.applicant.lastName[0]}</div>
+        <div class="dash-listing-info">
+          <div class="dash-listing-name">${a.applicant.firstName} ${a.applicant.lastName} <span style="font-size:0.72rem;padding:0.15rem 0.4rem;border-radius:4px;background:var(--mist);color:var(--smoke)">${a.applicant.role}</span></div>
+          <div class="dash-listing-meta">${l?l.name:a.listingId} · ${a.applicant.phone} · Applied ${timeAgo(a.appliedAt)}</div>
+        </div>
+        <span class="dash-listing-status status-pending">${a.status}</span>
+      </div>`;}).join('')}
+    </div>`;
+  }
+
+  else if (panel==='agreements') {
+    content=`<div class="dash-header"><div><div class="dash-welcome">Tenancy Agreements</div><div class="dash-sub">All your lawyer-drafted agreements</div></div></div>
+    <div class="dash-panel" style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">⚖️</div>
+      <div style="font-weight:700;color:var(--forest);margin-bottom:0.5rem">Agreements Module</div>
+      <p style="color:var(--smoke);font-size:0.88rem;max-width:400px;margin:0 auto">In the full platform, every accepted application generates a lawyer-drafted, state-specific tenancy agreement ready for e-signature. Documents are stored here permanently.</p>
+    </div>`;
+  }
+
+  else if (panel==='analytics') {
+    content=`<div class="dash-header"><div><div class="dash-welcome">Analytics</div></div></div>
+    <div class="dash-stats">
+      <div class="dash-stat"><div class="dash-stat-num">${myListings.length}</div><div class="dash-stat-label">Listings</div></div>
+      <div class="dash-stat"><div class="dash-stat-num">${reviews.filter(r=>myListings.find(l=>l.id===r.listingId)).length}</div><div class="dash-stat-label">Reviews</div></div>
+      <div class="dash-stat"><div class="dash-stat-num">${(myListings.reduce((s,l)=>s+(l.rating||4),0)/Math.max(myListings.length,1)).toFixed(1)}★</div><div class="dash-stat-label">Avg. Rating</div></div>
+    </div>
+    <div class="dash-panel" style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">📊</div>
+      <p style="color:var(--smoke);font-size:0.88rem">Full analytics — views, applications, revenue — available in the production build connected to a live database.</p>
+    </div>`;
+  }
+
+  else if (panel==='my-reviews') {
+    const myReviews = reviews.filter(r=>r.userId===u.id);
+    content=`<div class="dash-header"><div><div class="dash-welcome">My Reviews</div><div class="dash-sub">${myReviews.length} review${myReviews.length!==1?'s':''} written</div></div></div>
+    <div class="dash-panel">
+    ${myReviews.length===0?'<p style="color:var(--smoke);font-size:0.88rem">You haven\'t written any reviews yet.</p>':
+    myReviews.map(r=>{
+      const l=listings.find(x=>x.id===r.listingId);
+      return `<div style="padding:1rem 0;border-bottom:1px solid var(--mist)">
+        <div style="font-weight:700;color:var(--forest);margin-bottom:0.3rem">${l?l.name:r.listingId}</div>
+        <div style="color:var(--ochre);font-size:0.85rem">${starStr(r.rating)} <span style="color:var(--smoke);font-size:0.72rem">${timeAgo(r.createdAt)}</span></div>
+        <div style="font-size:0.85rem;color:var(--smoke);margin-top:0.4rem">"${r.text}"</div>
+      </div>`;}).join('')}
+    </div>`;
+  }
+
+  else if (panel==='profile-dash') { navigate('profile'); return; }
+
+  document.getElementById('dashMain').innerHTML = content || '<div class="dash-header"><div class="dash-welcome">Coming soon</div></div>';
+}
+
+// ── ADD LISTING FORM ─────────────────────────────────
+let uploadedImages = [];
+let rulesArr = ['No smoking','No parties after 10PM'];
+
+function renderAddListingForm() {
+  uploadedImages=[];
+  rulesArr=['No smoking'];
+  document.getElementById('addListingForm').innerHTML=`
+  <div class="form-section">
+    <div class="form-section-title"><span>🏠</span> Basic Information</div>
+    <div class="form-group"><label class="form-label">Property Name / Title *</label><input class="form-input" id="lf-name" placeholder="e.g. Modern Self-Contain, Akure GRA"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">State *</label>
+        <select class="form-select" id="lf-state">
+          <option value="">Select State</option>
+          <option>Ondo</option><option>Ekiti</option><option>Oyo</option><option>Osun</option><option>Kwara</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">City / Town *</label><input class="form-input" id="lf-city" placeholder="e.g. Akure"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Full Address *</label><input class="form-input" id="lf-address" placeholder="e.g. 14 Oyemekun Road, Akure"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Property Type *</label>
+        <select class="form-select" id="lf-type">
+          <option value="">Select</option>
+          <option>Self-Contain</option><option>Mini Flat</option><option>Room & Parlour</option>
+          <option>2-Bedroom</option><option>3-Bedroom</option><option>Shared</option><option>Shortlet</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="lf-category">
+          <option value="corper">NYSC Corper (CorperNest)</option>
+          <option value="student">Student</option>
+          <option value="professional">Professional</option>
+          <option value="shortlet">Shortlet</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Description *</label><textarea class="form-textarea" id="lf-desc" placeholder="Describe your property. Mention the neighbourhood, condition, what makes it special..."></textarea></div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title"><span>💰</span> Pricing</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Rent Amount (₦) *</label><input class="form-input" id="lf-price" type="number" placeholder="120000"></div>
+      <div class="form-group">
+        <label class="form-label">Per</label>
+        <select class="form-select" id="lf-period">
+          <option value="yr">Year</option>
+          <option value="month">Month</option>
+          <option value="night">Night (Shortlet)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Bedrooms</label>
+        <select class="form-select" id="lf-beds">
+          <option value="0">Bedsitter/Studio</option>
+          <option value="1">1 Bedroom</option>
+          <option value="2">2 Bedrooms</option>
+          <option value="3">3 Bedrooms</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Bathrooms</label>
+        <select class="form-select" id="lf-baths">
+          <option value="1">1 Bathroom</option>
+          <option value="2">2 Bathrooms</option>
+          <option value="3">3 Bathrooms</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title"><span>🔌</span> Utilities & Amenities</div>
+    <p style="font-size:0.82rem;color:var(--smoke);margin-bottom:1rem">Select all that apply to your property</p>
+    <div id="utilsGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem"></div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title"><span>📋</span> House Rules</div>
+    <p style="font-size:0.82rem;color:var(--smoke);margin-bottom:1rem">Add the rules tenants must follow</p>
+    <div class="rules-editor" id="rulesEditor"></div>
+    <button class="btn btn-outline btn-sm mt-2" onclick="addRuleField()">+ Add Rule</button>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title"><span>⚙️</span> Settings</div>
+    <div class="toggle-row"><span class="toggle-label">🎓 Corper-Friendly (CorperNest)</span><button class="toggle-switch on" id="tog-corper" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+    <div class="toggle-row"><span class="toggle-label">✅ Property Documents Verified</span><button class="toggle-switch off" id="tog-verified" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+    <div class="toggle-row"><span class="toggle-label">🏨 This is a Shortlet</span><button class="toggle-switch off" id="tog-shortlet" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+  </div>
+
+  <div class="form-section">
+    <div class="form-section-title"><span>📸</span> Property Photos</div>
+    <p style="font-size:0.82rem;color:var(--smoke);margin-bottom:1rem">Upload real photos of the property. Good photos get 3× more views. Max 10 photos, 5MB each.</p>
+    <div class="image-upload-zone" id="uploadZone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleImgDrop(event)">
+      <input type="file" multiple accept="image/*" onchange="handleImgSelect(this)" id="imgFileInput">
+      <div class="upload-icon-big">📸</div>
+      <div class="upload-title">Drag & drop photos here</div>
+      <div class="upload-sub">or click to browse · JPG, PNG, WEBP · Max 5MB each</div>
+    </div>
+    <div class="image-preview-grid" id="imgPreviewGrid"></div>
+    <p class="form-hint mt-1">In the live platform, photos upload to Cloudinary (cloud image storage) and are automatically compressed for fast loading on Nigerian mobile data.</p>
+  </div>
+
+  <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1rem;padding-bottom:3rem">
+    <button class="btn btn-outline" onclick="navigate('dashboard')">Cancel</button>
+    <button class="btn btn-primary" onclick="saveListing()">🏠 Publish Listing</button>
+  </div>`;
+
+  renderUtilsGrid();
+  renderRulesEditor();
+}
+
+const UTILS_OPTIONS = ['Borehole water','Municipal water','NEPA electricity','Generator (Private)','Solar/Inverter','WiFi/Internet','Air conditioning','24hr security','CCTV cameras','Off-street parking','Tiled floors','Fully furnished','Washing machine','Shared kitchen','Reading room','Swimming pool'];
+let selectedUtils = ['Borehole water','NEPA electricity'];
+
+function renderUtilsGrid() {
+  const grid = document.getElementById('utilsGrid');
+  if (!grid) return;
+  grid.innerHTML = UTILS_OPTIONS.map(u=>`
+    <label style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.7rem;background:${selectedUtils.includes(u)?'rgba(45,92,48,0.1)':'var(--mist)'};border-radius:8px;cursor:pointer;border:1.5px solid ${selectedUtils.includes(u)?'var(--moss)':'transparent'};font-size:0.82rem;transition:all 0.2s">
+      <input type="checkbox" ${selectedUtils.includes(u)?'checked':''} onchange="toggleUtil('${u}',this)" style="accent-color:var(--moss)">
+      ${u}
+    </label>`).join('');
+}
+
+function toggleUtil(u, cb) {
+  if (cb.checked) { if (!selectedUtils.includes(u)) selectedUtils.push(u); }
+  else { selectedUtils = selectedUtils.filter(x=>x!==u); }
+  renderUtilsGrid();
+}
+
+function renderRulesEditor() {
+  const ed = document.getElementById('rulesEditor');
+  if (!ed) return;
+  ed.innerHTML = rulesArr.map((r,i)=>`
+    <div class="rule-input-row">
+      <input class="form-input" value="${r}" oninput="rulesArr[${i}]=this.value" placeholder="e.g. No smoking">
+      <button class="btn btn-icon" onclick="removeRule(${i})" title="Remove">✕</button>
+    </div>`).join('');
+}
+
+function addRuleField() { rulesArr.push(''); renderRulesEditor(); }
+function removeRule(i) { rulesArr.splice(i,1); renderRulesEditor(); }
+
+function handleImgSelect(input) {
+  Array.from(input.files).forEach(f=>readImageFile(f));
+}
+function handleImgDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')).forEach(f=>readImageFile(f));
+}
+
+function readImageFile(file) {
+  if (uploadedImages.length>=10) { toast('error','Maximum 10 photos allowed'); return; }
+  if (file.size>5*1024*1024) { toast('error',`${file.name} is too large (max 5MB)`); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    uploadedImages.push(e.target.result);
+    renderImgPreviews();
+    toast('success','📸 Photo added!');
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderImgPreviews() {
+  const grid = document.getElementById('imgPreviewGrid');
+  if (!grid) return;
+  grid.innerHTML = uploadedImages.map((src,i)=>`
+    <div class="img-preview-item">
+      <img src="${src}" alt="Photo ${i+1}">
+      <button class="img-preview-remove" onclick="removeImg(${i})" title="Remove">✕</button>
+      ${i===0?'<div style="position:absolute;bottom:3px;left:3px;background:rgba(45,92,48,0.9);color:white;font-size:0.6rem;padding:0.1rem 0.4rem;border-radius:4px">Cover</div>':''}
+    </div>`).join('');
+}
+
+function removeImg(i) { uploadedImages.splice(i,1); renderImgPreviews(); }
+
+function saveListing() {
+  const name = document.getElementById('lf-name')?.value.trim();
+  const s    = document.getElementById('lf-state')?.value;
+  const city = document.getElementById('lf-city')?.value.trim();
+  const addr = document.getElementById('lf-address')?.value.trim();
+  const type = document.getElementById('lf-type')?.value;
+  const desc = document.getElementById('lf-desc')?.value.trim();
+  const price= parseFloat(document.getElementById('lf-price')?.value)||0;
+
+  if (!name||!s||!city||!addr||!type||!desc||price<=0) {
+    toast('error','Please fill in all required fields'); return;
+  }
+
+  const listing = {
+    id: 'l'+Date.now(),
+    landlordId: state.currentUser.id,
+    name, state:s, city, address:addr, type, desc,
+    price, period: document.getElementById('lf-period')?.value||'yr',
+    bedrooms: parseInt(document.getElementById('lf-beds')?.value)||0,
+    bathrooms: parseInt(document.getElementById('lf-baths')?.value)||1,
+    category: document.getElementById('lf-category')?.value||'general',
+    utils: [...selectedUtils],
+    rules: rulesArr.filter(r=>r.trim()),
+    corperFriendly: document.getElementById('tog-corper')?.classList.contains('on'),
+    verified: document.getElementById('tog-verified')?.classList.contains('on'),
+    isShortlet: document.getElementById('tog-shortlet')?.classList.contains('on'),
+    images: [...uploadedImages],
+    rating: 0, reviewCount: 0,
+    status: 'active',
+    createdAt: Date.now(),
+    imgClass: 'img-g'+(Math.floor(Math.random()*8)+1),
+    emoji: '🏠',
+    mapQuery: encodeURIComponent(addr+' '+city+' '+s+' State Nigeria'),
+  };
+
+  const listings = getListings();
+  listings.push(listing);
+  DB.set('listings', listings);
+  toast('success','🎉 Your listing is live!');
+  navigate('dashboard');
+}
+
+// ── PROFILE ──────────────────────────────────────────
+function renderProfile() {
+  if (!state.currentUser) { navigate('home'); return; }
+  const u = state.currentUser;
+  const roleColors = {corper:'#2d5c30',landlord:'#5c3020',student:'#1e3a5c',tenant:'#2a4a2a',association:'#3a2a5c',agent:'#5c4a10'};
+
+  document.getElementById('profileContent').innerHTML=`
+  <div class="profile-header">
+    <div class="container">
+      <div class="profile-avatar-big" style="background:${avatarColor(u.firstName)}">${u.firstName[0]}${u.lastName[0]}</div>
+      <div class="profile-name">${u.firstName} ${u.lastName}</div>
+      <div class="profile-role-badge" style="background:rgba(246,241,232,0.15)">${roleBadge(u.role)} ${u.role.charAt(0).toUpperCase()+u.role.slice(1)}</div>
+      <div style="margin-top:1rem;font-size:0.85rem;color:rgba(246,241,232,0.5)">Member since ${new Date(u.createdAt).toLocaleDateString('en-NG',{month:'long',year:'numeric'})}</div>
+    </div>
+  </div>
+  <div class="container section">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;max-width:700px">
+      <div class="form-section" style="margin:0">
+        <div class="form-section-title"><span>👤</span> Personal Info</div>
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="pf-first" value="${u.firstName}"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="pf-last" value="${u.lastName}"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="pf-email" value="${u.email}"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="pf-phone" value="${u.phone||''}"></div>
+        ${u.role==='corper'?`<div class="form-group"><label class="form-label">NYSC Code</label><input class="form-input" id="pf-nysc" value="${u.nysc||''}"></div>`:''}
+        <button class="btn btn-primary btn-sm mt-2" onclick="saveProfile()">Save Changes</button>
+      </div>
+      <div class="form-section" style="margin:0">
+        <div class="form-section-title"><span>🔒</span> Security</div>
+        <div class="form-group"><label class="form-label">New Password</label><input class="form-input" id="pf-pass" type="password" placeholder="Leave blank to keep current"></div>
+        <div class="form-group"><label class="form-label">Confirm New Password</label><input class="form-input" id="pf-pass2" type="password" placeholder="Repeat password"></div>
+        <button class="btn btn-outline btn-sm mt-2" onclick="changePassword()">Update Password</button>
+        <hr style="border:none;border-top:1px solid var(--mist);margin:1.5rem 0">
+        <div class="form-section-title"><span>🚪</span> Account</div>
+        <button class="btn btn-sm mt-1" style="background:rgba(220,53,69,0.1);color:var(--error);border:1px solid rgba(220,53,69,0.2)" onclick="handleLogout()">Log Out</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+const var_moss = '#2d5c30'; // css var workaround
+
+function saveProfile() {
+  const first = document.getElementById('pf-first')?.value.trim();
+  const last  = document.getElementById('pf-last')?.value.trim();
+  const email = document.getElementById('pf-email')?.value.trim();
+  const phone = document.getElementById('pf-phone')?.value.trim();
+  if (!first||!last||!email) { toast('error','Please fill required fields'); return; }
+  const users = DB.get('users',[]);
+  const idx = users.findIndex(u=>u.id===state.currentUser.id);
+  if (idx===-1) return;
+  users[idx] = {...users[idx], firstName:first, lastName:last, email, phone};
+  DB.set('users',users);
+  state.currentUser=users[idx];
+  DB.set('currentUser',users[idx]);
+  updateNav();
+  toast('success','✅ Profile updated!');
+}
+
+function changePassword() {
+  const p = document.getElementById('pf-pass')?.value;
+  const p2= document.getElementById('pf-pass2')?.value;
+  if (!p) return;
+  if (p.length<8) { toast('error','Password must be at least 8 characters'); return; }
+  if (p!==p2) { toast('error','Passwords do not match'); return; }
+  const users = DB.get('users',[]);
+  const idx = users.findIndex(u=>u.id===state.currentUser.id);
+  if (idx===-1) return;
+  users[idx].password = hashPass(p);
+  DB.set('users',users);
+  toast('success','🔒 Password updated!');
+}
+
+// ── LIGHTBOX ─────────────────────────────────────────
+function openLightbox(src, caption) {
+  document.getElementById('lightboxImg').src=src;
+  document.getElementById('lightboxCaption').textContent=caption||'';
+  document.getElementById('lightboxModal').classList.add('open');
+}
+
+// ── MODAL HELPERS ────────────────────────────────────
+function openModal(id, tab='') {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow='hidden';
+  if (id==='authModal' && tab) switchAuthTab(tab);
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ── TOAST ────────────────────────────────────────────
+function toast(type='info', msg='') {
+  const icons={success:'✅',error:'❌',info:'ℹ️'};
+  const t = document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span class="toast-icon">${icons[type]||'ℹ️'}</span>${msg}`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; t.style.transition='all 0.3s'; setTimeout(()=>t.remove(),300); },3500);
+}
+
+// ── UTILITIES ────────────────────────────────────────
+function starStr(n) { return '★'.repeat(Math.max(0,Math.min(5,n)))+'☆'.repeat(5-Math.max(0,Math.min(5,n))); }
+function timeAgo(ts) {
+  const d=(Date.now()-ts)/1000;
+  if (d<60) return 'just now';
+  if (d<3600) return Math.floor(d/60)+'m ago';
+  if (d<86400) return Math.floor(d/3600)+'h ago';
+  return Math.floor(d/86400)+'d ago';
+}
+function timeOfDay() {
+  const h=new Date().getHours();
+  if (h<12) return 'morning'; if (h<17) return 'afternoon'; return 'evening';
+}
+function avatarColor(name='') {
+  const colors=['#2d5c30','#5c3020','#1e3a5c','#5c4a10','#3a1e5c','#1e4a5c','#5c2a20','#2a3a1e'];
+  return colors[(name.charCodeAt(0)||0)%colors.length];
+}
+function roleBadge(r) {
+  const m={corper:'🎓',landlord:'🏘️',tenant:'🏠',student:'📚',association:'🏢',agent:'🤝'};
+  return m[r]||'👤';
+}
+function copyText(text) {
+  navigator.clipboard?.writeText(text).then(()=>toast('success','📋 Copied!')).catch(()=>toast('info','Copy: '+text));
+}
+function editListing(id) { toast('info','Listing editor — redirect to edit form for listing '+id); }
+
+// ── INIT ─────────────────────────────────────────────
+function init() {
+  seedListings();
+  updateNav();
+  renderHome();
+  // Restore session
+  const saved = DB.get('currentUser',null);
+  if (saved) { state.currentUser=saved; updateNav(); }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+window.addEventListener('popstate', ()=>navigate('home'));
+</script>
+</body>
+</html>
