@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HouseNest — Trust & Security Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:     #0c1a0d;
+  --forest:  #1b3a1e;
+  --moss:    #2a5c2e;
+  --sage:    #4a7c4e;
+  --reed:    #7ab87e;
+  --lime:    #b0d8b4;
+  --bone:    #f5f0e6;
+  --parch:   #ede5d2;
+  --sand:    #ddd5be;
+  --mist:    #eee8dc;
+  --white:   #fdfaf3;
+  --clay:    #c05a20;
+  --copper:  #a04818;
+  --ochre:   #cc9a28;
+  --smoke:   #787570;
+  --ash:     #c4c0b8;
+  --err:     #c8323c;
+  --warn:    #c87820;
+  --ok:      #2a7c38;
+
+  /* KYC tier colours */
+  --tier1:   #4a7c4e;
+  --tier2:   #c05a20;
+  --tier3:   #8c48bc;
+  --tier4:   #2050a0;
+
+  /* Escrow state colours */
+  --e-pending:   #c87820;
+  --e-funded:    #2050a0;
+  --e-inspect:   #8c48bc;
+  --e-confirmed: #2a7c38;
+  --e-released:  #1b3a1e;
+  --e-disputed:  #c8323c;
+  --e-refunded:  #787570;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--white);color:var(--ink);overflow-x:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;height:60px;display:flex;align-items:center;background:rgba(253,250,243,0.97);backdrop-filter:blur(16px);border-bottom:1px solid rgba(27,58,30,0.08);box-shadow:0 1px 12px rgba(12,26,13,0.07)}
+.nav-i{width:100%;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 2rem}
+.logo{display:flex;align-items:center;gap:0.5rem;cursor:pointer}
+.logo-m{width:30px;height:30px;border-radius:7px;background:var(--forest);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:0.9rem;font-weight:700;color:var(--bone)}
+.logo-t{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:700;color:var(--forest)}
+.logo-t span{color:var(--clay)}
+.nav-tabs{display:flex;gap:0.3rem}
+.nav-tab{padding:0.4rem 1rem;border-radius:8px;border:none;background:none;font-size:0.82rem;font-weight:600;color:var(--smoke);cursor:pointer;transition:all 0.2s}
+.nav-tab:hover{background:var(--mist);color:var(--forest)}
+.nav-tab.active{background:var(--forest);color:white}
+.nav-badge{background:var(--clay);color:white;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.72rem;font-weight:700}
+
+/* ── LAYOUT ── */
+.page{padding-top:60px;min-height:100vh}
+.container{max-width:1200px;margin:0 auto;padding:0 2rem}
+.view{display:none;animation:fadeIn 0.3s ease}
+.view.active{display:block}
+
+/* ── HERO BANNER ── */
+.hero-banner{
+  background:var(--forest);padding:3.5rem 2rem 3rem;position:relative;overflow:hidden
+}
+.hero-banner::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle,rgba(122,184,126,0.1) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+.hero-banner-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;display:grid;grid-template-columns:1fr auto;align-items:center;gap:2rem}
+.hb-label{display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem}
+.hb-label-dot{width:7px;height:7px;border-radius:50%;background:var(--reed);animation:pulse 2s infinite}
+.hb-label-text{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--reed);text-transform:uppercase;letter-spacing:0.15em}
+.hb-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:var(--bone);line-height:1;margin-bottom:0.8rem}
+.hb-title em{font-style:italic;color:var(--reed)}
+.hb-sub{font-size:0.95rem;color:rgba(245,240,230,0.6);line-height:1.7;max-width:520px;font-weight:300}
+.hb-stats{display:flex;gap:2.5rem;margin-top:2rem}
+.hb-stat-n{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--bone);line-height:1}
+.hb-stat-l{font-size:0.7rem;color:rgba(245,240,230,0.4);margin-top:0.15rem}
+.trust-score-ring{width:120px;height:120px;position:relative;flex-shrink:0}
+.trust-ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.trust-ring-bg{fill:none;stroke:rgba(245,240,230,0.1);stroke-width:8}
+.trust-ring-fill{fill:none;stroke:var(--reed);stroke-width:8;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:47;transition:stroke-dashoffset 1s ease}
+.trust-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.trust-ring-pct{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--bone);line-height:1}
+.trust-ring-lbl{font-size:0.6rem;color:rgba(245,240,230,0.45);text-transform:uppercase;letter-spacing:0.08em}
+
+/* ── KYC TIER CARDS ── */
+.tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.5rem}
+.tier-card{
+  border-radius:16px;border:1.5px solid var(--mist);background:white;
+  overflow:hidden;transition:all 0.3s;cursor:pointer;
+}
+.tier-card:hover{box-shadow:0 10px 30px rgba(12,26,13,0.1);transform:translateY(-3px);border-color:transparent}
+.tier-card.active{border-color:var(--moss);box-shadow:0 0 0 3px rgba(42,92,46,0.12)}
+.tier-card-top{padding:1.4rem 1.4rem 1rem;border-bottom:1px solid var(--mist)}
+.tier-number{font-family:'Space Mono',monospace;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.6rem}
+.tier-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:0.8rem}
+.tier-name{font-weight:700;font-size:0.95rem;color:var(--ink);margin-bottom:0.3rem}
+.tier-desc{font-size:0.78rem;color:var(--smoke);line-height:1.55}
+.tier-card-bottom{padding:1rem 1.4rem}
+.tier-checks{display:flex;flex-direction:column;gap:0.35rem}
+.tier-check{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.75rem;color:var(--forest)}
+.tier-check-icon{flex-shrink:0;margin-top:1px;font-size:0.8rem}
+.tier-badge{display:inline-flex;align-items:center;gap:0.35rem;padding:0.22rem 0.65rem;border-radius:50px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.8rem}
+
+/* ── KYC FLOW UI ── */
+.kyc-wrap{max-width:780px;margin:3rem auto;padding:0 2rem}
+.kyc-progress{display:flex;align-items:center;margin-bottom:3rem;position:relative}
+.kyc-progress::before{content:'';position:absolute;top:18px;left:18px;right:18px;height:2px;background:var(--mist);z-index:0}
+.kyc-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:1}
+.kyc-step-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;border:2px solid var(--mist);background:white;transition:all 0.35s;margin-bottom:0.5rem}
+.kyc-step.done .kyc-step-dot{background:var(--moss);border-color:var(--moss);color:white}
+.kyc-step.current .kyc-step-dot{background:var(--forest);border-color:var(--forest);color:white;box-shadow:0 0 0 4px rgba(42,92,46,0.2)}
+.kyc-step.pending .kyc-step-dot{background:white;border-color:var(--ash);color:var(--ash)}
+.kyc-step-label{font-size:0.7rem;font-weight:600;color:var(--smoke);text-align:center;max-width:70px}
+.kyc-step.current .kyc-step-label{color:var(--forest);font-weight:700}
+.kyc-step.done .kyc-step-label{color:var(--moss)}
+.progress-fill{position:absolute;top:18px;left:18px;height:2px;background:var(--moss);z-index:0;transition:width 0.5s ease}
+
+/* KYC Panels */
+.kyc-panel{background:white;border-radius:20px;border:1px solid var(--mist);overflow:hidden;box-shadow:0 4px 24px rgba(12,26,13,0.07)}
+.kyc-panel-header{padding:1.8rem 2rem 1.5rem;border-bottom:1px solid var(--mist);display:flex;align-items:flex-start;gap:1rem}
+.kyc-panel-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.kyc-panel-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--forest);margin-bottom:0.2rem}
+.kyc-panel-sub{font-size:0.82rem;color:var(--smoke);line-height:1.55}
+.kyc-panel-body{padding:2rem}
+.kyc-panel-footer{padding:1.2rem 2rem;border-top:1px solid var(--mist);display:flex;justify-content:space-between;align-items:center;background:var(--mist)}
+
+/* Form elements */
+.f-group{margin-bottom:1.2rem}
+.f-label{display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--forest);margin-bottom:0.45rem}
+.f-input,.f-select,.f-textarea{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--sand);border-radius:10px;font-family:'Outfit';font-size:0.9rem;color:var(--ink);background:white;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--moss);box-shadow:0 0 0 3px rgba(42,92,46,0.1)}
+.f-input.error{border-color:var(--err)}
+.f-err{font-size:0.72rem;color:var(--err);margin-top:0.3rem;display:none}
+.f-err.show{display:block}
+.f-hint{font-size:0.72rem;color:var(--smoke);margin-top:0.3rem}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+
+/* Upload zones */
+.upload-zone{
+  border:2px dashed var(--sand);border-radius:14px;padding:2.2rem 1.5rem;
+  text-align:center;cursor:pointer;transition:all 0.25s;position:relative;background:var(--mist)
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--clay);background:rgba(192,90,32,0.04)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone.uploaded{border-color:var(--moss);background:rgba(42,92,46,0.04)}
+.uz-icon{font-size:2.2rem;margin-bottom:0.7rem}
+.uz-title{font-weight:700;color:var(--ink);margin-bottom:0.3rem;font-size:0.9rem}
+.uz-sub{font-size:0.75rem;color:var(--smoke)}
+.uz-success{display:none;align-items:center;gap:0.6rem;justify-content:center}
+.upload-zone.uploaded .uz-default{display:none}
+.upload-zone.uploaded .uz-success{display:flex}
+.uz-success-icon{width:32px;height:32px;border-radius:50%;background:var(--moss);display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem}
+.uz-success-text{font-size:0.85rem;font-weight:700;color:var(--moss)}
+
+/* Liveness check */
+.liveness-box{background:var(--ink);border-radius:16px;overflow:hidden;position:relative}
+.liveness-cam{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1b3a1e,#0c1a0d);position:relative}
+.liveness-cam-placeholder{display:flex;flex-direction:column;align-items:center;gap:1rem;color:rgba(245,240,230,0.5)}
+.liveness-cam-placeholder .cam-icon{font-size:3rem}
+.liveness-frame{position:absolute;inset:20%;border:3px solid rgba(122,184,126,0.6);border-radius:50%;animation:scanFrame 2s ease-in-out infinite}
+.liveness-code-display{padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.liveness-code{font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;color:var(--reed);letter-spacing:0.15em}
+.liveness-instruction{font-size:0.78rem;color:rgba(245,240,230,0.5);max-width:200px;line-height:1.5}
+
+/* OTP Input */
+.otp-row{display:flex;gap:0.6rem;justify-content:center;margin:1.2rem 0}
+.otp-digit{width:52px;height:60px;border:1.5px solid var(--sand);border-radius:12px;text-align:center;font-size:1.5rem;font-weight:700;font-family:'Space Mono',monospace;color:var(--forest);background:white;outline:none;transition:all 0.2s}
+.otp-digit:focus{border-color:var(--moss);box-shadow:0 0 0 3px rgba(42,92,46,0.12)}
+
+/* BVN field */
+.bvn-row{display:flex;gap:0.5rem;align-items:flex-end}
+.bvn-row .f-input{letter-spacing:0.15em;font-family:'Space Mono',monospace;font-size:1rem}
+.bvn-verify-btn{background:var(--forest);color:white;border:none;padding:0.75rem 1.2rem;border-radius:10px;font-weight:700;font-size:0.85rem;white-space:nowrap;flex-shrink:0;transition:all 0.2s}
+.bvn-verify-btn:hover{background:var(--clay)}
+
+/* Trust score badge */
+.trust-badge{display:inline-flex;align-items:center;gap:0.5rem;padding:0.4rem 1rem;border-radius:50px;font-weight:700;font-size:0.78rem}
+.tb-unverified{background:rgba(200,120,32,0.12);color:var(--warn);border:1px solid rgba(200,120,32,0.25)}
+.tb-basic{background:rgba(42,92,46,0.12);color:var(--moss);border:1px solid rgba(42,92,46,0.25)}
+.tb-verified{background:rgba(42,92,46,0.15);color:var(--ok);border:1px solid rgba(42,92,46,0.3)}
+.tb-full{background:linear-gradient(135deg,rgba(27,58,30,0.2),rgba(140,72,188,0.15));color:var(--forest);border:1px solid rgba(42,92,46,0.4)}
+
+/* ── ESCROW SYSTEM ── */
+.escrow-wrap{max-width:900px;margin:0 auto;padding:3rem 2rem}
+.escrow-flow{display:grid;grid-template-columns:repeat(5,1fr);position:relative;margin-bottom:3rem}
+.escrow-flow::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--e-pending),var(--e-funded),var(--e-inspect),var(--e-confirmed),var(--e-released));opacity:0.3;z-index:0}
+.ef-step{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+.ef-dot{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:0.7rem;border:2px solid transparent;transition:all 0.3s}
+.ef-label{font-size:0.72rem;font-weight:700;text-align:center;color:var(--smoke);max-width:70px}
+.ef-time{font-size:0.62rem;color:var(--ash);margin-top:0.2rem}
+
+/* Escrow transaction card */
+.escrow-card{background:white;border-radius:20px;border:1.5px solid var(--mist);overflow:hidden;margin-bottom:1.5rem;box-shadow:0 3px 16px rgba(12,26,13,0.07)}
+.ec-header{padding:1.5rem 1.8rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--mist)}
+.ec-ref{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--smoke)}
+.ec-state-badge{padding:0.3rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700}
+.ec-body{padding:1.8rem}
+.ec-amount{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;color:var(--forest);line-height:1;margin-bottom:0.4rem}
+.ec-listing{font-size:0.9rem;font-weight:600;color:var(--ink);margin-bottom:0.2rem}
+.ec-parties{display:flex;gap:2rem;margin-top:1.2rem}
+.ec-party{display:flex;align-items:center;gap:0.6rem}
+.ec-party-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:white;flex-shrink:0}
+.ec-party-role{font-size:0.62rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em}
+.ec-party-name{font-size:0.85rem;font-weight:700;color:var(--ink)}
+.ec-timeline{display:flex;flex-direction:column;gap:0}
+.ect-item{display:flex;gap:1rem;align-items:flex-start;position:relative;padding-bottom:1rem}
+.ect-item:not(:last-child)::before{content:'';position:absolute;left:16px;top:32px;width:1px;height:calc(100% - 0.5rem);background:var(--mist)}
+.ect-dot{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.85rem;position:relative;z-index:1}
+.ect-done{background:rgba(42,124,56,0.15)}
+.ect-active{background:rgba(192,90,32,0.15);animation:subtlePulse 2s infinite}
+.ect-pending{background:var(--mist)}
+.ect-label{font-size:0.7rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em}
+.ect-text{font-size:0.88rem;font-weight:600;color:var(--ink);margin-top:0.1rem}
+.ect-time{font-size:0.7rem;color:var(--ash)}
+
+/* Escrow initiate form */
+.escrow-form-card{background:white;border-radius:20px;border:1.5px solid var(--mist);overflow:hidden}
+.efc-header{padding:1.5rem 1.8rem;border-bottom:1px solid var(--mist);background:linear-gradient(135deg,var(--forest),#0c1a0d);display:flex;align-items:center;gap:1rem}
+.efc-icon{font-size:2rem}
+.efc-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--bone)}
+.efc-sub{font-size:0.78rem;color:rgba(245,240,230,0.55)}
+.efc-body{padding:1.8rem}
+.fee-breakdown{background:var(--mist);border-radius:12px;padding:1.2rem;margin-bottom:1.2rem}
+.fee-row{display:flex;justify-content:space-between;font-size:0.85rem;padding:0.35rem 0;color:var(--forest)}
+.fee-row.total{font-weight:700;border-top:1px solid var(--sand);padding-top:0.6rem;margin-top:0.2rem}
+.fee-row.free-label{color:var(--ok)}
+.free-badge{background:rgba(42,124,56,0.15);color:var(--ok);padding:0.15rem 0.5rem;border-radius:50px;font-size:0.65rem;font-weight:700;margin-left:0.5rem}
+
+/* Escrow protection pillars */
+.protection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+.prot-card{background:white;border:1px solid var(--mist);border-radius:16px;padding:1.4rem;transition:all 0.25s}
+.prot-card:hover{box-shadow:0 8px 24px rgba(12,26,13,0.09);transform:translateY(-2px);border-color:transparent}
+.prot-icon{font-size:1.8rem;margin-bottom:0.8rem}
+.prot-title{font-weight:700;color:var(--forest);margin-bottom:0.35rem;font-size:0.9rem}
+.prot-desc{font-size:0.78rem;color:var(--smoke);line-height:1.65}
+
+/* ── ADMIN PANEL ── */
+.admin-wrap{max-width:1100px;margin:0 auto;padding:2rem}
+.admin-grid{display:grid;grid-template-columns:240px 1fr;gap:1.5rem;min-height:600px}
+.admin-sidebar{background:var(--forest);border-radius:16px;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:0.3rem}
+.admin-nav-label{font-family:'Space Mono',monospace;font-size:0.58rem;color:rgba(245,240,230,0.3);text-transform:uppercase;letter-spacing:0.12em;padding:0.5rem 0.7rem 0.2rem;margin-top:0.5rem}
+.admin-nav-btn{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;border-radius:9px;border:none;background:none;color:rgba(245,240,230,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;width:100%;text-align:left;transition:all 0.2s}
+.admin-nav-btn:hover{background:rgba(245,240,230,0.08);color:var(--bone)}
+.admin-nav-btn.active{background:rgba(245,240,230,0.12);color:var(--bone);font-weight:700}
+.admin-nav-btn .badge{background:var(--clay);color:white;border-radius:50px;font-size:0.62rem;font-weight:700;padding:0.1rem 0.45rem;margin-left:auto}
+.admin-main{background:white;border-radius:16px;border:1px solid var(--mist);overflow:hidden}
+.admin-main-header{padding:1.4rem 1.8rem;border-bottom:1px solid var(--mist);display:flex;justify-content:space-between;align-items:center}
+.admin-section-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--forest)}
+.admin-body{padding:1.5rem 1.8rem}
+
+/* Verification queue */
+.vq-item{display:flex;gap:1rem;align-items:flex-start;padding:1.1rem;border:1.5px solid var(--mist);border-radius:14px;margin-bottom:0.8rem;transition:all 0.2s}
+.vq-item:hover{border-color:var(--sand);box-shadow:0 3px 12px rgba(12,26,13,0.06)}
+.vq-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white;flex-shrink:0}
+.vq-info{flex:1}
+.vq-name{font-weight:700;color:var(--ink);font-size:0.9rem;margin-bottom:0.2rem}
+.vq-role{font-size:0.72rem;color:var(--smoke);margin-bottom:0.5rem}
+.vq-docs{display:flex;gap:0.4rem;flex-wrap:wrap}
+.vq-doc{background:var(--mist);border-radius:6px;padding:0.2rem 0.55rem;font-size:0.68rem;color:var(--forest);font-weight:600;cursor:pointer;transition:background 0.2s}
+.vq-doc:hover{background:var(--sand)}
+.vq-doc.ok{background:rgba(42,124,56,0.12);color:var(--ok)}
+.vq-doc.warn{background:rgba(200,120,32,0.12);color:var(--warn)}
+.vq-actions{display:flex;gap:0.5rem;flex-direction:column;flex-shrink:0}
+.vq-approve{background:var(--moss);color:white;border:none;padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;transition:background 0.2s;white-space:nowrap}
+.vq-approve:hover{background:var(--ok)}
+.vq-reject{background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2);padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.vq-reject:hover{background:var(--err);color:white}
+.vq-time{font-size:0.62rem;color:var(--ash);margin-top:0.3rem}
+.risk-tag{display:inline-flex;align-items:center;gap:0.3rem;padding:0.18rem 0.55rem;border-radius:50px;font-size:0.65rem;font-weight:700}
+.risk-low{background:rgba(42,124,56,0.1);color:var(--ok)}
+.risk-med{background:rgba(200,120,32,0.12);color:var(--warn)}
+.risk-high{background:rgba(200,50,60,0.1);color:var(--err)}
+
+/* Escrow admin table */
+.esc-table{width:100%;border-collapse:collapse}
+.esc-table th{font-size:0.68rem;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--smoke);padding:0.6rem 0.8rem;border-bottom:2px solid var(--mist);text-align:left}
+.esc-table td{padding:0.8rem;border-bottom:1px solid var(--mist);font-size:0.82rem;color:var(--ink)}
+.esc-table tr:hover td{background:var(--mist)}
+.esc-action-btn{background:var(--mist);border:none;border-radius:7px;padding:0.3rem 0.7rem;font-size:0.72rem;font-weight:600;cursor:pointer;color:var(--forest);transition:all 0.2s}
+.esc-action-btn:hover{background:var(--sand)}
+.esc-action-btn.release{background:rgba(42,124,56,0.12);color:var(--ok)}
+.esc-action-btn.release:hover{background:var(--ok);color:white}
+
+/* Fraud detection */
+.fraud-alert{border-radius:14px;padding:1.1rem 1.3rem;margin-bottom:0.8rem;display:flex;gap:0.8rem;align-items:flex-start}
+.fa-high{background:rgba(200,50,60,0.08);border:1px solid rgba(200,50,60,0.2)}
+.fa-med{background:rgba(200,120,32,0.08);border:1px solid rgba(200,120,32,0.2)}
+.fa-low{background:rgba(42,124,56,0.06);border:1px solid rgba(42,124,56,0.15)}
+.fa-icon{font-size:1.2rem;flex-shrink:0;margin-top:0.1rem}
+.fa-title{font-weight:700;font-size:0.85rem;margin-bottom:0.2rem}
+.fa-high .fa-title{color:var(--err)}
+.fa-med .fa-title{color:var(--warn)}
+.fa-low .fa-title{color:var(--ok)}
+.fa-detail{font-size:0.78rem;color:var(--smoke);line-height:1.5}
+.fa-actions{margin-left:auto;display:flex;gap:0.4rem;flex-shrink:0}
+.fa-btn{border:none;border-radius:7px;padding:0.35rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+.fa-dismiss{background:var(--mist);color:var(--smoke)}
+.fa-review{background:var(--warn);color:white}
+.fa-block{background:var(--err);color:white}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-tile{background:var(--mist);border-radius:12px;padding:1rem 1.2rem}
+.stat-tile-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--forest);line-height:1}
+.stat-tile-l{font-size:0.72rem;color:var(--smoke);margin-top:0.15rem}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.7rem 1.5rem;border-radius:10px;border:none;font-size:0.88rem;font-weight:700;transition:all 0.22s;cursor:pointer}
+.btn-primary{background:var(--forest);color:var(--bone)}
+.btn-primary:hover{background:var(--clay);transform:translateY(-1px)}
+.btn-clay{background:var(--clay);color:white}
+.btn-clay:hover{background:var(--copper)}
+.btn-outline{background:transparent;border:1.5px solid var(--forest);color:var(--forest)}
+.btn-outline:hover{background:var(--forest);color:var(--bone)}
+.btn-ghost{background:transparent;color:var(--smoke);border:none;padding:0.5rem;font-size:0.85rem}
+.btn-ghost:hover{color:var(--forest)}
+.btn-sm{padding:0.45rem 0.9rem;font-size:0.78rem;border-radius:8px}
+.btn-full{width:100%;justify-content:center}
+.btn-success{background:var(--ok);color:white}
+.btn-success:hover{background:var(--moss)}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;z-index:1000;background:rgba(12,26,13,0.8);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:1.5rem}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:18px;padding:1.8rem;max-width:460px;width:100%;max-height:88vh;overflow-y:auto;animation:popIn 0.25s ease;box-shadow:0 24px 60px rgba(0,0,0,0.3)}
+.modal-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.3rem}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--forest)}
+.modal-x{background:var(--mist);border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:var(--smoke);cursor:pointer;transition:all 0.2s}
+.modal-x:hover{background:var(--err);color:white}
+
+/* ── TOAST ── */
+.toast-c{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem}
+.toast{background:var(--ink);color:white;padding:0.8rem 1.2rem;border-radius:12px;font-size:0.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;align-items:center;gap:0.6rem;max-width:300px;animation:toastIn 0.3s ease}
+.toast.ok{background:var(--moss)}
+.toast.warn{background:var(--warn)}
+.toast.err{background:var(--err)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes scanFrame{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.06);opacity:1}}
+@keyframes subtlePulse{0%,100%{box-shadow:0 0 0 0 rgba(192,90,32,0.3)}50%{box-shadow:0 0 0 6px rgba(192,90,32,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes progress{from{stroke-dashoffset:314}to{stroke-dashoffset:47}}
+.ring-animate .trust-ring-fill{animation:progress 1.5s ease forwards}
+
+/* ── MISC ── */
+.hidden{display:none!important}
+.divider{border:none;border-top:1px solid var(--mist);margin:1.5rem 0}
+.chip{display:inline-flex;align-items:center;gap:0.35rem;padding:0.25rem 0.7rem;border-radius:50px;font-size:0.7rem;font-weight:600}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .tier-grid{grid-template-columns:1fr 1fr}
+  .escrow-flow{grid-template-columns:1fr 1fr;gap:1rem}
+  .escrow-flow::before{display:none}
+  .protection-grid{grid-template-columns:1fr}
+  .admin-grid{grid-template-columns:1fr}
+  .admin-sidebar{flex-direction:row;flex-wrap:wrap;border-radius:12px}
+  .admin-nav-label{display:none}
+  .hero-banner-inner{grid-template-columns:1fr}
+  .trust-score-ring{display:none}
+  .f-row{grid-template-columns:1fr}
+  .stats-bar{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .tier-grid{grid-template-columns:1fr}
+  .nav-tabs{display:none}
+  .container{padding:0 1rem}
+  .kyc-wrap,.escrow-wrap,.admin-wrap{padding:2rem 1rem}
+  .stats-bar{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-i">
+    <div class="logo">
+      <div class="logo-m">HN</div>
+      <div class="logo-t">House<span>Nest</span></div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showView('overview',this)">Trust Overview</button>
+      <button class="nav-tab" onclick="showView('kyc',this)">KYC Verification</button>
+      <button class="nav-tab" onclick="showView('escrow',this)">Escrow Service</button>
+      <button class="nav-tab" onclick="showView('admin',this)">Admin Centre</button>
+    </div>
+    <span class="nav-badge">🔒 Security Module</span>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 1: TRUST OVERVIEW
+══════════════════════════════════════════════════ -->
+<div class="view active" id="view-overview">
+
+  <!-- Hero -->
+  <div class="hero-banner">
+    <div class="hero-banner-inner container">
+      <div>
+        <div class="hb-label"><div class="hb-label-dot"></div><span class="hb-label-text">HouseNest Trust & Security Framework</span></div>
+        <h1 class="hb-title">Fraud doesn't stand a chance<br>on <em>HouseNest.</em></h1>
+        <p class="hb-sub">Every landlord, agent, and association on HouseNest passes a multi-layer KYC process before a single listing goes live. Combined with escrow payment protection, we target 90%+ fraud deterrence — the highest standard in Nigerian proptech.</p>
+        <div class="hb-stats">
+          <div><div class="hb-stat-n" id="stat1">0</div><div class="hb-stat-l">Fraud Deterrence Rate</div></div>
+          <div><div class="hb-stat-n" id="stat2">0</div><div class="hb-stat-l">Verification Checks</div></div>
+          <div><div class="hb-stat-n" id="stat3">0</div><div class="hb-stat-l">Escrow Protected</div></div>
+        </div>
+      </div>
+      <div class="trust-score-ring ring-animate" id="trustRing">
+        <svg class="trust-ring-svg" viewBox="0 0 100 100">
+          <circle class="trust-ring-bg" cx="50" cy="50" r="40"/>
+          <circle class="trust-ring-fill" cx="50" cy="50" r="40"/>
+        </svg>
+        <div class="trust-ring-text">
+          <div class="trust-ring-pct">90%</div>
+          <div class="trust-ring-lbl">Trust Score</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KYC Tier cards -->
+  <div class="container" style="padding-top:2.5rem;padding-bottom:1rem">
+    <div style="margin-bottom:0.5rem">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem">
+        <div style="width:18px;height:1.5px;background:var(--clay)"></div>
+        <span style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--clay);text-transform:uppercase;letter-spacing:0.15em">The Four Verification Tiers</span>
+      </div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--forest)">Layered verification. <em style="color:var(--clay)">No shortcuts.</em></h2>
+      <p style="font-size:0.88rem;color:var(--smoke);margin-top:0.5rem;max-width:580px">Each tier stacks on top of the previous. A lister must pass all applicable tiers before their first listing goes live. Failure at any point freezes the account pending manual review.</p>
+    </div>
+    <div class="tier-grid">
+
+      <!-- Tier 1 -->
+      <div class="tier-card active" onclick="showView('kyc',null);setTimeout(()=>showKycStep(0),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier1)">Tier 01 — All Users</div>
+          <div class="tier-icon-wrap" style="background:rgba(74,124,78,0.12)">📱</div>
+          <div class="tier-name">Basic Identity</div>
+          <div class="tier-desc">Every account — tenant or lister — must pass this immediately on sign-up.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Phone OTP verification</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Email verification link</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>BVN last-4 cross-check</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Duplicate phone/device detection</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(74,124,78,0.12);color:var(--tier1);border:1px solid rgba(74,124,78,0.25)">🛡️ Basic Verified</div>
+        </div>
+      </div>
+
+      <!-- Tier 2 -->
+      <div class="tier-card" onclick="showView('kyc',null);setTimeout(()=>showKycStep(1),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier2)">Tier 02 — All Listers</div>
+          <div class="tier-icon-wrap" style="background:rgba(192,90,32,0.12)">🪪</div>
+          <div class="tier-name">Personal Identity</div>
+          <div class="tier-desc">Required before the first listing can be published. Cannot be skipped.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>NIN capture + verification</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Government ID upload</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Selfie liveness check</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Face-to-ID photo match</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(192,90,32,0.12);color:var(--tier2);border:1px solid rgba(192,90,32,0.25)">✅ Identity Verified</div>
+        </div>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="tier-card" onclick="showView('kyc',null);setTimeout(()=>showKycStep(2),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier3)">Tier 03 — Landlords</div>
+          <div class="tier-icon-wrap" style="background:rgba(140,72,188,0.12)">🏠</div>
+          <div class="tier-name">Property Ownership</div>
+          <div class="tier-desc">Proves the person listing a property actually has rights to rent it out.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>C of O or Right of Occupancy</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Utility bill matching address</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Photos with GPS metadata</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Admin phone verification call</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(140,72,188,0.12);color:var(--tier3);border:1px solid rgba(140,72,188,0.25)">🏡 Property Verified</div>
+        </div>
+      </div>
+
+      <!-- Tier 4 -->
+      <div class="tier-card" onclick="showView('kyc',null);setTimeout(()=>showKycStep(3),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier4)">Tier 04 — Agents & Assoc.</div>
+          <div class="tier-icon-wrap" style="background:rgba(32,80,160,0.12)">🏢</div>
+          <div class="tier-name">Business Registration</div>
+          <div class="tier-desc">Agents and associations prove legitimate business registration in Nigeria.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>CAC business registration</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>NIESV/ESVARBON licence</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Association chairman NIN</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Registered office address proof</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(32,80,160,0.12);color:var(--tier4);border:1px solid rgba(32,80,160,0.25)">🏢 Business Verified</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fraud Deterrence Layer -->
+  <div style="background:var(--ink);padding:3rem 0;margin-top:3rem">
+    <div class="container">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem">
+        <div style="width:18px;height:1.5px;background:var(--reed)"></div>
+        <span style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--reed);text-transform:uppercase;letter-spacing:0.15em">Beyond KYC</span>
+      </div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:var(--bone);margin-bottom:0.5rem">The systems that catch what KYC <em style="color:var(--reed)">misses.</em></h2>
+      <p style="font-size:0.85rem;color:rgba(245,240,230,0.45);max-width:560px;margin-bottom:2.5rem;line-height:1.7">KYC confirms identity. These systems detect patterns and behaviours that indicate fraud even from verified accounts.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem" id="deterrenceGrid"></div>
+    </div>
+  </div>
+
+  <!-- Escrow teaser -->
+  <div class="container" style="padding:3rem 2rem">
+    <div style="background:linear-gradient(135deg,var(--forest),#0c1a0d);border-radius:20px;padding:2.5rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--reed);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.7rem">Payment Protection</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--bone);margin-bottom:0.5rem">Free Escrow. <em style="color:var(--reed)">Always.</em></h3>
+        <p style="font-size:0.85rem;color:rgba(245,240,230,0.5);line-height:1.7;max-width:500px">When a tenant is ready to move in, they deposit rent through HouseNest. We hold it. After inspection and confirmation, we release to the landlord within 2–4 hours. Zero fee. No surprises.</p>
+      </div>
+      <button class="btn btn-clay" style="white-space:nowrap;font-size:0.95rem;padding:0.9rem 1.8rem" onclick="showView('escrow',null)">See How Escrow Works →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 2: KYC FLOW
+══════════════════════════════════════════════════ -->
+<div class="view" id="view-kyc">
+  <div class="kyc-wrap">
+    <div style="margin-bottom:2rem">
+      <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--forest)">Get Verified to List</h1>
+      <p style="color:var(--smoke);font-size:0.88rem;margin-top:0.4rem">Complete your verification to publish listings. Each step makes HouseNest safer for everyone.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="kyc-progress" id="kycProgress">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="kyc-step done" id="kstep-0"><div class="kyc-step-dot">✓</div><div class="kyc-step-label">Phone & Email</div></div>
+      <div class="kyc-step current" id="kstep-1"><div class="kyc-step-dot">2</div><div class="kyc-step-label">Identity</div></div>
+      <div class="kyc-step pending" id="kstep-2"><div class="kyc-step-dot">3</div><div class="kyc-step-label">Property Docs</div></div>
+      <div class="kyc-step pending" id="kstep-3"><div class="kyc-step-dot">4</div><div class="kyc-step-label">Liveness</div></div>
+      <div class="kyc-step pending" id="kstep-4"><div class="kyc-step-dot">5</div><div class="kyc-step-label">Review</div></div>
+    </div>
+
+    <!-- Step panels -->
+    <div id="kycPanels"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 3: ESCROW
+══════════════════════════════════════════════════ -->
+<div class="view" id="view-escrow">
+  <div class="hero-banner" style="padding:2.5rem 2rem">
+    <div class="container" style="position:relative;z-index:1">
+      <div class="hb-label"><div class="hb-label-dot"></div><span class="hb-label-text">HouseNest Escrow Service</span></div>
+      <h1 class="hb-title" style="font-size:2.5rem">Your rent is safe <em>until you're home.</em></h1>
+      <p class="hb-sub">We hold your payment. You inspect. You confirm. We release in 2–4 hours. If anything goes wrong, we mediate. Always free. Always fast.</p>
+    </div>
+  </div>
+
+  <div class="escrow-wrap">
+
+    <!-- Flow steps -->
+    <div style="margin-bottom:1rem">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:var(--forest);margin-bottom:0.4rem">How the escrow flow works</h2>
+      <p style="font-size:0.83rem;color:var(--smoke)">From payment to keys — every step is tracked and protected.</p>
+    </div>
+    <div class="escrow-flow" id="escrowFlow"></div>
+
+    <!-- Protection pillars -->
+    <div class="protection-grid" id="protectionGrid"></div>
+
+    <hr class="divider">
+
+    <!-- Live escrow transaction demo -->
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--forest);margin-bottom:0.3rem">Live Transaction</h2>
+    <p style="font-size:0.82rem;color:var(--smoke);margin-bottom:1.5rem">See a real escrow transaction in progress — interactive demo below.</p>
+
+    <div class="escrow-card" id="liveTxCard"></div>
+
+    <hr class="divider">
+
+    <!-- Initiate escrow form -->
+    <div class="escrow-form-card">
+      <div class="efc-header">
+        <div class="efc-icon">🏦</div>
+        <div>
+          <div class="efc-title">Initiate Escrow Payment</div>
+          <div class="efc-sub">Tenant deposits rent · HouseNest holds securely · Released on your confirmation</div>
+        </div>
+      </div>
+      <div class="efc-body">
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Listing Reference</label>
+            <input class="f-input" id="escRef" placeholder="e.g. HN-OND-2025-0041" value="HN-OND-2025-0041">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Rental Amount (₦)</label>
+            <input class="f-input" id="escAmount" type="number" placeholder="120000" value="120000">
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Tenant Full Name</label>
+            <input class="f-input" id="escTenant" placeholder="Ngozi Okafor" value="Ngozi Okafor">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Landlord Full Name</label>
+            <input class="f-input" id="escLandlord" placeholder="Mr. Bello Abdullahi" value="Mr. Bello Abdullahi">
+          </div>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Property Address</label>
+          <input class="f-input" id="escAddr" placeholder="14B Adewole Estate, Akure, Ondo State" value="14B Adewole Estate, Akure, Ondo State">
+        </div>
+        <div class="fee-breakdown">
+          <div class="fee-row"><span>Rental Amount</span><span>₦<span id="feeAmount">120,000</span></span></div>
+          <div class="fee-row"><span>HouseNest Escrow Fee</span><span class="free-badge">FREE</span></div>
+          <div class="fee-row"><span>Payment Processing</span><span style="color:var(--ok);font-size:0.78rem">Absorbed by HouseNest</span></div>
+          <div class="fee-row total"><span>Total Tenant Pays</span><span>₦<span id="feeTotal">120,000</span></span></div>
+        </div>
+        <p style="font-size:0.75rem;color:var(--smoke);line-height:1.6;margin-bottom:1.2rem">In production this connects to <strong>Paystack</strong> or <strong>Flutterwave</strong>. Funds are held in a dedicated HouseNest trust account and released only on tenant confirmation or after the 48-hour window. See our <a href="#" style="color:var(--clay)">Escrow Terms</a>.</p>
+        <button class="btn btn-primary btn-full" style="font-size:0.95rem;padding:0.9rem" onclick="initiateEscrow()">🏦 Initiate Escrow Transaction</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 4: ADMIN CENTRE
+══════════════════════════════════════════════════ -->
+<div class="view" id="view-admin">
+  <div class="hero-banner" style="padding:2rem">
+    <div class="container" style="position:relative;z-index:1">
+      <div class="hb-label"><div class="hb-label-dot"></div><span class="hb-label-text">HouseNest Admin · Trust Operations</span></div>
+      <h1 class="hb-title" style="font-size:2rem">Trust Operations <em>Centre</em></h1>
+    </div>
+  </div>
+  <div class="admin-wrap">
+    <div class="admin-grid">
+      <div class="admin-sidebar">
+        <div class="admin-nav-label">Verification</div>
+        <button class="admin-nav-btn active" onclick="showAdminPanel('queue',this)"><span>📋</span>KYC Queue <span class="badge" id="queueBadge">4</span></button>
+        <button class="admin-nav-btn" onclick="showAdminPanel('fraud',this)"><span>🚨</span>Fraud Alerts <span class="badge" id="fraudBadge">2</span></button>
+        <button class="admin-nav-btn" onclick="showAdminPanel('verified',this)"><span>✅</span>Verified Users</button>
+        <div class="admin-nav-label">Escrow</div>
+        <button class="admin-nav-btn" onclick="showAdminPanel('escrow-admin',this)"><span>🏦</span>Transactions <span class="badge" id="escBadge">3</span></button>
+        <button class="admin-nav-btn" onclick="showAdminPanel('escrow-disputes',this)"><span>⚖️</span>Disputes</button>
+        <div class="admin-nav-label">Reports</div>
+        <button class="admin-nav-btn" onclick="showAdminPanel('blacklist',this)"><span>🚫</span>Blacklist</button>
+        <button class="admin-nav-btn" onclick="showAdminPanel('stats',this)"><span>📊</span>Statistics</button>
+      </div>
+      <div class="admin-main">
+        <div class="admin-main-header">
+          <div class="admin-section-title" id="adminTitle">KYC Verification Queue</div>
+          <button class="btn btn-sm btn-outline" onclick="showAdminPanel('queue',null)">↻ Refresh</button>
+        </div>
+        <div class="admin-body" id="adminBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end .page -->
+
+<!-- Modal for doc review -->
+<div class="modal-bg" id="docModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-h">
+      <div class="modal-title" id="docModalTitle">Document Review</div>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div id="docModalBody"></div>
+  </div>
+</div>
+
+<div class="toast-c" id="toastC"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════════
+const DB = {
+  get:(k,d=[])=>{ try{return JSON.parse(localStorage.getItem('hntrust_'+k))??d}catch{return d} },
+  set:(k,v)=>localStorage.setItem('hntrust_'+k,JSON.stringify(v)),
+};
+
+let kycStep = 1; // current step (0-indexed)
+let kycUploads = {}; // track uploaded docs
+let reviewStars = 0;
+
+// ══════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════
+function showView(id, btn) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  window.scrollTo(0,0);
+  if (id==='kyc') renderKycStep(kycStep);
+  if (id==='escrow') { renderEscrowFlow(); renderProtection(); renderLiveTx(); }
+  if (id==='admin') showAdminPanel('queue', document.querySelector('.admin-nav-btn'));
+  if (id==='overview') animateStats();
+}
+
+// ══════════════════════════════════════════════════
+// OVERVIEW — animate stats & deterrence grid
+// ══════════════════════════════════════════════════
+function animateStats() {
+  animCount('stat1','90%',0,90,50,'%');
+  animCount('stat2','12',0,12,120,'');
+  animCount('stat3','₦0',0,100,40,'%',true);
+}
+
+function animCount(id, final, from, to, delay, suffix, prefix=false) {
+  const el=document.getElementById(id);
+  if(!el) return;
+  setTimeout(()=>{
+    let n=from;
+    const step=Math.ceil((to-from)/30);
+    const iv=setInterval(()=>{
+      n=Math.min(n+step,to);
+      el.textContent=(prefix?'₦':'')+n+suffix;
+      if(n>=to){el.textContent=final;clearInterval(iv);}
+    },40);
+  },delay);
+}
+
+const DETERRENCE = [
+  {icon:'🔁',title:'Duplicate Detection',desc:'Same phone number, BVN digits, or device fingerprint = immediate account freeze. One person, one account — enforced automatically.'},
+  {icon:'📍',title:'GPS Metadata Verification',desc:'Property photos are checked for embedded GPS coordinates. If the location metadata contradicts the stated address, the listing is flagged.'},
+  {icon:'🏠',title:'Address Deduplication',desc:'The same property address cannot be listed by two different users without triggering a manual review. Prevents ghost listings.'},
+  {icon:'⏳',title:'24-Hour Listing Hold',desc:'Every new listing from a first-time lister sits in a "pending" state for 24 hours while admin reviews. No fraud goes live instantly.'},
+  {icon:'📞',title:'Admin Phone Call',desc:'Before a new landlord's first listing is approved, our team calls them on the listed phone number to verify the conversation is real.'},
+  {icon:'🚩',title:'Community Flagging',desc:'Any registered user can report a listing. Three independent flags from different accounts auto-suspends the listing pending review.'},
+  {icon:'🚫',title:'Permanent Blacklist',desc:'Any NIN, BVN, or phone number confirmed as fraudulent is permanently blacklisted across all HouseNest platforms — no second chances.'},
+  {icon:'💰',title:'₦500 Listing Deposit',desc:'A small refundable deposit to publish deters mass fake listing creation. Returned when the listing is taken down by the legitimate landlord.'},
+  {icon:'🤖',title:'AI Pattern Detection',desc:'Machine learning flags accounts whose listing activity matches known fraud patterns — unusual hours, copy-paste descriptions, price anomalies.'},
+];
+
+function renderDeterrenceGrid() {
+  const g=document.getElementById('deterrenceGrid');
+  if(!g) return;
+  g.innerHTML=DETERRENCE.map(d=>`
+  <div style="background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);border-radius:14px;padding:1.2rem;transition:all 0.2s" onmouseover="this.style.background='rgba(245,240,230,0.09)'" onmouseout="this.style.background='rgba(245,240,230,0.05)'">
+    <div style="font-size:1.5rem;margin-bottom:0.7rem">${d.icon}</div>
+    <div style="font-weight:700;color:var(--bone);font-size:0.88rem;margin-bottom:0.35rem">${d.title}</div>
+    <div style="font-size:0.75rem;color:rgba(245,240,230,0.42);line-height:1.6">${d.desc}</div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// KYC FLOW
+// ══════════════════════════════════════════════════
+function showKycStep(n) { kycStep=n; renderKycStep(n); }
+
+function renderKycStep(step) {
+  updateKycProgress(step);
+  const panels = [step0HTML, step1HTML, step2HTML, step3HTML, step4HTML];
+  const fn = panels[step];
+  if (fn) document.getElementById('kycPanels').innerHTML = fn();
+}
+
+function updateKycProgress(step) {
+  const total=5;
+  const pct = Math.min((step/total)*100,95);
+  document.getElementById('progressFill').style.width=pct+'%';
+  for(let i=0;i<total;i++){
+    const el=document.getElementById('kstep-'+i);
+    if(!el) continue;
+    el.className='kyc-step '+(i<step?'done':i===step?'current':'pending');
+    el.querySelector('.kyc-step-dot').textContent=i<step?'✓':(i+1);
+  }
+}
+
+// Step 0: Phone + BVN (done state shown as example)
+function step0HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(74,124,78,0.12)">📱</div>
+    <div>
+      <div class="kyc-panel-title">Step 1 — Phone & Email</div>
+      <div class="kyc-panel-sub">Verify your phone number and email address. This step is already complete.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div style="display:flex;flex-direction:column;gap:0.8rem">
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:12px">
+        <span style="font-size:1.3rem">📱</span>
+        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">Phone Verified</div><div style="font-size:0.75rem;color:var(--smoke)">08012345678 · OTP confirmed</div></div>
+        <span style="margin-left:auto;color:var(--ok);font-size:1.1rem">✓</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:12px">
+        <span style="font-size:1.3rem">📧</span>
+        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">Email Verified</div><div style="font-size:0.75rem;color:var(--smoke)">ngozi@email.com · Link clicked</div></div>
+        <span style="margin-left:auto;color:var(--ok);font-size:1.1rem">✓</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:12px">
+        <span style="font-size:1.3rem">🏦</span>
+        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">BVN Last-4 Checked</div><div style="font-size:0.75rem;color:var(--smoke)">···· ···· 4782 · No duplicates</div></div>
+        <span style="margin-left:auto;color:var(--ok);font-size:1.1rem">✓</span>
+      </div>
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <div class="trust-badge tb-basic">✓ Basic Verified</div>
+    <button class="btn btn-primary btn-sm" onclick="showKycStep(1)">Continue to Identity →</button>
+  </div>
+</div>`; }
+
+// Step 1: Government ID + NIN
+function step1HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(192,90,32,0.12)">🪪</div>
+    <div>
+      <div class="kyc-panel-title">Step 2 — Personal Identity</div>
+      <div class="kyc-panel-sub">Upload your NIN and a valid government-issued ID. Required before you can publish any listing.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div class="f-group">
+      <label class="f-label">National Identification Number (NIN)</label>
+      <div class="bvn-row">
+        <input class="f-input" id="ninInput" placeholder="12345678901" maxlength="11" style="letter-spacing:0.12em;font-family:'Space Mono',monospace">
+        <button class="bvn-verify-btn" onclick="verifyNIN()">Verify NIN</button>
+      </div>
+      <div class="f-hint">Your 11-digit NIN from your NIMC slip or NIN card</div>
+      <div class="f-err" id="ninErr">NIN must be exactly 11 digits</div>
+    </div>
+    <div class="f-group">
+      <label class="f-label">ID Type</label>
+      <select class="f-select" id="idType">
+        <option value="">Select your ID type</option>
+        <option>National ID Card (NIN Card)</option>
+        <option>International Passport</option>
+        <option>Driver's Licence</option>
+        <option>Permanent Voter's Card (PVC)</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Upload Government ID (Front)</label>
+      <div class="upload-zone" id="uz-id-front" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleUzDrop(event,'id-front')">
+        <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'id-front')">
+        <div class="uz-default">
+          <div class="uz-icon">🪪</div>
+          <div class="uz-title">Upload ID Front</div>
+          <div class="uz-sub">JPG, PNG or PDF · Max 5MB · Must be clear, unobstructed</div>
+        </div>
+        <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-id-front-name">Uploaded</div></div>
+      </div>
+    </div>
+    <div class="f-row">
+      <div class="f-group">
+        <label class="f-label">Upload ID Back</label>
+        <div class="upload-zone" id="uz-id-back" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleUzDrop(event,'id-back')">
+          <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'id-back')">
+          <div class="uz-default"><div class="uz-icon">🔄</div><div class="uz-title">ID Back</div><div class="uz-sub">If applicable</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-id-back-name">Uploaded</div></div>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Upload Clear Selfie</label>
+        <div class="upload-zone" id="uz-selfie" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleUzDrop(event,'selfie')">
+          <input type="file" accept="image/*" capture="user" onchange="handleUzFile(this,'selfie')">
+          <div class="uz-default"><div class="uz-icon">🤳</div><div class="uz-title">Selfie</div><div class="uz-sub">Face clearly visible, good lighting</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-selfie-name">Uploaded</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:rgba(192,90,32,0.06);border:1px solid rgba(192,90,32,0.15);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:var(--clay);line-height:1.6">
+      <strong>⚠️ Important:</strong> Ensure your ID is not expired, not blurry, and matches your registered name exactly. Mismatched names will be rejected. Documents are encrypted and stored securely — never shared with third parties.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <button class="btn btn-ghost btn-sm" onclick="showKycStep(0)">← Back</button>
+    <button class="btn btn-primary btn-sm" onclick="submitIdentity()">Submit Identity Documents →</button>
+  </div>
+</div>`; }
+
+// Step 2: Property documents
+function step2HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(140,72,188,0.12)">🏠</div>
+    <div>
+      <div class="kyc-panel-title">Step 3 — Property Ownership</div>
+      <div class="kyc-panel-sub">Prove ownership or right to rent out the specific property you're listing. One set per property.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div class="f-group">
+      <label class="f-label">Property Ownership Document Type</label>
+      <select class="f-select" id="propDocType">
+        <option value="">Select document type</option>
+        <option>Certificate of Occupancy (C of O)</option>
+        <option>Right of Occupancy (R of O)</option>
+        <option>Deed of Assignment</option>
+        <option>Landlord Association Letter + Chairman NIN</option>
+        <option>Governor's Consent</option>
+        <option>Registered Survey Plan</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Upload Ownership Document</label>
+      <div class="upload-zone" id="uz-prop-doc" ondrop="handleUzDrop(event,'prop-doc')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+        <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'prop-doc')">
+        <div class="uz-default"><div class="uz-icon">📄</div><div class="uz-title">Ownership Document</div><div class="uz-sub">PDF or clear image · All pages if multi-page</div></div>
+        <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-prop-doc-name">Uploaded</div></div>
+      </div>
+    </div>
+    <div class="f-row">
+      <div class="f-group">
+        <label class="f-label">Utility Bill (same address)</label>
+        <div class="upload-zone" id="uz-utility" ondrop="handleUzDrop(event,'utility')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+          <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'utility')">
+          <div class="uz-default"><div class="uz-icon">💡</div><div class="uz-title">Utility Bill</div><div class="uz-sub">BEDC/IBEDC/EKEDC · Not older than 3 months</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-utility-name">Uploaded</div></div>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Property Photo (GPS on)</label>
+        <div class="upload-zone" id="uz-prop-photo" ondrop="handleUzDrop(event,'prop-photo')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+          <input type="file" accept="image/*" capture="environment" onchange="handleUzFile(this,'prop-photo')">
+          <div class="uz-default"><div class="uz-icon">📍</div><div class="uz-title">Property Photo + GPS</div><div class="uz-sub">Enable location on camera app first</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-prop-photo-name">Uploaded</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:rgba(140,72,188,0.06);border:1px solid rgba(140,72,188,0.15);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:#6c2a9c;line-height:1.6">
+      <strong>📍 GPS Note:</strong> Take the property photo with your phone's location services enabled. We cross-reference the GPS coordinates embedded in the photo against your stated address. A mismatch sends the listing to manual review.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <button class="btn btn-ghost btn-sm" onclick="showKycStep(1)">← Back</button>
+    <button class="btn btn-primary btn-sm" onclick="submitPropertyDocs()">Submit Property Documents →</button>
+  </div>
+</div>`; }
+
+// Step 3: Liveness check
+function step3HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(32,80,160,0.12)">👁️</div>
+    <div>
+      <div class="kyc-panel-title">Step 4 — Liveness Check</div>
+      <div class="kyc-panel-sub">Hold up the code shown below to your camera. This proves a real human is behind this account — not a bot or photo spoofing.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div class="liveness-box">
+      <div class="liveness-cam">
+        <div class="liveness-cam-placeholder">
+          <div class="cam-icon">📷</div>
+          <div style="font-size:0.82rem;text-align:center">Camera feed appears here<br><small style="opacity:0.5">Production: uses device camera API</small></div>
+        </div>
+        <div class="liveness-frame"></div>
+      </div>
+      <div class="liveness-code-display">
+        <div>
+          <div style="font-size:0.65rem;color:rgba(245,240,230,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem">Hold up this code to the camera</div>
+          <div class="liveness-code" id="livenessCode">A7 • 3K</div>
+        </div>
+        <div class="liveness-instruction">Write this 4-character code on a piece of paper and hold it up clearly in frame. Our system verifies it's you.</div>
+      </div>
+    </div>
+    <div style="margin-top:1.2rem;display:flex;gap:0.6rem">
+      <button class="btn btn-outline btn-sm" onclick="refreshLivenessCode()">🔄 New Code</button>
+      <button class="btn btn-primary btn-sm" onclick="submitLiveness()" style="flex:1">✓ I've Shown the Code — Verify Me</button>
+    </div>
+    <div style="margin-top:1rem;background:rgba(32,80,160,0.06);border:1px solid rgba(32,80,160,0.15);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:#2050a0;line-height:1.6">
+      <strong>🤖 Why liveness?</strong> Standard ID upload can be spoofed with a photo of someone else's ID. The liveness check with a unique random code proves you're physically present and in possession of your body — not a fraud account using stolen identity.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <button class="btn btn-ghost btn-sm" onclick="showKycStep(2)">← Back</button>
+    <span style="font-size:0.75rem;color:var(--smoke)">Code refreshes every 60 seconds</span>
+  </div>
+</div>`; }
+
+// Step 4: Review & submit
+function step4HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(42,124,56,0.12)">🎉</div>
+    <div>
+      <div class="kyc-panel-title">Step 5 — Under Review</div>
+      <div class="kyc-panel-sub">Your documents have been submitted. Our verification team reviews within 24 hours.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div style="text-align:center;padding:1.5rem 0">
+      <div style="font-size:4rem;margin-bottom:1rem">⏳</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--forest);margin-bottom:0.6rem">Documents under review</h3>
+      <p style="font-size:0.85rem;color:var(--smoke);max-width:380px;margin:0 auto;line-height:1.7">A member of our verification team will manually review your documents, cross-check your NIN with NIMC, and call your phone number to confirm. This takes up to 24 hours.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:1.5rem">
+      ${['NIN submitted · Cross-check with NIMC in progress','Government ID uploaded · Face-match running','Property documents submitted · Address verification in progress','Liveness check completed · Anti-spoofing confirmed'].map((t,i)=>`
+      <div style="display:flex;align-items:center;gap:0.8rem;padding:0.75rem 0.9rem;background:var(--mist);border-radius:10px">
+        <div style="width:28px;height:28px;border-radius:8px;background:${i===3?'rgba(42,124,56,0.15)':'rgba(200,120,32,0.12)'};display:flex;align-items:center;justify-content:center;font-size:0.8rem">${i===3?'✓':'⏳'}</div>
+        <span style="font-size:0.82rem;color:var(--forest)">${t}</span>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:1.5rem;background:rgba(42,124,56,0.06);border:1px solid rgba(42,124,56,0.15);border-radius:12px;padding:1.1rem;font-size:0.82rem;color:var(--ok);line-height:1.6">
+      <strong>✉️ Next steps:</strong> You'll receive an SMS and email when your account is approved. Once verified, you can immediately publish your first listing. If we need clarification on any document, we'll call you on your registered number.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <span class="trust-badge tb-basic">⏳ Under Review</span>
+    <button class="btn btn-outline btn-sm" onclick="showView('overview',null)">Back to Overview</button>
+  </div>
+</div>`; }
+
+// KYC actions
+function verifyNIN() {
+  const nin = document.getElementById('ninInput')?.value.trim();
+  const err = document.getElementById('ninErr');
+  if (!/^\d{11}$/.test(nin)) { err.classList.add('show'); return; }
+  err.classList.remove('show');
+  toast('ok','✅ NIN format valid — cross-checking with NIMC database...');
+  setTimeout(()=>toast('ok','✓ NIN verified successfully! No duplicates found.'),2000);
+}
+
+function handleUzFile(input, key) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { toast('err','File too large — max 5MB'); return; }
+  kycUploads[key] = file.name;
+  const zone = document.getElementById('uz-'+key);
+  const nameEl = document.getElementById('uz-'+key+'-name');
+  if (zone) zone.classList.add('uploaded');
+  if (nameEl) nameEl.textContent = file.name.length>22 ? file.name.slice(0,20)+'...' : file.name;
+  toast('ok','📎 '+file.name+' uploaded');
+}
+
+function handleUzDrop(e, key) {
+  e.preventDefault();
+  const zone = document.getElementById('uz-'+key);
+  zone?.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) { kycUploads[key]=file.name; zone?.classList.add('uploaded'); toast('ok','📎 '+file.name+' uploaded'); }
+}
+
+function submitIdentity() {
+  const nin = document.getElementById('ninInput')?.value;
+  const idType = document.getElementById('idType')?.value;
+  if (!nin || nin.length!==11) { toast('err','Please enter and verify your NIN'); return; }
+  if (!idType) { toast('err','Please select an ID type'); return; }
+  if (!kycUploads['id-front']) { toast('err','Please upload your ID front'); return; }
+  if (!kycUploads['selfie']) { toast('err','Please upload your selfie'); return; }
+  toast('ok','✅ Identity documents submitted successfully!');
+  setTimeout(()=>showKycStep(2),800);
+}
+
+function submitPropertyDocs() {
+  if (!document.getElementById('propDocType')?.value) { toast('err','Please select document type'); return; }
+  if (!kycUploads['prop-doc']) { toast('err','Please upload ownership document'); return; }
+  toast('ok','✅ Property documents submitted!');
+  setTimeout(()=>showKycStep(3),800);
+}
+
+const LIVENESS_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function genCode() {
+  const r=()=>LIVENESS_CHARS[Math.floor(Math.random()*LIVENESS_CHARS.length)];
+  return r()+r()+' • '+r()+r();
+}
+function refreshLivenessCode() {
+  const el=document.getElementById('livenessCode');
+  if(el){el.style.opacity='0';setTimeout(()=>{el.textContent=genCode();el.style.opacity='1';el.style.transition='opacity 0.3s'},200);}
+}
+function submitLiveness() {
+  toast('ok','✅ Liveness check submitted — processing...');
+  setTimeout(()=>{ toast('ok','✓ Liveness confirmed! Proceeding to review...'); setTimeout(()=>showKycStep(4),600); },1500);
+}
+
+// Auto-refresh liveness code every 60s
+setInterval(()=>{ if(document.getElementById('livenessCode')) refreshLivenessCode(); },60000);
+
+// ══════════════════════════════════════════════════
+// ESCROW FLOW
+// ══════════════════════════════════════════════════
+const ESCROW_STEPS = [
+  {icon:'💳',label:'Tenant Pays',desc:'Tenant deposits rent via Paystack/Flutterwave',time:'Instant',color:'var(--e-pending)',bg:'rgba(200,120,32,0.12)'},
+  {icon:'🏦',label:'Funds Held',desc:'HouseNest holds in trust account',time:'< 5 mins',color:'var(--e-funded)',bg:'rgba(32,80,160,0.12)'},
+  {icon:'🔑',label:'Inspection',desc:'Tenant inspects property — 48hr window',time:'Up to 48hrs',color:'var(--e-inspect)',bg:'rgba(140,72,188,0.12)'},
+  {icon:'✅',label:'Confirmed',desc:'Tenant confirms space is as described',time:'Tenant action',color:'var(--e-confirmed)',bg:'rgba(42,124,56,0.12)'},
+  {icon:'💸',label:'Released',desc:'Funds hit landlord account',time:'2–4 hours',color:'var(--e-released)',bg:'rgba(27,58,30,0.15)'},
+];
+
+function renderEscrowFlow() {
+  const f=document.getElementById('escrowFlow');
+  if(!f) return;
+  f.innerHTML=ESCROW_STEPS.map((s,i)=>`
+  <div class="ef-step">
+    <div class="ef-dot" style="background:${s.bg};border-color:${s.color};color:${s.color}">
+      ${s.icon}
+    </div>
+    <div class="ef-label" style="color:${s.color};font-weight:700">${s.label}</div>
+    <div class="ef-time">${s.time}</div>
+  </div>`).join('');
+}
+
+const PROTECTION = [
+  {icon:'🛡️',title:'Tenant Protection',desc:'If the property doesn\'t match the listing, the tenant raises a dispute within 48 hours. HouseNest mediates. If valid, full refund within 3 working days.'},
+  {icon:'🤝',title:'Landlord Protection',desc:'Funds are committed the moment the tenant deposits. No fake interest, no time-wasters. A tenant who has paid is a tenant who is serious.'},
+  {icon:'⚖️',title:'Dispute Mediation',desc:'Our legal team handles disputes with documented evidence. We aim to resolve in 3–5 working days. Court escalation available for unresolved cases.'},
+];
+
+function renderProtection() {
+  const g=document.getElementById('protectionGrid');
+  if(!g) return;
+  g.innerHTML=PROTECTION.map(p=>`
+  <div class="prot-card">
+    <div class="prot-icon">${p.icon}</div>
+    <div class="prot-title">${p.title}</div>
+    <div class="prot-desc">${p.desc}</div>
+  </div>`).join('');
+}
+
+function renderLiveTx() {
+  document.getElementById('liveTxCard').innerHTML=`
+  <div class="ec-header">
+    <div>
+      <div style="font-weight:700;font-size:0.9rem;color:var(--ink)">Transaction #HN-ESC-2025-0041</div>
+      <div class="ec-ref">Initiated 2 hours ago · Ondo State</div>
+    </div>
+    <div class="ec-state-badge" style="background:rgba(140,72,188,0.12);color:#8c48bc;border:1px solid rgba(140,72,188,0.25)">🔑 Inspection Period</div>
+  </div>
+  <div class="ec-body">
+    <div class="ec-amount">₦120,000</div>
+    <div class="ec-listing">Self-Contain Near FUTA, Akure, Ondo State</div>
+    <div style="font-size:0.78rem;color:var(--smoke)">Annual rent · 1 year tenancy</div>
+    <div class="ec-parties">
+      <div class="ec-party">
+        <div class="ec-party-av" style="background:#2a5c2e">N</div>
+        <div><div class="ec-party-role">Tenant</div><div class="ec-party-name">Ngozi Okafor</div></div>
+      </div>
+      <div style="color:var(--ash);font-size:1.2rem;align-self:center">→</div>
+      <div class="ec-party">
+        <div class="ec-party-av" style="background:#5c3020">B</div>
+        <div><div class="ec-party-role">Landlord</div><div class="ec-party-name">Mr. Bello Abdullahi</div></div>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--mist);margin:1.2rem 0">
+    <div style="font-weight:700;font-size:0.85rem;color:var(--forest);margin-bottom:1rem">Transaction Timeline</div>
+    <div class="ec-timeline">
+      <div class="ect-item"><div class="ect-dot ect-done">💳</div><div><div class="ect-label">Step 1</div><div class="ect-text">Payment Received</div><div class="ect-time">Today 09:14 AM · ₦120,000 via Paystack</div></div></div>
+      <div class="ect-item"><div class="ect-dot ect-done">🏦</div><div><div class="ect-label">Step 2</div><div class="ect-text">Funds Secured in Escrow</div><div class="ect-time">Today 09:19 AM · HouseNest Trust Account</div></div></div>
+      <div class="ect-item"><div class="ect-dot ect-active">🔑</div><div><div class="ect-label">Step 3 — Active now</div><div class="ect-text">Inspection Period (46hrs remaining)</div><div class="ect-time">Tenant must inspect and confirm by Tomorrow 09:14 AM</div></div></div>
+      <div class="ect-item"><div class="ect-dot ect-pending">✅</div><div><div class="ect-label">Step 4 — Pending</div><div class="ect-text">Awaiting Tenant Confirmation</div><div class="ect-time">—</div></div></div>
+      <div class="ect-item" style="padding-bottom:0"><div class="ect-dot ect-pending">💸</div><div><div class="ect-label">Step 5 — Pending</div><div class="ect-text">Funds Release to Landlord</div><div class="ect-time">— (within 2–4hrs of confirmation)</div></div></div>
+    </div>
+  </div>
+  <div style="padding:1.2rem 1.8rem;border-top:1px solid var(--mist);display:flex;gap:0.7rem;flex-wrap:wrap;background:var(--mist)">
+    <button class="btn btn-success btn-sm" onclick="confirmEscrow()">✅ Confirm Move-In & Release Funds</button>
+    <button class="btn btn-sm" style="background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2)" onclick="raiseDispute()">⚠️ Raise a Dispute</button>
+    <button class="btn btn-outline btn-sm" onclick="toast('ok','📋 Transaction receipt copied to clipboard')">📋 Copy Reference</button>
+  </div>`;
+}
+
+function confirmEscrow() {
+  toast('ok','✅ Move-in confirmed! Releasing ₦120,000 to landlord...');
+  setTimeout(()=>toast('ok','💸 ₦120,000 released to Mr. Bello Abdullahi · Arrives within 2–4 hours'),2000);
+  setTimeout(()=>renderLiveTx(),4000);
+}
+
+function raiseDispute() {
+  toast('warn','⚠️ Dispute raised. Our legal team will contact you within 24 hours to begin mediation.');
+}
+
+function initiateEscrow() {
+  const amount = parseFloat(document.getElementById('escAmount')?.value)||0;
+  const tenant = document.getElementById('escTenant')?.value.trim();
+  const landlord = document.getElementById('escLandlord')?.value.trim();
+  const addr = document.getElementById('escAddr')?.value.trim();
+  if (!amount||!tenant||!landlord||!addr) { toast('err','Please fill all fields'); return; }
+  toast('ok','🏦 Escrow initiated! In production, this opens the Paystack payment modal...');
+  setTimeout(()=>toast('ok','💳 Connecting to Paystack — ₦'+amount.toLocaleString()+' to be held in escrow'),1500);
+}
+
+document.getElementById('escAmount')?.addEventListener('input',function(){
+  const v = parseFloat(this.value)||0;
+  document.getElementById('feeAmount').textContent=v.toLocaleString();
+  document.getElementById('feeTotal').textContent=v.toLocaleString();
+});
+
+// ══════════════════════════════════════════════════
+// ADMIN CENTRE
+// ══════════════════════════════════════════════════
+const KYC_QUEUE = [
+  {id:'u1',name:'Adebayo Olusola',role:'Landlord',phone:'08023456789',submitted:'2hrs ago',risk:'low',docs:['NIN ✓','ID Front ✓','Selfie ✓','C of O ✓','Utility Bill ✓'],notes:'Documents look clean. Address matches utility bill. NIN verified.'},
+  {id:'u2',name:'Chisom Eze',role:'Agent',phone:'07034567890',submitted:'4hrs ago',risk:'med',docs:['NIN ✓','ID Front ✓','CAC Cert ⚠️'],notes:'CAC certificate is partially obscured. Needs resubmission of page 2.'},
+  {id:'u3',name:'Fatimah Bello',role:'Landlord',phone:'09056789012',submitted:'6hrs ago',risk:'high',docs:['NIN ✓','ID Front ✓','Selfie ✓','R of O ✓'],notes:'GPS metadata on property photo shows location 8km from stated address. Flagged for call verification.'},
+  {id:'u4',name:'Emeka Nwosu',role:'Association',phone:'08167890123',submitted:'1day ago',risk:'low',docs:['NIN ✓','CAC Cert ✓','Chairman NIN ✓','Association Letter ✓'],notes:'All documents verified. Association has 14 existing members. Clean history.'},
+];
+
+const FRAUD_ALERTS = [
+  {level:'high',icon:'🚨',title:'Duplicate NIN detected',detail:'NIN 12345678901 was used to register 3 accounts (u234, u567, u890) in the past 48 hours. Two accounts from different phone numbers. Likely fraud ring.',id:'fa1'},
+  {level:'med',icon:'⚠️',title:'GPS location mismatch — Listing HN-EKT-0042',detail:'Listed address: "12 GRA Ado-Ekiti". GPS coordinates in property photo: 7.2°N, 5.1°E — which places it in Efon-Alaaye, 45km away. Could be honest error or deliberate misdirection.',id:'fa2'},
+  {level:'low',icon:'ℹ️',title:'New lister submitted 4 listings in 2 hours',detail:'User u1024 (verified landlord) submitted 4 listings within 2 hours of account creation. Unusual speed but documents check out. Monitor first 30 days.',id:'fa3'},
+];
+
+const ESCROW_TXS = [
+  {ref:'HN-ESC-0041',tenant:'Ngozi Okafor',landlord:'Bello Abdullahi',amount:'₦120,000',state:'Inspection',stateColor:'var(--e-inspect)',since:'2hrs ago'},
+  {ref:'HN-ESC-0039',tenant:'Taiwo Adeyemi',landlord:'Chief Olusola',amount:'₦95,000',state:'Confirmed',stateColor:'var(--e-confirmed)',since:'5hrs ago'},
+  {ref:'HN-ESC-0038',tenant:'Musa Garba',landlord:'Mrs. Lawal',amount:'₦180,000',state:'Funded',stateColor:'var(--e-funded)',since:'8hrs ago'},
+];
+
+const VERIFIED_USERS = [
+  {name:'Adebayo Olusola',role:'Landlord',tier:'Property Verified',badge:'tb-verified',since:'3 days ago',listings:2},
+  {name:'Emeka Nwosu',role:'Association',tier:'Business Verified',badge:'tb-full',since:'1 week ago',listings:14},
+  {name:'Ngozi Okafor',role:'Tenant',tier:'Basic Verified',badge:'tb-basic',since:'Today',listings:0},
+];
+
+function showAdminPanel(panel, btn) {
+  if(btn){ document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  const title=document.getElementById('adminTitle');
+  const body=document.getElementById('adminBody');
+
+  if(panel==='queue'){
+    title.textContent='KYC Verification Queue';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">4</div><div class="stat-tile-l">Pending Review</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">2</div><div class="stat-tile-l">High Risk Flags</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">12</div><div class="stat-tile-l">Approved Today</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">1</div><div class="stat-tile-l">Rejected Today</div></div>
+    </div>
+    ${KYC_QUEUE.map(u=>`
+    <div class="vq-item">
+      <div class="vq-avatar" style="background:${u.risk==='high'?'#c8323c':u.risk==='med'?'#c87820':'#2a7c38'}">${u.name[0]}</div>
+      <div class="vq-info">
+        <div class="vq-name">${u.name} <span class="risk-tag risk-${u.risk}" style="margin-left:0.4rem">${u.risk==='high'?'🚨 High Risk':u.risk==='med'?'⚠️ Review':'✓ Low Risk'}</span></div>
+        <div class="vq-role">${u.role} · ${u.phone} · Submitted ${u.submitted}</div>
+        <div class="vq-docs">${u.docs.map(d=>`<span class="vq-doc ${d.includes('✓')?'ok':d.includes('⚠️')?'warn':''}">${d}</span>`).join('')}</div>
+        <div style="font-size:0.72rem;color:var(--smoke);margin-top:0.4rem;font-style:italic">${u.notes}</div>
+      </div>
+      <div class="vq-actions">
+        <button class="vq-approve" onclick="approveKyc('${u.id}','${u.name}')">✓ Approve</button>
+        <button class="vq-reject" onclick="rejectKyc('${u.id}','${u.name}')">✕ Reject</button>
+        <button class="btn btn-sm btn-outline" style="font-size:0.7rem" onclick="reviewDocs('${u.name}','${u.docs}')">View Docs</button>
+      </div>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='fraud'){
+    title.textContent='Fraud Detection Alerts';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">2</div><div class="stat-tile-l">Active Alerts</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">1</div><div class="stat-tile-l">High Priority</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">8</div><div class="stat-tile-l">Blocked This Week</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">3</div><div class="stat-tile-l">On Blacklist</div></div>
+    </div>
+    ${FRAUD_ALERTS.map(a=>`
+    <div class="fraud-alert fa-${a.level}">
+      <div class="fa-icon">${a.icon}</div>
+      <div style="flex:1"><div class="fa-title">${a.title}</div><div class="fa-detail">${a.detail}</div></div>
+      <div class="fa-actions">
+        <button class="fa-btn fa-dismiss" onclick="toast('ok','Alert dismissed')">Dismiss</button>
+        ${a.level==='high'?`<button class="fa-btn fa-block" onclick="toast('err','Account blocked and NIN blacklisted')">Block</button>`:`<button class="fa-btn fa-review" onclick="toast('warn','Escalated to senior review')">Escalate</button>`}
+      </div>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='verified'){
+    title.textContent='Verified Users';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">28</div><div class="stat-tile-l">Fully Verified</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">14</div><div class="stat-tile-l">Property Verified</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">47</div><div class="stat-tile-l">Basic Verified</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">3</div><div class="stat-tile-l">Pending</div></div>
+    </div>
+    ${VERIFIED_USERS.map(u=>`
+    <div class="vq-item">
+      <div class="vq-avatar" style="background:var(--moss)">${u.name[0]}</div>
+      <div class="vq-info">
+        <div class="vq-name">${u.name}</div>
+        <div class="vq-role">${u.role} · ${u.listings} listing${u.listings!==1?'s':''} · Verified ${u.since}</div>
+      </div>
+      <span class="trust-badge ${u.badge}">${u.tier}</span>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='escrow-admin'){
+    title.textContent='Escrow Transactions';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">₦1.2M</div><div class="stat-tile-l">Currently Held</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">3</div><div class="stat-tile-l">Active Transactions</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">₦8.4M</div><div class="stat-tile-l">Released This Month</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">0</div><div class="stat-tile-l">Overdue Releases</div></div>
+    </div>
+    <table class="esc-table">
+      <thead><tr><th>Reference</th><th>Tenant</th><th>Landlord</th><th>Amount</th><th>Status</th><th>Since</th><th>Action</th></tr></thead>
+      <tbody>
+        ${ESCROW_TXS.map(t=>`<tr>
+          <td style="font-family:'Space Mono',monospace;font-size:0.72rem">${t.ref}</td>
+          <td>${t.tenant}</td>
+          <td>${t.landlord}</td>
+          <td style="font-weight:700">${t.amount}</td>
+          <td><span style="padding:0.18rem 0.55rem;border-radius:50px;font-size:0.65rem;font-weight:700;background:${t.stateColor}22;color:${t.stateColor}">${t.state}</span></td>
+          <td style="color:var(--smoke);font-size:0.78rem">${t.since}</td>
+          <td><button class="esc-action-btn ${t.state==='Confirmed'?'release':''}" onclick="adminRelease('${t.ref}','${t.amount}')">${t.state==='Confirmed'?'Release Funds':'View'}</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  else if(panel==='escrow-disputes'){
+    title.textContent='Dispute Cases';
+    body.innerHTML=`<div style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">⚖️</div>
+      <div style="font-weight:700;color:var(--forest);margin-bottom:0.5rem">No active disputes</div>
+      <p style="font-size:0.85rem;color:var(--smoke)">All current transactions are proceeding normally. Disputed transactions will appear here with full mediation tools.</p>
+    </div>`;
+  }
+
+  else if(panel==='blacklist'){
+    title.textContent='Permanent Blacklist';
+    body.innerHTML=`
+    <div style="background:rgba(200,50,60,0.06);border:1px solid rgba(200,50,60,0.15);border-radius:12px;padding:1.1rem;margin-bottom:1.2rem;font-size:0.82rem;color:var(--err);line-height:1.6">
+      <strong>🚫 Blacklisted identifiers</strong> are permanently banned across all HouseNest platforms. A blacklisted NIN, phone, or BVN cannot be used to create a new account under any circumstances.
+    </div>
+    ${[
+      {type:'NIN',value:'12345●●●●901',reason:'Duplicate fraud ring — 3 fake accounts',date:'Today'},
+      {type:'Phone',value:'0803●●●●899',reason:'Attempted listing of non-existent property — verified by site visit',date:'3 days ago'},
+      {type:'NIN',value:'98765●●●●432',reason:'Fake C of O document submitted — document verified as forged by land registry',date:'1 week ago'},
+    ].map(b=>`
+    <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem;border:1px solid rgba(200,50,60,0.15);border-radius:10px;margin-bottom:0.5rem">
+      <span style="background:rgba(200,50,60,0.1);color:var(--err);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;flex-shrink:0">${b.type}</span>
+      <code style="font-size:0.82rem;color:var(--ink)">${b.value}</code>
+      <div style="flex:1;font-size:0.78rem;color:var(--smoke)">${b.reason}</div>
+      <div style="font-size:0.7rem;color:var(--ash);flex-shrink:0">${b.date}</div>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='stats'){
+    title.textContent='Platform Statistics';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">91%</div><div class="stat-tile-l">Fraud Deterrence Rate</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">24hrs</div><div class="stat-tile-l">Avg. Verification Time</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">2.3hrs</div><div class="stat-tile-l">Avg. Escrow Release</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">0</div><div class="stat-tile-l">Unresolved Disputes</div></div>
+    </div>
+    <div style="background:var(--mist);border-radius:12px;padding:1.5rem;text-align:center">
+      <div style="font-size:2rem;margin-bottom:0.8rem">📊</div>
+      <p style="font-size:0.85rem;color:var(--smoke)">Full charts — daily verifications, escrow volume, fraud attempts by state — available in production connected to live data (Chart.js or Recharts).</p>
+    </div>`;
+  }
+}
+
+function approveKyc(id, name) {
+  toast('ok','✅ '+name+' approved! Account is now Verified. SMS sent.');
+  document.getElementById('queueBadge').textContent=Math.max(0,parseInt(document.getElementById('queueBadge').textContent)-1);
+}
+
+function rejectKyc(id, name) {
+  toast('err','✕ '+name+' rejected. SMS sent with reason. Documents cleared from server.');
+}
+
+function reviewDocs(name, docs) {
+  document.getElementById('docModalTitle').textContent='Documents — '+name;
+  document.getElementById('docModalBody').innerHTML=`
+  <p style="font-size:0.85rem;color:var(--smoke);margin-bottom:1.2rem">Review each document carefully. Check for clarity, date validity, and that names match the registered account.</p>
+  ${docs.split(',').map(d=>`
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:var(--mist);border-radius:9px;margin-bottom:0.5rem">
+    <span style="font-size:0.85rem;font-weight:600;color:var(--forest)">${d.trim()}</span>
+    <div style="display:flex;gap:0.4rem">
+      <button class="fa-btn fa-dismiss" onclick="toast('ok','Document marked as reviewed')">Review</button>
+      ${d.includes('⚠️')?`<button class="fa-btn fa-review" onclick="toast('warn','Marked for resubmission — SMS sent to user')">Request Resubmit</button>`:''}
+    </div>
+  </div>`).join('')}
+  <hr style="border:none;border-top:1px solid var(--mist);margin:1rem 0">
+  <div style="display:flex;gap:0.6rem">
+    <button class="btn btn-success btn-sm btn-full" onclick="toast('ok','Approved!');closeModal()">✓ Approve All</button>
+    <button class="btn btn-sm btn-full" style="background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2)" onclick="toast('err','Rejected');closeModal()">✕ Reject</button>
+  </div>`;
+  document.getElementById('docModal').classList.add('open');
+}
+
+function adminRelease(ref, amount) {
+  toast('ok','💸 Releasing '+amount+' for transaction '+ref+'...');
+  setTimeout(()=>toast('ok','✅ Funds released successfully! Landlord notified via SMS.'),2000);
+}
+
+function closeModal() {
+  document.getElementById('docModal').classList.remove('open');
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+function toast(type='ok', msg='') {
+  const icons={ok:'✅',warn:'⚠️',err:'❌',info:'ℹ️'};
+  const t=document.createElement('div');
+  t.className='toast '+(type==='info'?'':type);
+  t.innerHTML=`<span>${icons[type]||'ℹ️'}</span>${msg}`;
+  document.getElementById('toastC').appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(16px)';t.style.transition='all 0.3s';setTimeout(()=>t.remove(),300);},3500);
+}
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderDeterrenceGrid();
+  animateStats();
+  // Set initial liveness code
+  setTimeout(()=>{
+    const el=document.getElementById('livenessCode');
+    if(el) el.textContent=genCode();
+  },100);
+});
+</script>
+</body>
+</html>
