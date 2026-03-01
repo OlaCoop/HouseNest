@@ -2484,9 +2484,18 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
 
 <!-- Image Lightbox -->
 <div class="modal-backdrop" id="lightboxModal" onclick="closeModal('lightboxModal')" style="background:rgba(0,0,0,0.92)">
-  <div style="max-width:90vw;max-height:90vh;position:relative">
+  <div id="lightboxImg-wrap" style="max-width:90vw;max-height:90vh;position:relative">
     <img id="lightboxImg" style="max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain" src="" alt="">
     <div id="lightboxCaption" style="text-align:center;color:rgba(255,255,255,0.6);margin-top:0.8rem;font-size:0.85rem"></div>
+  </div>
+</div>
+
+<!-- KYC Document Review Modal -->
+<div id="docModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeTrustDocModal()">
+  <div style="background:var(--ink);border:1px solid rgba(246,241,232,0.12);border-radius:18px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;padding:1.8rem;position:relative">
+    <button onclick="closeTrustDocModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--smoke);font-size:1.4rem;cursor:pointer;line-height:1">✕</button>
+    <h3 id="docModalTitle" style="font-size:1.05rem;font-weight:700;color:var(--bone);margin:0 0 1.2rem"></h3>
+    <div id="docModalBody"></div>
   </div>
 </div>
 
@@ -2496,14 +2505,168 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
 // ════════════════════════════════════════════════════
 
 // ── STORAGE HELPERS ──────────────────────────────────
+
+// ════════════════════════════════════════════════════════
+// SUPABASE + CLOUDINARY INTEGRATION
+// ════════════════════════════════════════════════════════
+const SUPA_URL  = 'https://pojelgiyybdfyowbdlam.supabase.co';
+const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvamVsZ2l5eWJkZnlvd2JkbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzODM1NjIsImV4cCI6MjA4Nzk1OTU2Mn0.yxBB5KUHHGhbdTCHOsk6-6NL9ETvZN9cKN5aQO9lOBU';
+const CLOUD_NAME   = 'dchsz8yc8';
+const CLOUD_PRESET_LISTINGS = 'housenest_listings';
+const CLOUD_PRESET_KYC      = 'housenest_kyc';
+
+// ── Supabase REST helper ──────────────────────────────
+const SB = {
+  headers: {
+    'apikey': SUPA_ANON,
+    'Authorization': 'Bearer ' + SUPA_ANON,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation',
+  },
+
+  async select(table, query='') {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, { headers: SB.headers });
+    if (!r.ok) { console.error('SB.select error', table, await r.text()); return []; }
+    return r.json();
+  },
+
+  async insert(table, data) {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+      method:'POST', headers:SB.headers, body:JSON.stringify(data)
+    });
+    if (!r.ok) { const e=await r.text(); console.error('SB.insert error', table, e); throw new Error(e); }
+    const result = await r.json();
+    return Array.isArray(result) ? result[0] : result;
+  },
+
+  async update(table, data, query) {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {
+      method:'PATCH', headers:SB.headers, body:JSON.stringify(data)
+    });
+    if (!r.ok) { console.error('SB.update error', table, await r.text()); return null; }
+    const result = await r.json();
+    return Array.isArray(result) ? result[0] : result;
+  },
+
+  async delete(table, query) {
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {
+      method:'DELETE', headers:SB.headers
+    });
+    if (!r.ok) { console.error('SB.delete error', table, await r.text()); return false; }
+    return true;
+  },
+
+  // Auth
+  async signUp(email, password) {
+    const r = await fetch(`${SUPA_URL}/auth/v1/signup`, {
+      method:'POST',
+      headers:{'apikey':SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+    return r.json();
+  },
+
+  async signIn(email, password) {
+    const r = await fetch(`${SUPA_URL}/auth/v1/token?grant_type=password`, {
+      method:'POST',
+      headers:{'apikey':SUPA_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({email,password})
+    });
+    return r.json();
+  },
+
+  async signOut(accessToken) {
+    await fetch(`${SUPA_URL}/auth/v1/logout`, {
+      method:'POST',
+      headers:{'apikey':SUPA_ANON,'Authorization':'Bearer '+accessToken}
+    });
+  },
+
+  // Auth-aware select (uses session token for RLS)
+  async selectAuth(table, query='') {
+    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const h = {...SB.headers, 'Authorization':'Bearer '+token};
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {headers:h});
+    if (!r.ok) { console.error('SB.selectAuth error', table, await r.text()); return []; }
+    return r.json();
+  },
+
+  async insertAuth(table, data) {
+    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const h = {...SB.headers, 'Authorization':'Bearer '+token};
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
+      method:'POST', headers:h, body:JSON.stringify(data)
+    });
+    if (!r.ok) { const e=await r.text(); console.error('SB.insertAuth error', table, e); throw new Error(e); }
+    const result = await r.json();
+    return Array.isArray(result) ? result[0] : result;
+  },
+
+  async updateAuth(table, data, query) {
+    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const h = {...SB.headers, 'Authorization':'Bearer '+token};
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {
+      method:'PATCH', headers:h, body:JSON.stringify(data)
+    });
+    if (!r.ok) { console.error('SB.updateAuth error', table, await r.text()); return null; }
+    const result = await r.json();
+    return Array.isArray(result) ? result[0] : result;
+  },
+
+  async deleteAuth(table, query) {
+    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const h = {...SB.headers, 'Authorization':'Bearer '+token};
+    const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {
+      method:'DELETE', headers:h
+    });
+    if (!r.ok) { console.error('SB.deleteAuth error', table, await r.text()); return false; }
+    return true;
+  },
+
+  // Session management
+  setSession(data) { localStorage.setItem('hn_session', JSON.stringify(data)); },
+  getSession() { try { return JSON.parse(localStorage.getItem('hn_session')); } catch{return null;} },
+  clearSession() { localStorage.removeItem('hn_session'); },
+};
+
+// ── Cloudinary upload helper ──────────────────────────
+async function uploadToCloudinary(file, preset=CLOUD_PRESET_LISTINGS) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', preset);
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method:'POST', body:fd
+  });
+  if (!r.ok) throw new Error('Cloudinary upload failed');
+  const data = await r.json();
+  return data.secure_url;
+}
+
+// Upload base64 image to Cloudinary (for liveness/selfie captured via canvas)
+async function uploadBase64ToCloudinary(base64, preset=CLOUD_PRESET_KYC) {
+  const fd = new FormData();
+  fd.append('file', base64);
+  fd.append('upload_preset', preset);
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+    method:'POST', body:fd
+  });
+  if (!r.ok) throw new Error('Cloudinary upload failed');
+  const data = await r.json();
+  return data.secure_url;
+}
+
+// ── localStorage fallback for non-critical UI state ──
 const DB = {
   get: (key, def=[]) => { try { return JSON.parse(localStorage.getItem('hn_'+key)) ?? def; } catch(e){ return def; } },
   set: (key, val) => localStorage.setItem('hn_'+key, JSON.stringify(val)),
   del: (key) => localStorage.removeItem('hn_'+key),
 };
+// AffDB kept for affiliate UI state that hasn't migrated yet
 
-// Simple hash for demo security (NOT production — use bcrypt server-side)
-const hashPass = s => btoa(unescape(encodeURIComponent(s + 'hn_salt_2025')));
+
+
+
+// Map Supabase snake_case user to app camelCase format
 
 // ── APP STATE ────────────────────────────────────────
 let state = {
@@ -2653,7 +2816,7 @@ function clearFieldErrors(...ids) {
   ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('show'); });
 }
 
-function handleLogin() {
+async function handleLogin() {
   clearFieldErrors('loginEmailErr','loginPassErr');
   const email = document.getElementById('loginEmail').value.trim();
   const pass = document.getElementById('loginPassword').value;
@@ -2662,22 +2825,38 @@ function handleLogin() {
   if (!pass) { showFieldError('loginPassErr','Password is required'); ok=false; }
   if (!ok) return;
 
-  const users = DB.get('users',[]);
-  const user = users.find(u=>u.email===email);
-  if (!user || user.password !== hashPass(pass)) {
-    showFieldError('loginPassErr','Incorrect email or password');
-    return;
+  const btn = document.querySelector('#loginForm .btn-primary, [onclick="handleLogin()"]');
+  if(btn){btn.disabled=true;btn.textContent='Signing in...';}
+  try {
+    // Sign in with Supabase Auth
+    const authData = await SB.signIn(email, pass);
+    if (authData.error || !authData.access_token) {
+      showFieldError('loginPassErr', authData.error?.message || 'Incorrect email or password');
+      return;
+    }
+    SB.setSession(authData);
+
+    // Fetch user profile from our users table
+    const users = await SB.selectAuth('users', `email=eq.${encodeURIComponent(email)}&limit=1`);
+    if (!users.length) { showFieldError('loginPassErr','Account not found'); return; }
+    const user = mapUserFromDB(users[0]);
+
+    state.currentUser = user;
+    DB.set('currentUser', user);
+    closeModal('authModal');
+    updateNav();
+    toast('success','✅ Welcome back, '+user.firstName+'!');
+    if (state.pendingNavCallback) { state.pendingNavCallback(); state.pendingNavCallback=null; }
+    else navigate('dashboard');
+  } catch(e) {
+    console.error('Login error:', e);
+    showFieldError('loginPassErr','Login failed. Please try again.');
+  } finally {
+    if(btn){btn.disabled=false;btn.textContent='Log In';}
   }
-  state.currentUser = user;
-  DB.set('currentUser', user);
-  closeModal('authModal');
-  updateNav();
-  toast('success','✅ Welcome back, '+user.firstName+'!');
-  if (state.pendingNavCallback) { state.pendingNavCallback(); state.pendingNavCallback=null; }
-  else navigate('dashboard');
 }
 
-function handleSignup() {
+async function handleSignup() {
   clearFieldErrors('signupFirstErr','signupLastErr','signupEmailErr','signupPhoneErr','signupPassErr','signupPass2Err');
   const first = document.getElementById('signupFirst').value.trim();
   const last  = document.getElementById('signupLast').value.trim();
@@ -2695,24 +2874,57 @@ function handleSignup() {
   if (pass!==pass2)  { showFieldError('signupPass2Err'); ok=false; }
   if (!ok) return;
 
-  const users = DB.get('users',[]);
-  if (users.find(u=>u.email===email)) {
-    showFieldError('signupEmailErr','This email is already registered');
-    return;
+  const btn = document.querySelector('[onclick="handleSignup()"]');
+  if(btn){btn.disabled=true;btn.textContent='Creating account...';}
+  try {
+    // 1. Create auth account
+    const authData = await SB.signUp(email, pass);
+    if (authData.error) {
+      showFieldError('signupEmailErr', authData.error.message || 'Signup failed');
+      return;
+    }
+    SB.setSession(authData);
+    const authId = authData.user?.id;
+
+    // 2. Insert profile into users table
+    const userData = {
+      auth_id: authId,
+      first_name: first, last_name: last,
+      email, phone, role: selectedRole,
+      nysc_code: selectedRole==='corper' ? nysc : null,
+      is_admin: false, is_verified: false, kyc_verified: false,
+    };
+    let dbUser;
+    try {
+      dbUser = await SB.insertAuth('users', userData);
+    } catch(e) {
+      // If user already exists (e.g. re-signup), fetch existing
+      const existing = await SB.selectAuth('users', `email=eq.${encodeURIComponent(email)}&limit=1`);
+      dbUser = existing[0];
+    }
+
+    const user = mapUserFromDB(dbUser);
+    state.currentUser = user;
+    DB.set('currentUser', user);
+    closeModal('authModal');
+    updateNav();
+    toast('success','🎉 Account created! Welcome to HouseNest, '+first+'!');
+    if (state.pendingNavCallback) { state.pendingNavCallback(); state.pendingNavCallback=null; }
+    else navigate('dashboard');
+  } catch(e) {
+    console.error('Signup error:', e);
+    toast('error','Signup failed: '+e.message);
+  } finally {
+    if(btn){btn.disabled=false;btn.textContent='Create Account';}
   }
-  const user = { id:'u'+Date.now(), firstName:first, lastName:last, email, phone, role:selectedRole, nysc:selectedRole==='corper'?nysc:'', kycVerified:false, password:hashPass(pass), createdAt:Date.now(), verified:false, savedListings:[], applications:[] };
-  users.push(user);
-  DB.set('users', users);
-  state.currentUser = user;
-  DB.set('currentUser', user);
-  closeModal('authModal');
-  updateNav();
-  toast('success','🎉 Welcome to HouseNest, '+first+'!');
-  if (state.pendingNavCallback) { state.pendingNavCallback(); state.pendingNavCallback=null; }
-  else navigate('dashboard');
 }
 
-function handleLogout() {
+async function handleLogout() {
+  const session = SB.getSession();
+  if (session?.access_token) {
+    await SB.signOut(session.access_token).catch(()=>{});
+  }
+  SB.clearSession();
   state.currentUser = null;
   DB.del('currentUser');
   updateNav();
@@ -2721,7 +2933,25 @@ function handleLogout() {
 }
 
 // ── LISTINGS ─────────────────────────────────────────
-function getListings() { return DB.get('listings',[]); }
+// In-memory listings cache — populated by loadListings() on init
+let _listingsCache = [];
+
+function getListings() {
+  return _listingsCache.length > 0 ? _listingsCache : DB.get('listings', []);
+}
+
+async function loadListings() {
+  try {
+    const rows = await SB.select('listings', 'status=eq.active&order=created_at.desc&limit=200');
+    _listingsCache = rows.map(mapListingFromDB);
+    DB.set('listings', _listingsCache);
+    return _listingsCache;
+  } catch(e) {
+    console.warn('Could not load listings from Supabase, using local cache:', e);
+    _listingsCache = DB.get('listings', []);
+    return _listingsCache;
+  }
+}
 
 function listingCardHTML(l, showSave=true) {
   const saved = state.currentUser?.savedListings?.includes(l.id) || false;
@@ -2762,16 +2992,14 @@ function listingCardHTML(l, showSave=true) {
 function toggleSave(e, listingId) {
   e.stopPropagation();
   if (!state.currentUser) { openModal('authModal','login'); return; }
-  const users = DB.get('users',[]);
-  const user = users.find(u=>u.id===state.currentUser.id);
-  if (!user) return;
-  if (!user.savedListings) user.savedListings=[];
-  const idx = user.savedListings.indexOf(listingId);
-  if (idx>-1) { user.savedListings.splice(idx,1); toast('info','Removed from saved'); }
-  else { user.savedListings.push(listingId); toast('success','❤️ Listing saved!'); }
-  DB.set('users', users);
-  state.currentUser = user;
-  DB.set('currentUser', user);
+  const savedIds = [...(state.currentUser.savedListings||[])];
+  const idx = savedIds.indexOf(listingId);
+  if (idx>-1) { savedIds.splice(idx,1); toast('info','Removed from saved'); }
+  else { savedIds.push(listingId); toast('success','❤️ Listing saved!'); }
+  state.currentUser.savedListings = savedIds;
+  DB.set('currentUser', state.currentUser);
+  // Persist to Supabase async
+  SB.updateAuth('users', { saved_listings: savedIds }, `id=eq.${state.currentUser.id}`).catch(e=>console.warn('Save listing sync:', e));
   // Re-render current view
   if (state.currentView==='browse') applyBrowseFilters();
   if (state.currentView==='home') renderFeaturedListings();
@@ -3110,46 +3338,59 @@ function setReviewStar(n) {
   });
 }
 
-function submitReview(listingId) {
+async function submitReview(listingId) {
   if (!state.currentUser) { openModal('authModal','login'); return; }
   if (currentReviewStar===0) { toast('error','Please select a star rating'); return; }
   const text = document.getElementById('reviewText')?.value.trim()||'';
   if (text.length<10) { toast('error','Please write at least 10 characters'); return; }
 
-  const reviews = DB.get('reviews',[]);
-  const existing = reviews.find(r=>r.listingId===listingId&&r.userId===state.currentUser.id);
-  if (existing) { toast('error','You\'ve already reviewed this property'); return; }
+  const btn = document.querySelector('[onclick^="submitReview"]');
+  if(btn){btn.disabled=true;btn.textContent='Submitting...';}
+  try {
+    const reviewData = {
+      listing_id: listingId,
+      user_id: state.currentUser.id,
+      user_name: state.currentUser.firstName+' '+state.currentUser.lastName[0]+'.',
+      user_role: state.currentUser.role,
+      rating: currentReviewStar,
+      text,
+    };
+    await SB.insertAuth('reviews', reviewData);
 
-  const review = { id:'r'+Date.now(), listingId, userId:state.currentUser.id, userName:state.currentUser.firstName+' '+state.currentUser.lastName[0]+'.', userRole:state.currentUser.role, rating:currentReviewStar, text, createdAt:Date.now() };
-  reviews.push(review);
-  DB.set('reviews', reviews);
-
-  // Update listing rating
-  const listings = getListings();
-  const listing = listings.find(l=>l.id===listingId);
-  if (listing) {
-    const listingReviews = reviews.filter(r=>r.listingId===listingId);
-    listing.rating = listingReviews.reduce((s,r)=>s+r.rating,0)/listingReviews.length;
-    listing.reviewCount = listingReviews.length;
-    DB.set('listings', listings);
+    // Update listing rating via aggregation
+    const reviews = await SB.select('reviews', `listing_id=eq.${listingId}&select=rating`);
+    if (reviews.length) {
+      const avg = reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
+      await SB.updateAuth('listings', { rating: avg.toFixed(1), review_count: reviews.length }, `id=eq.${listingId}`);
+      // Update local cache
+      const l = _listingsCache.find(x=>x.id===listingId);
+      if(l){ l.rating=parseFloat(avg.toFixed(1)); l.reviewCount=reviews.length; }
+    }
+    toast('success','⭐ Review submitted! Thank you.');
+    openListing(listingId);
+  } catch(e) {
+    console.error('Review error:', e);
+    if(e.message && e.message.includes('unique')) toast('error','You\'ve already reviewed this property');
+    else toast('error','Failed to submit review. Please try again.');
+  } finally {
+    if(btn){btn.disabled=false;btn.textContent='Submit Review';}
   }
-
-  toast('success','⭐ Review submitted! Thank you.');
-  openListing(listingId);
 }
 
 function toggleSaveFromDetail(id) { toggleSave({stopPropagation:()=>{}},id); }
 
-function handleApply(listingId) {
-  const users = DB.get('users',[]);
-  const user = users.find(u=>u.id===state.currentUser.id);
-  if (!user.applications) user.applications=[];
-  if (user.applications.find(a=>a.listingId===listingId)) { toast('info','You\'ve already applied for this property'); return; }
-  user.applications.push({ listingId, status:'pending', appliedAt:Date.now() });
-  DB.set('users',users);
-  state.currentUser=user;
-  DB.set('currentUser',user);
-  toast('success','✅ Application submitted! The landlord will contact you soon.');
+async function handleApply(listingId) {
+  try {
+    await SB.insertAuth('applications', {
+      listing_id: listingId,
+      tenant_id: state.currentUser.id,
+      status: 'pending',
+    });
+    toast('success','✅ Application submitted! The landlord will contact you soon.');
+  } catch(e) {
+    if(e.message && e.message.includes('unique')) toast('info','You\'ve already applied for this property');
+    else { console.error('Apply error:', e); toast('error','Application failed. Please try again.'); }
+  }
 }
 
 // handleMessage is defined in the listing management section above
@@ -3521,7 +3762,7 @@ function renderImgPreviews() {
 
 function removeImg(i) { uploadedImages.splice(i,1); renderImgPreviews(); }
 
-function saveListing() {
+async function saveListing() {
   const name = document.getElementById('lf-name')?.value.trim();
   const s    = document.getElementById('lf-state')?.value;
   const city = document.getElementById('lf-city')?.value.trim();
@@ -3556,11 +3797,44 @@ function saveListing() {
     mapQuery: encodeURIComponent(addr+' '+city+' '+s+' State Nigeria'),
   };
 
-  const listings = getListings();
-  listings.push(listing);
-  DB.set('listings', listings);
-  toast('success','🎉 Your listing is live!');
-  navigate('dashboard');
+  // Save to Supabase
+  const btn = document.querySelector('[onclick="saveListing()"]') || document.activeElement;
+  const dbListing = {
+    landlord_id: state.currentUser.id,
+    name: listing.name,
+    category: listing.category,
+    state: listing.state,
+    city: listing.city,
+    address: listing.address,
+    type: listing.type,
+    price: listing.price,
+    period: listing.period,
+    bedrooms: listing.bedrooms,
+    bathrooms: listing.bathrooms,
+    description: listing.desc,
+    rules: listing.rules,
+    utilities: listing.utils,
+    images: listing.images,
+    corper_friendly: listing.corperFriendly,
+    is_shortlet: listing.isShortlet,
+    status: 'active',
+    map_query: listing.mapQuery,
+  };
+  try {
+    if(btn) btn.disabled=true;
+    const saved = await SB.insertAuth('listings', dbListing);
+    if(saved) {
+      _listingsCache.push(mapListingFromDB(saved));
+      DB.set('listings', _listingsCache);
+    }
+    toast('success','🎉 Your listing is live!');
+    navigate('dashboard');
+  } catch(e) {
+    console.error('Save listing error:', e);
+    toast('error','Failed to save listing. Please try again.');
+  } finally {
+    if(btn) btn.disabled=false;
+  }
 }
 
 // ── PROFILE ──────────────────────────────────────────
@@ -3689,7 +3963,7 @@ function copyText(text) {
 }
 function editListing(id) { toast('info','Listing editor — redirect to edit form for listing '+id); }
 
-function deleteListing(id) {
+async function deleteListing(id) {
   const u = state.currentUser;
   if (!u) return;
   const listings = DB.get('listings',[]);
@@ -3701,46 +3975,77 @@ function deleteListing(id) {
     return;
   }
   if (!confirm(`Delete "${listing.name}"? This cannot be undone.`)) return;
-  const updated = listings.filter(l=>l.id!==id);
-  DB.set('listings', updated);
-  toast('success','🗑️ Listing deleted successfully');
-  // Refresh dashboard
-  renderDashboard();
+  try {
+    await SB.deleteAuth('listings', `id=eq.${id}`);
+    _listingsCache = _listingsCache.filter(l=>l.id!==id);
+    DB.set('listings', _listingsCache);
+    toast('success','🗑️ Listing deleted successfully');
+    renderDashboard();
+  } catch(e) {
+    toast('error','Could not delete listing. Please try again.');
+  }
 }
 
-function handleMessage(listingId, landlordId) {
+async function handleMessage(listingId, landlordId) {
   if (!state.currentUser) { openModal('authModal','login'); return; }
-  const landlord = DB.get('users',[]).find(u=>u.id===landlordId);
-  const landlordName = landlord ? landlord.firstName+' '+landlord.lastName : 'the landlord';
-  // In-app message system using localStorage
-  const messages = DB.get('messages',[]);
-  const thread = messages.find(m=>m.listingId===listingId && m.tenantId===state.currentUser.id);
-  if(thread) {
-    toast('info','💬 You already have a message thread with '+landlordName+'. Check your dashboard inbox.');
-    return;
+  try {
+    // Check for existing thread
+    const existing = await SB.selectAuth('message_threads',
+      `listing_id=eq.${listingId}&tenant_id=eq.${state.currentUser.id}&limit=1`);
+    if (existing.length) {
+      toast('info','💬 You already have a message thread with this landlord. Check your dashboard.');
+      return;
+    }
+    // Create thread
+    const thread = await SB.insertAuth('message_threads', {
+      listing_id: listingId,
+      landlord_id: landlordId,
+      tenant_id: state.currentUser.id,
+    });
+    // First message
+    if (thread?.id) {
+      await SB.insertAuth('messages', {
+        thread_id: thread.id,
+        sender_id: state.currentUser.id,
+        sender_name: state.currentUser.firstName+' '+state.currentUser.lastName,
+        text: state.currentUser.firstName+' is interested in this property and has sent a message request.',
+      });
+    }
+    toast('success','💬 Message sent! The landlord will be notified.');
+  } catch(e) {
+    console.error('Message error:', e);
+    toast('error','Could not send message. Please try again.');
   }
-  // Create message thread
-  const newThread = {
-    id:'msg'+Date.now(), listingId, landlordId,
-    tenantId:state.currentUser.id,
-    tenantName:state.currentUser.firstName+' '+state.currentUser.lastName,
-    landlordName, createdAt:Date.now(), messages:[
-      { from:'system', text:'Thread started. '+state.currentUser.firstName+' is interested in this property.', at:Date.now() }
-    ]
-  };
-  messages.push(newThread);
-  DB.set('messages', messages);
-  toast('success','💬 Message sent to '+landlordName+'! They\'ll be notified. Check your Dashboard → Inbox for their reply.');
 }
 
 // ── INIT ─────────────────────────────────────────────
-function init() {
-  seedListings();
+async function init() {
   updateNav();
+  // Restore session from Supabase or localStorage cache
+  const session = SB.getSession();
+  const cachedUser = DB.get('currentUser', null);
+  if (cachedUser) {
+    state.currentUser = cachedUser;
+    updateNav();
+    // Refresh user from Supabase in background
+    if (session?.access_token) {
+      SB.selectAuth('users', `id=eq.${cachedUser.id}&limit=1`)
+        .then(rows => {
+          if(rows.length) {
+            state.currentUser = mapUserFromDB(rows[0]);
+            DB.set('currentUser', state.currentUser);
+            updateNav();
+          }
+        }).catch(()=>{});
+    }
+  }
+  // Load listings from Supabase, seed demo data if empty
+  await loadListings();
+  if (_listingsCache.length === 0) {
+    seedListings(); // seed demo data for fresh DB
+    await loadListings(); // reload after seed
+  }
   renderHome();
-  // Restore session
-  const saved = DB.get('currentUser',null);
-  if (saved) { state.currentUser=saved; updateNav(); }
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -4185,29 +4490,59 @@ function handleUzDrop(e, key) {
   if (file) { kycUploads[key]=file.name; zone?.classList.add('uploaded'); toast('success','📎 '+file.name+' uploaded'); }
 }
 
-function submitIdentity() {
+async function submitIdentity() {
   const nin = document.getElementById('ninInput')?.value;
   const idType = document.getElementById('idType')?.value;
   if (!nin || nin.length!==11) { toast('error','Please enter and verify your NIN'); return; }
   if (!idType) { toast('error','Please select an ID type'); return; }
   if (!kycUploads['id-front']) { toast('error','Please upload your ID front'); return; }
   if (!kycUploads['selfie']) { toast('error','Please upload your selfie'); return; }
-  // Save submission to localStorage for admin review
   const u = state.currentUser;
-  const submissions = DB.get('kyc_submissions',[]);
-  const existing = submissions.findIndex(s=>s.userId===u?.id);
-  const submission = {
-    userId:u?.id, name:u?.firstName+' '+(u?.lastName||''), phone:u?.phone, role:u?.role,
-    nin, idType, selfie:kycUploads['selfie'], idFront:kycUploads['id-front'],
-    submittedAt:Date.now(), status:'pending', docs:[idType+' ✓','Selfie ✓','NIN ✓']
-  };
-  if(existing>=0) submissions[existing]=submission; else submissions.push(submission);
-  DB.set('kyc_submissions', submissions);
-  toast('success','✅ Identity documents submitted successfully!');
-  setTimeout(()=>showKycStep(2),800);
+  if(!u) { toast('error','Please log in first'); return; }
+  toast('info','⏳ Uploading documents...');
+  try {
+    // Upload images to Cloudinary KYC bucket
+    let idFrontUrl = null, selfieUrl = null;
+    if(kycUploads['id-front']) {
+      if(typeof kycUploads['id-front'] === 'string' && kycUploads['id-front'].startsWith('data:')) {
+        idFrontUrl = await uploadBase64ToCloudinary(kycUploads['id-front'], CLOUD_PRESET_KYC);
+      } else if(kycUploads['id-front'] instanceof File) {
+        idFrontUrl = await uploadToCloudinary(kycUploads['id-front'], CLOUD_PRESET_KYC);
+      }
+    }
+    if(kycUploads['selfie']) {
+      if(typeof kycUploads['selfie'] === 'string' && kycUploads['selfie'].startsWith('data:')) {
+        selfieUrl = await uploadBase64ToCloudinary(kycUploads['selfie'], CLOUD_PRESET_KYC);
+      } else if(kycUploads['selfie'] instanceof File) {
+        selfieUrl = await uploadToCloudinary(kycUploads['selfie'], CLOUD_PRESET_KYC);
+      }
+    }
+    // Upsert to Supabase
+    const submission = {
+      user_id: u.id,
+      user_name: u.firstName+' '+u.lastName,
+      phone: u.phone, role: u.role,
+      nin, id_type: idType,
+      id_front_url: idFrontUrl,
+      selfie_url: selfieUrl,
+      docs_list: [idType+' ✓','Selfie ✓','NIN ✓'],
+      status: 'pending',
+    };
+    // Try insert first, fall back to update if exists
+    try {
+      await SB.insertAuth('kyc_submissions', submission);
+    } catch(e) {
+      await SB.updateAuth('kyc_submissions', submission, `user_id=eq.${u.id}`);
+    }
+    toast('success','✅ Identity documents submitted successfully!');
+    setTimeout(()=>showKycStep(2),800);
+  } catch(e) {
+    console.error('KYC identity submit error:', e);
+    toast('error','Upload failed. Check your connection and try again.');
+  }
 }
 
-function submitPropertyDocs() {
+async function submitPropertyDocs() {
   if (!document.getElementById('propDocType')?.value) { toast('error','Please select document type'); return; }
   if (!kycUploads['prop-doc']) { toast('error','Please upload ownership document'); return; }
   // Append property doc to existing KYC submission
@@ -4271,17 +4606,18 @@ function captureLiveness() {
   canvas.height = video.videoHeight;
   canvas.getContext('2d').drawImage(video, 0, 0);
   const imageData = canvas.toDataURL('image/jpeg', 0.7);
-  // Save liveness photo to KYC submission
+  // Upload liveness photo to Cloudinary + save to Supabase
   const u = state.currentUser;
-  const submissions = DB.get('kyc_submissions',[]);
-  const existing = submissions.find(s=>s.userId===u?.id);
   const code = document.getElementById('livenessCode')?.textContent||'';
-  if(existing) {
-    existing.livenessPhoto = imageData;
-    existing.livenessCode = code;
-    existing.docs = [...(existing.docs||[]).filter(d=>!d.includes('Liveness')), 'Liveness ✓'];
-    DB.set('kyc_submissions', submissions);
-  }
+  uploadBase64ToCloudinary(imageData, CLOUD_PRESET_KYC).then(async livenessUrl => {
+    try {
+      await SB.updateAuth('kyc_submissions', {
+        liveness_photo_url: livenessUrl,
+        liveness_code: code,
+        docs_list: ['NIN ✓','ID ✓','Selfie ✓','Liveness ✓'],
+      }, `user_id=eq.${u?.id}`);
+    } catch(e) { console.warn('Liveness upload to DB:', e); }
+  }).catch(e => console.warn('Liveness Cloudinary upload:', e));
   // Show captured image briefly
   canvas.style.display='block';
   video.style.display='none';
@@ -4290,7 +4626,7 @@ function captureLiveness() {
   setTimeout(()=>submitLiveness(),1000);
 }
 
-function submitLiveness() {
+async function submitLiveness() {
   const u = state.currentUser;
   const submissions = DB.get('kyc_submissions',[]);
   const existing = submissions.find(s=>s.userId===u?.id);
@@ -4449,20 +4785,26 @@ function trustShowAdminPanel(panel, btn) {
   if(btn){ document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
   // Merge real KYC submissions with demo data for queue panel
   if(panel==='queue') {
-    const realSubs = DB.get('kyc_submissions',[]);
-    const merged = [...KYC_QUEUE.filter(k=>!realSubs.find(r=>r.userId===k.id)), ...realSubs.map(s=>({
-      id:s.userId, name:s.name, role:s.role, phone:s.phone,
-      submitted: s.submittedAt ? timeAgo(s.submittedAt) : 'just now',
-      risk: s.livenessPhoto ? 'low' : 'med',
-      docs: s.docs||['NIN ✓'], isReal:true
-    }))];
-    // Temporarily patch KYC_QUEUE for the render
-    const orig = [...KYC_QUEUE];
-    KYC_QUEUE.length=0; merged.forEach(m=>KYC_QUEUE.push(m));
-    const result = buildAdminBody(panel);
-    KYC_QUEUE.length=0; orig.forEach(m=>KYC_QUEUE.push(m));
-    const ab = document.getElementById('adminBody');
-    if(ab) ab.innerHTML = result;
+    // Load real submissions from Supabase async then re-render
+    SB.select('kyc_submissions', 'status=eq.pending&order=submitted_at.asc').then(realSubs => {
+      const merged = [...KYC_QUEUE, ...realSubs.map(s=>({
+        id: s.user_id,
+        name: s.user_name || 'Unknown',
+        role: s.role,
+        phone: s.phone,
+        submitted: s.submitted_at ? timeAgo(new Date(s.submitted_at).getTime()) : 'just now',
+        risk: s.liveness_photo_url ? 'low' : 'med',
+        docs: s.docs_list || ['NIN ✓'],
+        isReal: true,
+      })).filter(s=>!KYC_QUEUE.find(k=>k.id===s.id))];
+      const orig = [...KYC_QUEUE];
+      KYC_QUEUE.length=0; merged.forEach(m=>KYC_QUEUE.push(m));
+      const ab = document.getElementById('adminBody');
+      if(ab) { const result = buildAdminBody_queue(); if(result) ab.innerHTML=result; }
+      KYC_QUEUE.length=0; orig.forEach(m=>KYC_QUEUE.push(m));
+    }).catch(()=>{});
+        // Show immediately with demo data while Supabase loads
+    if(ab) ab.innerHTML = buildAdminBody(panel);
     return;
   }
   const ab = document.getElementById('adminBody');
@@ -4494,7 +4836,7 @@ function buildAdminBody(panel) {
       <div class="vq-actions">
         <button class="vq-approve" onclick="approveKyc('${u.id}','${u.name}')">✓ Approve</button>
         <button class="vq-reject" onclick="rejectKyc('${u.id}','${u.name}')">✕ Reject</button>
-        <button class="btn btn-sm btn-outline" style="font-size:0.7rem" onclick="reviewDocs('${u.name}','${u.docs}')">View Docs</button>
+        <button class="btn btn-sm btn-outline" style="font-size:0.7rem" onclick="reviewDocs('${u.id}','${u.name}')">📋 View Full Submission</button>
       </div>
     </div>`).join('')}`;
   }
@@ -4608,42 +4950,144 @@ function buildAdminBody(panel) {
   }
 }
 
-function approveKyc(id, name) {
-  // Mark user as kycVerified
-  const users = DB.get('users',[]);
-  const u = users.find(x=>x.id===id);
-  if(u) { u.kycVerified=true; DB.set('users',users); }
-  // Mark all listings by this landlord as trustVerified
-  const listings = DB.get('listings',[]);
-  let updated=false;
-  listings.forEach(l=>{ if(l.landlordId===id) { l.trustVerified=true; updated=true; } });
-  if(updated) DB.set('listings',listings);
-  toast('success','✅ '+name+' approved! Account is now Trust Verified. SMS sent.');
-  document.getElementById('queueBadge').textContent=Math.max(0,parseInt(document.getElementById('queueBadge').textContent)-1);
+async function approveKyc(id, name) {
+  try {
+    // Update user
+    await SB.update('users', { kyc_verified: true, is_verified: true }, `id=eq.${id}`);
+    // Update KYC submission
+    await SB.update('kyc_submissions', {
+      status: 'approved',
+      reviewed_at: new Date().toISOString(),
+    }, `user_id=eq.${id}`);
+    // Mark their listings as trust verified
+    await SB.update('listings', { trust_verified: true }, `landlord_id=eq.${id}`);
+    // Update local cache
+    _listingsCache.forEach(l=>{ if(l.landlordId===id) l.trustVerified=true; });
+    toast('success','✅ '+name+' approved! Account is now Trust Verified.');
+    const badge = document.getElementById('queueBadge');
+    if(badge) badge.textContent=Math.max(0,parseInt(badge.textContent)-1);
+  } catch(e) {
+    console.error('Approve KYC error:', e);
+    toast('error','Approval failed. Please try again.');
+  }
 }
 
-function rejectKyc(id, name) {
-  toast('error','✕ '+name+' rejected. SMS sent with reason. Documents cleared from server.');
+async function rejectKyc(id, name) {
+  const reason = prompt('Rejection reason (sent to user via SMS):', 'Documents unclear or mismatch detected');
+  if(reason===null) return; // cancelled
+  try {
+    await SB.update('kyc_submissions', {
+      status: 'rejected',
+      rejection_reason: reason,
+      reviewed_at: new Date().toISOString(),
+    }, `user_id=eq.${id}`);
+    toast('error','✕ '+name+' rejected. Reason recorded.');
+    const badge = document.getElementById('queueBadge');
+    if(badge) badge.textContent=Math.max(0,parseInt(badge.textContent)-1);
+  } catch(e) {
+    console.error('Reject KYC error:', e);
+    toast('error','Rejection failed. Please try again.');
+  }
 }
 
-function reviewDocs(name, docs) {
-  document.getElementById('docModalTitle').textContent='Documents — '+name;
-  document.getElementById('docModalBody').innerHTML=`
-  <p style="font-size:0.85rem;color:var(--smoke);margin-bottom:1.2rem">Review each document carefully. Check for clarity, date validity, and that names match the registered account.</p>
-  ${docs.split(',').map(d=>`
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:var(--mist);border-radius:9px;margin-bottom:0.5rem">
-    <span style="font-size:0.85rem;font-weight:600;color:var(--forest)">${d.trim()}</span>
-    <div style="display:flex;gap:0.4rem">
-      <button class="fa-btn fa-dismiss" onclick="toast('success','Document marked as reviewed')">Review</button>
-      ${d.includes('⚠️')?`<button class="fa-btn fa-review" onclick="toast('info','Marked for resubmission — SMS sent to user')">Request Resubmit</button>`:''}
+function reviewDocs(userId, name) {
+  // Pull full submission from localStorage
+  const submissions = DB.get('kyc_submissions', []);
+  const sub = submissions.find(s => s.userId === userId);
+
+  // Also check demo queue for non-real entries
+  const demoEntry = KYC_QUEUE.find(u => u.id === userId);
+
+  const modal = document.getElementById('docModal');
+  const title = document.getElementById('docModalTitle');
+  const body  = document.getElementById('docModalBody');
+  title.textContent = 'KYC Review — ' + name;
+
+  if (!sub && !demoEntry) {
+    body.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--smoke)">
+      <div style="font-size:2rem;margin-bottom:0.8rem">📭</div>
+      <p>No submission data found for this user yet.</p>
+      <p style="font-size:0.8rem;margin-top:0.5rem">They may still be completing the KYC flow.</p>
+    </div>`;
+    modal.style.display='flex';
+    return;
+  }
+
+  if (sub) {
+    // Real submission — render all fields
+    const photoBlock = (label, src) => src
+      ? `<div style="margin-bottom:1.2rem">
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--smoke);margin-bottom:0.4rem">${label}</div>
+          <img src="${src}" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;border:1px solid var(--mist);background:#111">
+         </div>`
+      : `<div style="margin-bottom:1.2rem;padding:0.8rem;background:var(--mist);border-radius:8px;font-size:0.8rem;color:var(--smoke)">${label}: <em>Not uploaded</em></div>`;
+
+    const field = (label, val) => val
+      ? `<div style="display:flex;justify-content:space-between;padding:0.6rem 0.8rem;background:var(--mist);border-radius:8px;margin-bottom:0.4rem">
+           <span style="font-size:0.78rem;color:var(--smoke)">${label}</span>
+           <span style="font-size:0.82rem;font-weight:700;color:var(--bone);font-family:'Space Mono',monospace">${val}</span>
+         </div>`
+      : '';
+
+    const submittedTime = sub.submittedAt ? new Date(sub.submittedAt).toLocaleString('en-NG',{dateStyle:'medium',timeStyle:'short'}) : 'Unknown';
+
+    body.innerHTML = `
+    <div style="margin-bottom:1rem;padding:0.7rem 0.9rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:8px;font-size:0.78rem;color:var(--smoke)">
+      Submitted: <strong style="color:var(--bone)">${submittedTime}</strong> · Status: <strong style="color:${sub.status==='pending'?'var(--amber)':sub.status==='approved'?'var(--ok)':'var(--err)'}">${sub.status?.toUpperCase()}</strong>
     </div>
-  </div>`).join('')}
-  <hr style="border:none;border-top:1px solid var(--mist);margin:1rem 0">
-  <div style="display:flex;gap:0.6rem">
-    <button class="btn btn-success btn-sm btn-full" onclick="toast('success','Approved!');closeTrustDocModal()">✓ Approve All</button>
-    <button class="btn btn-sm btn-full" style="background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2)" onclick="toast('error','Rejected');closeTrustDocModal()">✕ Reject</button>
-  </div>`;
-  document.getElementById('docModal').classList.add('open');
+
+    <div style="font-size:0.78rem;font-weight:700;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.7rem">Identity Details</div>
+    ${field('Full Name', sub.name)}
+    ${field('Phone', sub.phone)}
+    ${field('Role', sub.role)}
+    ${field('NIN', sub.nin ? sub.nin.replace(/(\d{3})(\d{4})(\d{4})/, '$1 $2 $3') : null)}
+    ${field('ID Type', sub.idType)}
+    ${sub.role==='corper' && sub.nysc ? field('NYSC Code', sub.nysc) : ''}
+
+    <hr style="border:none;border-top:1px solid rgba(246,241,232,0.08);margin:1rem 0">
+    <div style="font-size:0.78rem;font-weight:700;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.7rem">Uploaded Documents</div>
+    ${photoBlock('Government-Issued ID (Front)', sub.idFront)}
+    ${photoBlock('Selfie with ID', sub.selfie)}
+    ${sub.livenessPhoto ? photoBlock('Liveness Check Photo', sub.livenessPhoto) : '<div style="margin-bottom:1rem;padding:0.7rem;background:rgba(200,120,32,0.08);border:1px solid rgba(200,120,32,0.2);border-radius:8px;font-size:0.78rem;color:var(--amber)">⚠️ Liveness check not yet completed</div>'}
+    ${sub.propDoc ? photoBlock('Property Ownership Document ('+sub.propDocType+')', sub.propDoc) : ''}
+    ${sub.livenessCode ? field('Liveness Code Used', sub.livenessCode) : ''}
+
+    <hr style="border:none;border-top:1px solid rgba(246,241,232,0.08);margin:1rem 0">
+    <div style="display:flex;gap:0.6rem">
+      <button class="btn btn-success btn-sm" style="flex:1" onclick="approveKyc('${userId}','${name}');closeTrustDocModal();trustShowAdminPanel('queue',null)">✓ Approve</button>
+      <button class="btn btn-sm" style="flex:1;background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2)" onclick="rejectKyc('${userId}','${name}');closeTrustDocModal();trustShowAdminPanel('queue',null)">✕ Reject</button>
+      <button class="btn btn-outline btn-sm" onclick="requestResubmit('${userId}','${name}')">↩ Request Resubmit</button>
+    </div>`;
+
+  } else {
+    // Demo entry — show placeholder
+    const docs = demoEntry.docs || [];
+    body.innerHTML = `
+    <div style="margin-bottom:1rem;padding:0.7rem 0.9rem;background:rgba(200,120,32,0.08);border:1px solid rgba(200,120,32,0.2);border-radius:8px;font-size:0.78rem;color:var(--amber)">
+      ℹ️ Demo entry — no real documents on file. Real submissions show uploaded photos and NIN.
+    </div>
+    <div style="font-size:0.78rem;font-weight:700;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.7rem">Reported Documents</div>
+    ${docs.map(d=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:0.65rem 0.8rem;background:var(--mist);border-radius:8px;margin-bottom:0.4rem">
+      <span style="font-size:0.83rem;font-weight:600;color:var(--forest)">${d}</span>
+      <span style="font-size:0.7rem;color:var(--smoke)">${d.includes('✓')?'✓ On file':'Pending'}</span>
+    </div>`).join('')}
+    <hr style="border:none;border-top:1px solid rgba(246,241,232,0.08);margin:1rem 0">
+    <div style="display:flex;gap:0.6rem">
+      <button class="btn btn-success btn-sm" style="flex:1" onclick="approveKyc('${userId}','${name}');closeTrustDocModal();trustShowAdminPanel('queue',null)">✓ Approve</button>
+      <button class="btn btn-sm" style="flex:1;background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2)" onclick="rejectKyc('${userId}','${name}');closeTrustDocModal();trustShowAdminPanel('queue',null)">✕ Reject</button>
+    </div>`;
+  }
+
+  modal.style.display='flex';
+}
+
+async function requestResubmit(userId, name) {
+  const submissions = DB.get('kyc_submissions',[]);
+  const sub = submissions.find(s=>s.userId===userId);
+  if(sub) { sub.status='resubmit_requested'; DB.set('kyc_submissions',submissions); }
+  toast('info','↩ Resubmission requested. '+name+' will be notified via SMS.');
+  closeTrustDocModal();
+  trustShowAdminPanel('queue',null);
 }
 
 function adminRelease(ref, amount) {
@@ -4652,7 +5096,8 @@ function adminRelease(ref, amount) {
 }
 
 function closeTrustDocModal() {
-  document.getElementById('docModal').classList.remove('open');
+  const m = document.getElementById('docModal');
+  if(m) m.style.display='none';
 }
 
 // ══════════════════════════════════════════════════
@@ -4735,6 +5180,61 @@ function affSeedData() {
   AffDB.set('affiliates', demoAffiliates);
   AffDB.set('commissions', demoCommissions);
   AffDB.set('seeded', true);
+}
+
+
+// Map Supabase snake_case user to app camelCase format
+function mapUserFromDB(u) {
+  if (!u) return null;
+  return {
+    id: u.id,
+    authId: u.auth_id,
+    firstName: u.first_name,
+    lastName: u.last_name,
+    email: u.email,
+    phone: u.phone,
+    role: u.role,
+    nysc: u.nysc_code || '',
+    isAdmin: u.is_admin || false,
+    verified: u.is_verified || false,
+    kycVerified: u.kyc_verified || false,
+    savedListings: u.saved_listings || [],
+    createdAt: new Date(u.created_at).getTime(),
+  };
+}
+
+// Map Supabase listing to app format
+function mapListingFromDB(l) {
+  if (!l) return null;
+  return {
+    id: l.id,
+    landlordId: l.landlord_id,
+    name: l.name,
+    category: l.category,
+    state: l.state,
+    city: l.city,
+    address: l.address,
+    type: l.type,
+    price: l.price,
+    period: l.period,
+    bedrooms: l.bedrooms,
+    bathrooms: l.bathrooms,
+    desc: l.description,
+    rules: l.rules || [],
+    utils: l.utilities || [],
+    images: l.images || [],
+    corperFriendly: l.corper_friendly || false,
+    isShortlet: l.is_shortlet || false,
+    trustVerified: l.trust_verified || false,
+    verified: l.trust_verified || false,
+    status: l.status,
+    rating: parseFloat(l.rating) || 0,
+    reviewCount: l.review_count || 0,
+    mapQuery: l.map_query || '',
+    createdAt: new Date(l.created_at).getTime(),
+    imgClass: 'img-g'+(Math.abs(l.id.charCodeAt(0))%8+1),
+    emoji: '🏠',
+  };
 }
 
 // ── APP STATE ────────────────────────────────────────
