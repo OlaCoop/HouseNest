@@ -405,6 +405,7 @@ a { color:inherit; text-decoration:none; }
 .lb-verified { background:var(--ochre); color:var(--ink); }
 .lb-corper { background:var(--moss); color:white; }
 .lb-shortlet { background:#2060c0; color:white; }
+.lb-trust { background:rgba(42,124,56,0.15); color:#2a7c38; border:1px solid rgba(42,124,56,0.35); }
 .lb-new { background:var(--clay); color:white; }
 .listing-card-fav {
   position:absolute; top:0.7rem; right:0.7rem;
@@ -971,7 +972,7 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
 .otp-digit{width:52px;height:60px;border:1.5px solid var(--sand);border-radius:12px;text-align:center;font-size:1.5rem;font-weight:700;font-family:'Space Mono',monospace;color:var(--forest);background:white;outline:none;transition:all 0.2s}
 .otp-digit:focus{border-color:var(--moss);box-shadow:0 0 0 3px rgba(42,92,46,0.12)}
 
-/* BVN field */
+/* NIN field */
 .bvn-row{display:flex;gap:0.5rem;align-items:flex-end}
 .bvn-row .f-input{letter-spacing:0.15em;font-family:'Space Mono',monospace;font-size:1rem}
 .bvn-verify-btn{background:var(--forest);color:white;border:none;padding:0.75rem 1.2rem;border-radius:10px;font-weight:700;font-size:0.85rem;white-space:nowrap;flex-shrink:0;transition:all 0.2s}
@@ -1796,6 +1797,10 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
         <option value="price-asc">Price: Low to High</option>
         <option value="price-desc">Price: High to Low</option>
       </select>
+      <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--smoke);cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="browseTrustFilter" onchange="applyBrowseFilters()" style="accent-color:var(--moss)">
+        🛡️ Trust Verified only
+      </label>
     </div>
   </div>
   <div class="container" style="padding-top:1.5rem;padding-bottom:4rem">
@@ -2001,7 +2006,7 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
           <div class="tier-checks">
             <div class="tier-check"><span class="tier-check-icon">✓</span>Phone OTP verification</div>
             <div class="tier-check"><span class="tier-check-icon">✓</span>Email verification link</div>
-            <div class="tier-check"><span class="tier-check-icon">✓</span>BVN last-4 cross-check</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>NIN last-4 cross-check</div>
             <div class="tier-check"><span class="tier-check-icon">✓</span>Duplicate phone/device detection</div>
           </div>
           <div class="tier-badge" style="background:rgba(74,124,78,0.12);color:var(--tier1);border:1px solid rgba(74,124,78,0.25)">🛡️ Basic Verified</div>
@@ -2248,7 +2253,7 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
       <button class="ntab active" onclick="navigateAff('home',this)">🏠 Programme</button>
       <button class="ntab" onclick="navigateAff('join',this)">✦ Join Now</button>
       <button class="ntab" onclick="navigateAff('dashboard',this)">📊 Dashboard</button>
-      <button class="ntab" onclick="navigateAff('admin',this)">⚙️ Admin</button>
+      <button class="ntab" onclick="navigateAff('admin',this)" id="affAdminTab" style="display:none">⚙️ Admin</button>
     </div>
     <div style="display:flex;align-items:center;gap:0.6rem">
       <div id="affGuestNav" style="display:flex;gap:0.5rem">
@@ -2504,7 +2509,7 @@ const hashPass = s => btoa(unescape(encodeURIComponent(s + 'hn_salt_2025')));
 let state = {
   currentUser: DB.get('currentUser', null),
   currentView: 'home',
-  browseFilter: { category:'', state:'', type:'', sort:'newest' },
+  browseFilter: { category:'', state:'', type:'', trust:false, sort:'newest' },
   currentListingId: null,
   pendingNavCallback: null,
 };
@@ -2695,7 +2700,7 @@ function handleSignup() {
     showFieldError('signupEmailErr','This email is already registered');
     return;
   }
-  const user = { id:'u'+Date.now(), firstName:first, lastName:last, email, phone, role:selectedRole, nysc:selectedRole==='corper'?nysc:'', password:hashPass(pass), createdAt:Date.now(), verified:false, savedListings:[], applications:[] };
+  const user = { id:'u'+Date.now(), firstName:first, lastName:last, email, phone, role:selectedRole, nysc:selectedRole==='corper'?nysc:'', kycVerified:false, password:hashPass(pass), createdAt:Date.now(), verified:false, savedListings:[], applications:[] };
   users.push(user);
   DB.set('users', users);
   state.currentUser = user;
@@ -2730,6 +2735,7 @@ function listingCardHTML(l, showSave=true) {
       ${imgContent}
       <div class="listing-card-badges">
         ${l.verified?'<span class="listing-badge lb-verified">✓ Verified</span>':''}
+        ${l.trustVerified?'<span class="listing-badge lb-trust" title="Landlord has completed Trust &amp; Safety KYC">🛡️ Trust Verified</span>':''}
         ${l.corperFriendly?'<span class="listing-badge lb-corper">🎓 Corper</span>':''}
         ${l.isShortlet?'<span class="listing-badge lb-shortlet">🏨 Shortlet</span>':''}
       </div>
@@ -2860,12 +2866,14 @@ function applyBrowseFilters() {
   const stateF = document.getElementById('browseStateFilter')?.value||'';
   const typeF = document.getElementById('browseTypeFilter')?.value||'';
   const sortF = document.getElementById('browseSortFilter')?.value||'newest';
+  const trustF = document.getElementById('browseTrustFilter')?.checked||false;
 
   if (cat==='corper') listings=listings.filter(l=>l.corperFriendly);
   else if (cat==='shortlet') listings=listings.filter(l=>l.isShortlet);
   else if (cat==='student') listings=listings.filter(l=>l.category==='student');
   if (stateF) listings=listings.filter(l=>l.state===stateF);
   if (typeF) listings=listings.filter(l=>l.type===typeF);
+  if (trustF) listings=listings.filter(l=>l.trustVerified);
   if (sortF==='price-asc') listings.sort((a,b)=>a.price-b.price);
   else if (sortF==='price-desc') listings.sort((a,b)=>b.price-a.price);
   else listings.sort((a,b)=>b.createdAt-a.createdAt);
@@ -2946,6 +2954,7 @@ function renderDetailContent(l) {
     <div class="detail-addr">📍 ${l.address}, ${l.city}, ${l.state} State</div>
     <div class="detail-badge-row">
       ${l.verified?'<span class="det-badge det-badge-y">✓ Verified Landlord</span>':''}
+      ${l.trustVerified?'<span class="det-badge" style="background:rgba(42,124,56,0.12);color:#2a7c38;border:1px solid rgba(42,124,56,0.25)">🛡️ Trust &amp; Safety Verified</span>':''}
       ${l.corperFriendly?'<span class="det-badge det-badge-g">🎓 CorperNest Listed</span>':''}
       ${l.isShortlet?'<span class="det-badge" style="background:rgba(32,96,192,0.1);color:#2060c0;border:1px solid rgba(32,96,192,0.2)">🏨 Shortlet</span>':''}
       <span class="det-badge det-badge-g">⚖️ Agreement Included</span>
@@ -3143,9 +3152,7 @@ function handleApply(listingId) {
   toast('success','✅ Application submitted! The landlord will contact you soon.');
 }
 
-function handleMessage(listingId, landlordId) {
-  toast('info','💬 Messaging feature — full implementation connects to real-time chat (Firebase). Demo coming soon!');
-}
+// handleMessage is defined in the listing management section above
 
 // ── DASHBOARD ────────────────────────────────────────
 function renderDashboard() {
@@ -3223,6 +3230,7 @@ function switchDashPanel(panel, btn) {
         </div>
         <span class="dash-listing-status status-${l.status}">${l.status}</span>
         <button class="btn btn-icon" onclick="event.stopPropagation();editListing('${l.id}')" title="Edit">✏️</button>
+        <button class="btn btn-icon" onclick="event.stopPropagation();deleteListing('${l.id}')" title="Delete listing" style="color:var(--clay)">🗑️</button>
       </div>`).join('')}
     </div>`:
     `<div class="dash-header"><div><div class="dash-welcome">${greeting} ${u.firstName} 👋</div><div class="dash-sub">Find your perfect home across 5 states.</div></div></div>
@@ -3681,6 +3689,50 @@ function copyText(text) {
 }
 function editListing(id) { toast('info','Listing editor — redirect to edit form for listing '+id); }
 
+function deleteListing(id) {
+  const u = state.currentUser;
+  if (!u) return;
+  const listings = DB.get('listings',[]);
+  const listing = listings.find(l=>l.id===id);
+  if (!listing) { toast('error','Listing not found'); return; }
+  // Only the lister or a super admin can delete
+  if (listing.landlordId !== u.id && !u.isAdmin) {
+    toast('error','You can only delete your own listings');
+    return;
+  }
+  if (!confirm(`Delete "${listing.name}"? This cannot be undone.`)) return;
+  const updated = listings.filter(l=>l.id!==id);
+  DB.set('listings', updated);
+  toast('success','🗑️ Listing deleted successfully');
+  // Refresh dashboard
+  renderDashboard();
+}
+
+function handleMessage(listingId, landlordId) {
+  if (!state.currentUser) { openModal('authModal','login'); return; }
+  const landlord = DB.get('users',[]).find(u=>u.id===landlordId);
+  const landlordName = landlord ? landlord.firstName+' '+landlord.lastName : 'the landlord';
+  // In-app message system using localStorage
+  const messages = DB.get('messages',[]);
+  const thread = messages.find(m=>m.listingId===listingId && m.tenantId===state.currentUser.id);
+  if(thread) {
+    toast('info','💬 You already have a message thread with '+landlordName+'. Check your dashboard inbox.');
+    return;
+  }
+  // Create message thread
+  const newThread = {
+    id:'msg'+Date.now(), listingId, landlordId,
+    tenantId:state.currentUser.id,
+    tenantName:state.currentUser.firstName+' '+state.currentUser.lastName,
+    landlordName, createdAt:Date.now(), messages:[
+      { from:'system', text:'Thread started. '+state.currentUser.firstName+' is interested in this property.', at:Date.now() }
+    ]
+  };
+  messages.push(newThread);
+  DB.set('messages', messages);
+  toast('success','💬 Message sent to '+landlordName+'! They\'ll be notified. Check your Dashboard → Inbox for their reply.');
+}
+
 // ── INIT ─────────────────────────────────────────────
 function init() {
   seedListings();
@@ -3713,7 +3765,14 @@ function navigateTrust(id, btn) {
   }
   if (id==='kyc') trustRenderKycStep(kycStep);
   if (id==='escrow') { trustRenderEscrowFlow(); trustRenderProtection(); trustRenderLiveTx(); }
-  if (id==='admin') trustShowAdminPanel('queue', trustView.querySelector('.admin-nav-btn'));
+  if (id==='admin') {
+    if (!state.currentUser?.isAdmin) {
+      toast('error','🔒 Admin access only. Contact HouseNest support.');
+      navigateTrust('overview', document.getElementById('tnav-overview'));
+      return;
+    }
+    trustShowAdminPanel('queue', trustView.querySelector('.admin-nav-btn'));
+  }
   if (id==='overview') trustAnimateStats();
 }
 
@@ -3809,13 +3868,13 @@ function animCount(id, final, from, to, delay, suffix, prefix=false) {
 }
 
 const DETERRENCE = [
-  {icon:'🔁',title:'Duplicate Detection',desc:'Same phone number, BVN digits, or device fingerprint = immediate account freeze. One person, one account — enforced automatically.'},
+  {icon:'🔁',title:'Duplicate Detection',desc:'Same phone number, NIN digits, or device fingerprint = immediate account freeze. One person, one account — enforced automatically.'},
   {icon:'📍',title:'GPS Metadata Verification',desc:'Property photos are checked for embedded GPS coordinates. If the location metadata contradicts the stated address, the listing is flagged.'},
   {icon:'🏠',title:'Address Deduplication',desc:'The same property address cannot be listed by two different users without triggering a manual review. Prevents ghost listings.'},
   {icon:'⏳',title:'24-Hour Listing Hold',desc:'Every new listing from a first-time lister sits in a "pending" state for 24 hours while admin reviews. No fraud goes live instantly.'},
   {icon:'📞',title:'Admin Phone Call',desc:'Before a new landlord\'s first listing is approved, our team calls them on the listed phone number to verify the conversation is real.'},
   {icon:'🚩',title:'Community Flagging',desc:'Any registered user can report a listing. Three independent flags from different accounts auto-suspends the listing pending review.'},
-  {icon:'🚫',title:'Permanent Blacklist',desc:'Any NIN, BVN, or phone number confirmed as fraudulent is permanently blacklisted across all HouseNest platforms — no second chances.'},
+  {icon:'🚫',title:'Permanent Blacklist',desc:'Any NIN, NIN, or phone number confirmed as fraudulent is permanently blacklisted across all HouseNest platforms — no second chances.'},
   {icon:'💰',title:'₦500 Listing Deposit',desc:'A small refundable deposit to publish deters mass fake listing creation. Returned when the listing is taken down by the legitimate landlord.'},
   {icon:'🤖',title:'AI Pattern Detection',desc:'Machine learning flags accounts whose listing activity matches known fraud patterns — unusual hours, copy-paste descriptions, price anomalies.'},
 ];
@@ -3855,7 +3914,7 @@ function trustUpdateKycProgress(step) {
   }
 }
 
-// Step 0: Phone + BVN (done state shown as example)
+// Step 0: Phone + NIN (done state shown as example)
 function step0HTML() { return `
 <div class="kyc-panel">
   <div class="kyc-panel-header">
@@ -3879,7 +3938,7 @@ function step0HTML() { return `
       </div>
       <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:12px">
         <span style="font-size:1.3rem">🏦</span>
-        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">BVN Last-4 Checked</div><div style="font-size:0.75rem;color:var(--smoke)">···· ···· 4782 · No duplicates</div></div>
+        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">NIN Last-4 Checked</div><div style="font-size:0.75rem;color:var(--smoke)">···· ···· 4782 · No duplicates</div></div>
         <span style="margin-left:auto;color:var(--ok);font-size:1.1rem">✓</span>
       </div>
     </div>
@@ -4032,9 +4091,11 @@ function step3HTML() { return `
   <div class="kyc-panel-body">
     <div class="liveness-box">
       <div class="liveness-cam">
-        <div class="liveness-cam-placeholder">
+        <video id="livenessVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;border-radius:10px;display:none"></video>
+        <canvas id="livenessCanvas" style="display:none;width:100%;height:100%;border-radius:10px"></canvas>
+        <div id="livenessCamPlaceholder" class="liveness-cam-placeholder">
           <div class="cam-icon">📷</div>
-          <div style="font-size:0.82rem;text-align:center">Camera feed appears here<br><small style="opacity:0.5">Production: uses device camera API</small></div>
+          <div style="font-size:0.82rem;text-align:center">Tap <strong>Start Camera</strong> below, then hold your code card up to the camera</div>
         </div>
         <div class="liveness-frame"></div>
       </div>
@@ -4047,8 +4108,9 @@ function step3HTML() { return `
       </div>
     </div>
     <div style="margin-top:1.2rem;display:flex;gap:0.6rem">
-      <button class="btn btn-outline btn-sm" onclick="refreshLivenessCode()">🔄 New Code</button>
-      <button class="btn btn-primary btn-sm" onclick="submitLiveness()" style="flex:1">✓ I've Shown the Code — Verify Me</button>
+      <button class="btn btn-outline btn-sm" id="btnStartCam" onclick="startLivenessCamera()">📷 Start Camera</button>
+      <button class="btn btn-primary btn-sm" id="btnCapture" onclick="captureLiveness()" style="flex:1;display:none">📸 Capture &amp; Verify</button>
+      <button class="btn btn-ghost btn-sm" id="btnStopCam" onclick="stopLivenessCamera()" style="display:none">✕ Stop</button>
     </div>
     <div style="margin-top:1rem;background:rgba(32,80,160,0.06);border:1px solid rgba(32,80,160,0.15);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:#2050a0;line-height:1.6">
       <strong>🤖 Why liveness?</strong> Standard ID upload can be spoofed with a photo of someone else's ID. The liveness check with a unique random code proves you're physically present and in possession of your body — not a fraud account using stolen identity.
@@ -4130,6 +4192,17 @@ function submitIdentity() {
   if (!idType) { toast('error','Please select an ID type'); return; }
   if (!kycUploads['id-front']) { toast('error','Please upload your ID front'); return; }
   if (!kycUploads['selfie']) { toast('error','Please upload your selfie'); return; }
+  // Save submission to localStorage for admin review
+  const u = state.currentUser;
+  const submissions = DB.get('kyc_submissions',[]);
+  const existing = submissions.findIndex(s=>s.userId===u?.id);
+  const submission = {
+    userId:u?.id, name:u?.firstName+' '+(u?.lastName||''), phone:u?.phone, role:u?.role,
+    nin, idType, selfie:kycUploads['selfie'], idFront:kycUploads['id-front'],
+    submittedAt:Date.now(), status:'pending', docs:[idType+' ✓','Selfie ✓','NIN ✓']
+  };
+  if(existing>=0) submissions[existing]=submission; else submissions.push(submission);
+  DB.set('kyc_submissions', submissions);
   toast('success','✅ Identity documents submitted successfully!');
   setTimeout(()=>showKycStep(2),800);
 }
@@ -4137,11 +4210,94 @@ function submitIdentity() {
 function submitPropertyDocs() {
   if (!document.getElementById('propDocType')?.value) { toast('error','Please select document type'); return; }
   if (!kycUploads['prop-doc']) { toast('error','Please upload ownership document'); return; }
+  // Append property doc to existing KYC submission
+  const u = state.currentUser;
+  const submissions = DB.get('kyc_submissions',[]);
+  const existing = submissions.find(s=>s.userId===u?.id);
+  if(existing) {
+    existing.propDocType = document.getElementById('propDocType').value;
+    existing.propDoc = kycUploads['prop-doc'];
+    existing.docs = [...(existing.docs||[]), existing.propDocType+' ✓'];
+    DB.set('kyc_submissions', submissions);
+  }
   toast('success','✅ Property documents submitted!');
   setTimeout(()=>showKycStep(3),800);
 }
 
 const LIVENESS_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+let livenessStream = null;
+
+function startLivenessCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    toast('error','Camera not available on this device/browser');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({ video: { facingMode:'user' }, audio: false })
+    .then(stream => {
+      livenessStream = stream;
+      const video = document.getElementById('livenessVideo');
+      const placeholder = document.getElementById('livenessCamPlaceholder');
+      if(video) { video.srcObject = stream; video.style.display='block'; }
+      if(placeholder) placeholder.style.display='none';
+      document.getElementById('btnStartCam').style.display='none';
+      document.getElementById('btnCapture').style.display='flex';
+      document.getElementById('btnStopCam').style.display='flex';
+      toast('success','📷 Camera active — hold your code card up and tap Capture');
+    })
+    .catch(err => {
+      console.error('Camera error:', err);
+      if(err.name==='NotAllowedError') toast('error','Camera access denied. Please allow camera access and try again.');
+      else if(err.name==='NotFoundError') toast('error','No camera found on this device.');
+      else toast('error','Could not start camera: '+err.message);
+    });
+}
+
+function stopLivenessCamera() {
+  if(livenessStream) { livenessStream.getTracks().forEach(t=>t.stop()); livenessStream=null; }
+  const video = document.getElementById('livenessVideo');
+  const placeholder = document.getElementById('livenessCamPlaceholder');
+  if(video) { video.srcObject=null; video.style.display='none'; }
+  if(placeholder) placeholder.style.display='flex';
+  document.getElementById('btnStartCam').style.display='flex';
+  document.getElementById('btnCapture').style.display='none';
+  document.getElementById('btnStopCam').style.display='none';
+}
+
+function captureLiveness() {
+  const video = document.getElementById('livenessVideo');
+  const canvas = document.getElementById('livenessCanvas');
+  if(!video || !canvas || !livenessStream) { toast('error','Start the camera first'); return; }
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const imageData = canvas.toDataURL('image/jpeg', 0.7);
+  // Save liveness photo to KYC submission
+  const u = state.currentUser;
+  const submissions = DB.get('kyc_submissions',[]);
+  const existing = submissions.find(s=>s.userId===u?.id);
+  const code = document.getElementById('livenessCode')?.textContent||'';
+  if(existing) {
+    existing.livenessPhoto = imageData;
+    existing.livenessCode = code;
+    existing.docs = [...(existing.docs||[]).filter(d=>!d.includes('Liveness')), 'Liveness ✓'];
+    DB.set('kyc_submissions', submissions);
+  }
+  // Show captured image briefly
+  canvas.style.display='block';
+  video.style.display='none';
+  stopLivenessCamera();
+  toast('success','📸 Photo captured! Submitting liveness verification...');
+  setTimeout(()=>submitLiveness(),1000);
+}
+
+function submitLiveness() {
+  const u = state.currentUser;
+  const submissions = DB.get('kyc_submissions',[]);
+  const existing = submissions.find(s=>s.userId===u?.id);
+  if(existing) { existing.status='pending'; existing.submittedAt=Date.now(); DB.set('kyc_submissions',submissions); }
+  toast('success','✅ Liveness check complete! Your KYC submission is under review.');
+  setTimeout(()=>showKycStep(4),800);
+}
 function trustGenLivenessCode() {
   const r=()=>LIVENESS_CHARS[Math.floor(Math.random()*LIVENESS_CHARS.length)];
   return r()+r()+' • '+r()+r();
@@ -4150,11 +4306,6 @@ function refreshLivenessCode() {
   const el=document.getElementById('livenessCode');
   if(el){el.style.opacity='0';setTimeout(()=>{el.textContent=trustGenLivenessCode();el.style.opacity='1';el.style.transition='opacity 0.3s'},200);}
 }
-function submitLiveness() {
-  toast('success','✅ Liveness check submitted — processing...');
-  setTimeout(()=>{ toast('success','✓ Liveness confirmed! Proceeding to review...'); setTimeout(()=>showKycStep(4),600); },1500);
-}
-
 // Auto-refresh liveness code every 60s
 setInterval(()=>{ if(document.getElementById('livenessCode')) refreshLivenessCode(); },60000);
 
@@ -4296,6 +4447,29 @@ const VERIFIED_USERS = [
 
 function trustShowAdminPanel(panel, btn) {
   if(btn){ document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  // Merge real KYC submissions with demo data for queue panel
+  if(panel==='queue') {
+    const realSubs = DB.get('kyc_submissions',[]);
+    const merged = [...KYC_QUEUE.filter(k=>!realSubs.find(r=>r.userId===k.id)), ...realSubs.map(s=>({
+      id:s.userId, name:s.name, role:s.role, phone:s.phone,
+      submitted: s.submittedAt ? timeAgo(s.submittedAt) : 'just now',
+      risk: s.livenessPhoto ? 'low' : 'med',
+      docs: s.docs||['NIN ✓'], isReal:true
+    }))];
+    // Temporarily patch KYC_QUEUE for the render
+    const orig = [...KYC_QUEUE];
+    KYC_QUEUE.length=0; merged.forEach(m=>KYC_QUEUE.push(m));
+    const result = buildAdminBody(panel);
+    KYC_QUEUE.length=0; orig.forEach(m=>KYC_QUEUE.push(m));
+    const ab = document.getElementById('adminBody');
+    if(ab) ab.innerHTML = result;
+    return;
+  }
+  const ab = document.getElementById('adminBody');
+  if(ab) ab.innerHTML = buildAdminBody(panel);
+}
+
+function buildAdminBody(panel) {
   const title=document.getElementById('adminTitle');
   const body=document.getElementById('adminBody');
 
@@ -4403,7 +4577,7 @@ function trustShowAdminPanel(panel, btn) {
     title.textContent='Permanent Blacklist';
     body.innerHTML=`
     <div style="background:rgba(200,50,60,0.06);border:1px solid rgba(200,50,60,0.15);border-radius:12px;padding:1.1rem;margin-bottom:1.2rem;font-size:0.82rem;color:var(--err);line-height:1.6">
-      <strong>🚫 Blacklisted identifiers</strong> are permanently banned across all HouseNest platforms. A blacklisted NIN, phone, or BVN cannot be used to create a new account under any circumstances.
+      <strong>🚫 Blacklisted identifiers</strong> are permanently banned across all HouseNest platforms. A blacklisted NIN, phone, or NIN cannot be used to create a new account under any circumstances.
     </div>
     ${[
       {type:'NIN',value:'12345●●●●901',reason:'Duplicate fraud ring — 3 fake accounts',date:'Today'},
@@ -4435,7 +4609,16 @@ function trustShowAdminPanel(panel, btn) {
 }
 
 function approveKyc(id, name) {
-  toast('success','✅ '+name+' approved! Account is now Verified. SMS sent.');
+  // Mark user as kycVerified
+  const users = DB.get('users',[]);
+  const u = users.find(x=>x.id===id);
+  if(u) { u.kycVerified=true; DB.set('users',users); }
+  // Mark all listings by this landlord as trustVerified
+  const listings = DB.get('listings',[]);
+  let updated=false;
+  listings.forEach(l=>{ if(l.landlordId===id) { l.trustVerified=true; updated=true; } });
+  if(updated) DB.set('listings',listings);
+  toast('success','✅ '+name+' approved! Account is now Trust Verified. SMS sent.');
   document.getElementById('queueBadge').textContent=Math.max(0,parseInt(document.getElementById('queueBadge').textContent)-1);
 }
 
@@ -4483,6 +4666,9 @@ function closeTrustDocModal() {
 
 // Trust module init - called when trust view is activated  
 function initTrustModule() {
+  // Gate admin tab visibility
+  const adminTab = document.getElementById('tnav-admin');
+  if (adminTab) adminTab.style.display = state.currentUser?.isAdmin ? '' : 'none';
   trustRenderDeterrenceGrid();
   trustAnimateStats();
   setTimeout(()=>{
@@ -4516,9 +4702,9 @@ const TIERS = {
 };
 
 const EARN_ACTIONS = [
-  { icon:'🏠',  title:'Tenant Signs Lease',     desc:'A new tenant signs a tenancy agreement through your referral code',              amounts:{corper:'₦24,000',influencer:'₦14,400',agent:'₦18,000',user:'₦9,600'} },
-  { icon:'🏘️', title:'Landlord Lists Property', desc:'A new landlord publishes their first listing after clicking your referral link', amounts:{corper:'₦4,500',influencer:'₦3,600',agent:'₦4,500',user:'₦2,400'} },
-  { icon:'🔑',  title:'Shortlet Booking',        desc:'A guest books a shortlet through your link (commission on nightly rate)',        amounts:{corper:'₦2,400',influencer:'₦1,440',agent:'₦1,800',user:'₦960'} },
+  { icon:'🏠',  title:'Tenant Signs Lease',     desc:'New tenant signs via your code. You earn your tier % of our 15% platform fee on the rent.',  amounts:{corper:'₦4,500',influencer:'₦2,700',agent:'₦3,375',user:'₦1,800'} },
+  { icon:'🏘️', title:'Landlord Lists Property', desc:'New landlord lists via your link. Earn a one-time flat referral bonus from HouseNest.',    amounts:{corper:'₦2,000',influencer:'₦1,200',agent:'₦1,500',user:'₦800'} },
+  { icon:'🔑',  title:'Shortlet Booking',        desc:'Guest books via your link. You earn your tier % of our 15% platform fee on the nightly rate.', amounts:{corper:'₦720',influencer:'₦432',agent:'₦540',user:'₦288'} },
   { icon:'⭐',  title:'Verified Referral Bonus', desc:'Referree completes full KYC verification within 7 days of signing up',          amounts:{corper:'₦1,000',influencer:'₦500',agent:'₦750',user:'₦250'} },
   { icon:'🎓',  title:'Corper-to-Corper Bonus',  desc:'Corpers earn extra when they refer another corper in the same NYSC batch',      amounts:{corper:'₦2,000',influencer:'N/A',agent:'N/A',user:'N/A'} },
   { icon:'🏢',  title:'Association Bulk Deal',   desc:'Agent/Association closes a bulk deal (5+ listings from one landlord)',          amounts:{corper:'N/A',influencer:'N/A',agent:'₦15,000',user:'N/A'} },
@@ -4598,7 +4784,7 @@ function renderHeroPreviews() {
         <div class="tpc-commission" style="color:${t.color}">${u.earned}</div></div>
         <div style="text-align:right"><div style="font-size:0.65rem;color:rgba(244,238,216,0.35)">Referrals</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;color:rgba(244,238,216,0.7)">${u.refs}</div></div>
       </div>
-      <div class="tpc-desc">${(t.rate*100).toFixed(0)}% commission · ${t.perks[0]}</div>
+      <div class="tpc-desc">${(t.rate*100).toFixed(0)}% of platform fee · ${t.perks[0]}</div>
     </div>`;
   }).join('');
 }
@@ -4744,6 +4930,8 @@ function affUpdateNavState() {
   const gu=document.getElementById('affGuestNav');
   const un=document.getElementById('affUserNav');
   const av=document.getElementById('affUserAv');
+  const adminTab=document.getElementById('affAdminTab');
+  if(adminTab) adminTab.style.display = affCurrentUser?.isAdmin ? '' : 'none';
   if(affCurrentUser) {
     gu.style.display='none';
     un.style.display='flex';
@@ -4771,7 +4959,7 @@ function affRenderDashboard() {
     <div>
       <div class="ds-user-name">${u.firstName} ${u.lastName}</div>
       <div class="ds-user-tier">${t.icon} ${t.label}</div>
-      <div class="ds-tier-badge" style="background:${t.bg};color:${t.color}">${(t.rate*100).toFixed(0)}% commission</div>
+      <div class="ds-tier-badge" style="background:${t.bg};color:${t.color}">${(t.rate*100).toFixed(0)}% of platform fee</div>
     </div>
   </div>
   <div class="ds-label">Main</div>
