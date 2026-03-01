@@ -2557,11 +2557,11 @@ const SB = {
   },
 
   // Auth
-  async signUp(email, password) {
+  async signUp(email, password, metadata={}) {
     const r = await fetch(`${SUPA_URL}/auth/v1/signup`, {
       method:'POST',
       headers:{'apikey':SUPA_ANON,'Content-Type':'application/json'},
-      body:JSON.stringify({email,password})
+      body:JSON.stringify({email, password, data: metadata})
     });
     return r.json();
   },
@@ -2838,8 +2838,32 @@ async function handleLogin() {
 
     // Fetch user profile from our users table
     const users = await SB.selectAuth('users', `email=eq.${encodeURIComponent(email)}&limit=1`);
-    if (!users.length) { showFieldError('loginPassErr','Account not found'); return; }
-    const user = mapUserFromDB(users[0]);
+    let dbUser = users[0];
+
+    // Profile row may not exist yet if trigger hasn't fired — create it now
+    if (!dbUser) {
+      const authUser = authData.user;
+      const meta = authUser?.user_metadata || {};
+      try {
+        dbUser = await SB.insertAuth('users', {
+          auth_id: authUser.id,
+          first_name: meta.first_name || email.split('@')[0],
+          last_name: meta.last_name || '',
+          email,
+          phone: meta.phone || '',
+          role: meta.role || 'tenant',
+          nysc_code: meta.nysc_code || null,
+          is_admin: false, is_verified: false, kyc_verified: false,
+        });
+      } catch(e) {
+        // Race condition — fetch again
+        const retry = await SB.selectAuth('users', `email=eq.${encodeURIComponent(email)}&limit=1`);
+        dbUser = retry[0];
+      }
+    }
+
+    if (!dbUser) { showFieldError('loginPassErr','Account not found. Please sign up first.'); return; }
+    const user = mapUserFromDB(dbUser);
 
     state.currentUser = user;
     DB.set('currentUser', user);
@@ -2877,16 +2901,43 @@ async function handleSignup() {
   const btn = document.querySelector('[onclick="handleSignup()"]');
   if(btn){btn.disabled=true;btn.textContent='Creating account...';}
   try {
-    // 1. Create auth account
-    const authData = await SB.signUp(email, pass);
+    // 1. Create auth account — pass all user details as metadata
+    // The database trigger uses this metadata to create the profile row automatically
+    const metadata = {
+      first_name: first,
+      last_name: last,
+      phone,
+      role: selectedRole,
+      nysc_code: selectedRole==='corper' ? nysc : '',
+    };
+    const authData = await SB.signUp(email, pass, metadata);
     if (authData.error) {
-      showFieldError('signupEmailErr', authData.error.message || 'Signup failed');
+      const msg = authData.error.message || '';
+      if (msg.toLowerCase().includes('already registered')) {
+        showFieldError('signupEmailErr', 'This email is already registered. Please log in.');
+      } else {
+        showFieldError('signupEmailErr', msg || 'Signup failed. Please try again.');
+      }
       return;
     }
-    SB.setSession(authData);
-    const authId = authData.user?.id;
 
-    // 2. Insert profile into users table
+    const authId = authData.user?.id;
+    const needsConfirmation = !authData.session && authData.user && !authData.user.confirmed_at;
+
+    if (needsConfirmation) {
+      // Email confirmation is on — trigger will create profile row when they confirm
+      closeModal('authModal');
+      toast('success','📧 Check your email! Click the confirmation link to activate your account.');
+      // Show a persistent info message
+      setTimeout(()=>toast('info','After confirming your email, return here and log in normally.'), 3500);
+      return;
+    }
+
+    // Email confirmation is off — session available immediately
+    if (authData.session) SB.setSession(authData.session);
+    else if (authData.access_token) SB.setSession(authData);
+
+    // 2. Insert profile row (trigger may have already done this, so we upsert)
     const userData = {
       auth_id: authId,
       first_name: first, last_name: last,
@@ -2898,9 +2949,14 @@ async function handleSignup() {
     try {
       dbUser = await SB.insertAuth('users', userData);
     } catch(e) {
-      // If user already exists (e.g. re-signup), fetch existing
+      // Trigger already created the row — just fetch it
       const existing = await SB.selectAuth('users', `email=eq.${encodeURIComponent(email)}&limit=1`);
       dbUser = existing[0];
+    }
+
+    if (!dbUser) {
+      toast('error','Account created but profile setup failed. Please log in to continue.');
+      return;
     }
 
     const user = mapUserFromDB(dbUser);
@@ -5369,6 +5425,10 @@ function affHandleSignup() {
 
   const affiliates = AffDB.get('affiliates',[]);
   if(affiliates.find(a=>a.email===email)){showErr('aff-su-email-err','Email already registered');return;}
+
+  // Check if email already exists in affiliates
+  const existingAffs = AffDB.get('affiliates',[]);
+  if(existingAffs.find(a=>a.email===email)){showErr('aff-su-email-err','Email already registered');return;}
 
   const code = genCode(affSelectedRole, first);
   const newAffiliate = {
