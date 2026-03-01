@@ -3412,16 +3412,37 @@ async function submitReview(listingId) {
       rating: currentReviewStar,
       text,
     };
-    await SB.insertAuth('reviews', reviewData);
+    // Check if IDs are valid UUIDs (demo listings use string IDs like 'l1')
+    const isValidUUID = s => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+    if (isValidUUID(listingId) && isValidUUID(state.currentUser.id)) {
+      await SB.insertAuth('reviews', reviewData);
+    } else {
+      // Demo listing — save to localStorage only
+      const localReviews = DB.get('reviews', []);
+      if (localReviews.find(r=>r.listingId===listingId&&r.userId===state.currentUser.id)) {
+        toast('error','You\'ve already reviewed this property'); return;
+      }
+      localReviews.push({...reviewData, id:'r'+Date.now(), listingId, userId:state.currentUser.id, createdAt:Date.now()});
+      DB.set('reviews', localReviews);
+    }
 
-    // Update listing rating via aggregation
-    const reviews = await SB.select('reviews', `listing_id=eq.${listingId}&select=rating`);
-    if (reviews.length) {
-      const avg = reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
-      await SB.updateAuth('listings', { rating: avg.toFixed(1), review_count: reviews.length }, `id=eq.${listingId}`);
-      // Update local cache
+    // Update listing rating
+    if (isValidUUID(listingId)) {
+      const reviews = await SB.select('reviews', `listing_id=eq.${listingId}&select=rating`);
+      if (reviews.length) {
+        const avg = reviews.reduce((s,r)=>s+r.rating,0)/reviews.length;
+        await SB.updateAuth('listings', { rating: avg.toFixed(1), review_count: reviews.length }, `id=eq.${listingId}`);
+        const l = _listingsCache.find(x=>x.id===listingId);
+        if(l){ l.rating=parseFloat(avg.toFixed(1)); l.reviewCount=reviews.length; }
+      }
+    } else {
+      // Demo listing — update local cache only
+      const localReviews = DB.get('reviews',[]).filter(r=>r.listingId===listingId);
       const l = _listingsCache.find(x=>x.id===listingId);
-      if(l){ l.rating=parseFloat(avg.toFixed(1)); l.reviewCount=reviews.length; }
+      if(l && localReviews.length) {
+        l.rating = parseFloat((localReviews.reduce((s,r)=>s+r.rating,0)/localReviews.length).toFixed(1));
+        l.reviewCount = localReviews.length;
+      }
     }
     toast('success','⭐ Review submitted! Thank you.');
     openListing(listingId);
@@ -3448,8 +3469,11 @@ async function handleApply(listingId) {
     });
     if (!r.ok) {
       const err = await r.json().catch(()=>({}));
-      if (err.code === '23505' || (err.message||'').includes('unique')) {
-        toast('info','You\'ve already applied for this property');
+      const msg = (err.message||err.details||err.hint||'').toLowerCase();
+      if (err.code === '23505' || msg.includes('unique') || msg.includes('duplicate')) {
+        toast('info','✅ You\'ve already applied for this property.');
+      } else if (msg.includes('security policy') || msg.includes('rls') || r.status === 403) {
+        toast('error','Session expired. Please log out and log back in.');
       } else {
         console.error('Apply error:', err);
         toast('error','Application failed: '+(err.message||'Please try again.'));
@@ -4406,6 +4430,12 @@ async function deleteListing(id) {
 
 async function handleMessage(listingId, landlordId) {
   if (!state.currentUser) { openModal('authModal','login'); return; }
+  // Demo listings have non-UUID landlordId — handle gracefully
+  const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(landlordId);
+  if (!isValidUUID) {
+    toast('info','💬 This is a demo listing. Message the landlord directly via the contact details on the listing.');
+    return;
+  }
   try {
     // Check for existing thread
     const existing = await SB.selectAuth('message_threads',
@@ -5848,17 +5878,28 @@ function affHandleSignup() {
     code, status:affSelectedRole==='user'?'active':'pending',
     earnings:0, pending:0, paid:0, referrals:0, conversions:0,
     joinDate:Date.now(),
-    password:affHashPass(pass),
+    password: linkedToMainAccount ? 'LINKED_MAIN_ACCOUNT' : affHashPass(pass),
     isAdmin:false,
   };
   affiliates.push(newAffiliate);
   AffDB.set('affiliates', affiliates);
-  currentUser = newAffiliate;
+  affCurrentUser = newAffiliate;
   AffDB.set('affCurrentUser', newAffiliate);
   affUpdateNavState();
   closeAffModal('affAuthModal');
+  // Navigate to dashboard and show code prominently
   navigateAff('dashboard', null);
-  toast('success','🎉 Welcome! Your code is '+code);
+  setTimeout(()=>{
+    toast('success','🎉 Welcome to HouseNest Earn! Your referral code is: '+code);
+    // Show code in a persistent banner on the dashboard
+    const dashHead = document.querySelector('#view-aff-dashboard .aff-dash-header, #view-aff-dashboard');
+    if(dashHead) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'background:rgba(42,124,56,0.15);border:1px solid rgba(42,124,56,0.3);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.2rem;text-align:center';
+      banner.innerHTML = '<div style="font-size:0.75rem;color:var(--smoke);margin-bottom:0.3rem">Your referral code</div><div style="font-size:1.4rem;font-weight:900;color:var(--ok);font-family:Space Mono,monospace;letter-spacing:0.05em">'+code+'</div><div style="font-size:0.72rem;color:var(--smoke);margin-top:0.3rem">Share this code to earn commissions</div>';
+      dashHead.prepend(banner);
+    }
+  }, 400);
 }
 
 function affHandleLogin() {
