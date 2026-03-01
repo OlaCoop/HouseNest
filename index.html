@@ -870,6 +870,681 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
   .image-preview-grid { grid-template-columns:repeat(3,1fr); }
   .nearby-grid { grid-template-columns:repeat(2,1fr); }
 }
+
+/* ═══════════════════════════════════════════════════
+   TRUST CENTRE STYLES (merged)
+═══════════════════════════════════════════════════ */
+:root {
+  --tier1: #4a7c4e;
+  --tier2: #c05a20;
+  --tier3: #8c48bc;
+  --tier4: #2050a0;
+  --e-pending: #c87820;
+  --e-funded: #2050a0;
+  --e-inspect: #8c48bc;
+  --e-confirmed: #2a7c38;
+  --e-released: #1b3a1e;
+  --e-disputed: #c8323c;
+  --e-refunded: #787570;
+}
+
+.tier-card{
+  border-radius:16px;border:1.5px solid var(--mist);background:white;
+  overflow:hidden;transition:all 0.3s;cursor:pointer;
+}
+.tier-card:hover{box-shadow:0 10px 30px rgba(12,26,13,0.1);transform:translateY(-3px);border-color:transparent}
+.tier-card.active{border-color:var(--moss);box-shadow:0 0 0 3px rgba(42,92,46,0.12)}
+.tier-card-top{padding:1.4rem 1.4rem 1rem;border-bottom:1px solid var(--mist)}
+.tier-number{font-family:'Space Mono',monospace;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.6rem}
+.tier-icon-wrap{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:0.8rem}
+.tier-name{font-weight:700;font-size:0.95rem;color:var(--ink);margin-bottom:0.3rem}
+.tier-desc{font-size:0.78rem;color:var(--smoke);line-height:1.55}
+.tier-card-bottom{padding:1rem 1.4rem}
+.tier-checks{display:flex;flex-direction:column;gap:0.35rem}
+.tier-check{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.75rem;color:var(--forest)}
+.tier-check-icon{flex-shrink:0;margin-top:1px;font-size:0.8rem}
+.tier-badge{display:inline-flex;align-items:center;gap:0.35rem;padding:0.22rem 0.65rem;border-radius:50px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.8rem}
+
+/* ── KYC FLOW UI ── */
+.kyc-wrap{max-width:780px;margin:3rem auto;padding:0 2rem}
+.kyc-progress{display:flex;align-items:center;margin-bottom:3rem;position:relative}
+.kyc-progress::before{content:'';position:absolute;top:18px;left:18px;right:18px;height:2px;background:var(--mist);z-index:0}
+.kyc-step{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:1}
+.kyc-step-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;border:2px solid var(--mist);background:white;transition:all 0.35s;margin-bottom:0.5rem}
+.kyc-step.done .kyc-step-dot{background:var(--moss);border-color:var(--moss);color:white}
+.kyc-step.current .kyc-step-dot{background:var(--forest);border-color:var(--forest);color:white;box-shadow:0 0 0 4px rgba(42,92,46,0.2)}
+.kyc-step.pending .kyc-step-dot{background:white;border-color:var(--ash);color:var(--ash)}
+.kyc-step-label{font-size:0.7rem;font-weight:600;color:var(--smoke);text-align:center;max-width:70px}
+.kyc-step.current .kyc-step-label{color:var(--forest);font-weight:700}
+.kyc-step.done .kyc-step-label{color:var(--moss)}
+.progress-fill{position:absolute;top:18px;left:18px;height:2px;background:var(--moss);z-index:0;transition:width 0.5s ease}
+
+/* KYC Panels */
+.kyc-panel{background:white;border-radius:20px;border:1px solid var(--mist);overflow:hidden;box-shadow:0 4px 24px rgba(12,26,13,0.07)}
+.kyc-panel-header{padding:1.8rem 2rem 1.5rem;border-bottom:1px solid var(--mist);display:flex;align-items:flex-start;gap:1rem}
+.kyc-panel-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.kyc-panel-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--forest);margin-bottom:0.2rem}
+.kyc-panel-sub{font-size:0.82rem;color:var(--smoke);line-height:1.55}
+.kyc-panel-body{padding:2rem}
+.kyc-panel-footer{padding:1.2rem 2rem;border-top:1px solid var(--mist);display:flex;justify-content:space-between;align-items:center;background:var(--mist)}
+
+/* Form elements */
+.f-group{margin-bottom:1.2rem}
+.f-label{display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--forest);margin-bottom:0.45rem}
+.f-input,.f-select,.f-textarea{width:100%;padding:0.75rem 1rem;border:1.5px solid var(--sand);border-radius:10px;font-family:'Outfit';font-size:0.9rem;color:var(--ink);background:white;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--moss);box-shadow:0 0 0 3px rgba(42,92,46,0.1)}
+.f-input.error{border-color:var(--err)}
+.f-err{font-size:0.72rem;color:var(--err);margin-top:0.3rem;display:none}
+.f-err.show{display:block}
+.f-hint{font-size:0.72rem;color:var(--smoke);margin-top:0.3rem}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+
+/* Upload zones */
+.upload-zone{
+  border:2px dashed var(--sand);border-radius:14px;padding:2.2rem 1.5rem;
+  text-align:center;cursor:pointer;transition:all 0.25s;position:relative;background:var(--mist)
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--clay);background:rgba(192,90,32,0.04)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone.uploaded{border-color:var(--moss);background:rgba(42,92,46,0.04)}
+.uz-icon{font-size:2.2rem;margin-bottom:0.7rem}
+.uz-title{font-weight:700;color:var(--ink);margin-bottom:0.3rem;font-size:0.9rem}
+.uz-sub{font-size:0.75rem;color:var(--smoke)}
+.uz-success{display:none;align-items:center;gap:0.6rem;justify-content:center}
+.upload-zone.uploaded .uz-default{display:none}
+.upload-zone.uploaded .uz-success{display:flex}
+.uz-success-icon{width:32px;height:32px;border-radius:50%;background:var(--moss);display:flex;align-items:center;justify-content:center;color:white;font-size:0.9rem}
+.uz-success-text{font-size:0.85rem;font-weight:700;color:var(--moss)}
+
+/* Liveness check */
+.liveness-box{background:var(--ink);border-radius:16px;overflow:hidden;position:relative}
+.liveness-cam{width:100%;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1b3a1e,#0c1a0d);position:relative}
+.liveness-cam-placeholder{display:flex;flex-direction:column;align-items:center;gap:1rem;color:rgba(245,240,230,0.5)}
+.liveness-cam-placeholder .cam-icon{font-size:3rem}
+.liveness-frame{position:absolute;inset:20%;border:3px solid rgba(122,184,126,0.6);border-radius:50%;animation:scanFrame 2s ease-in-out infinite}
+.liveness-code-display{padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.liveness-code{font-family:'Space Mono',monospace;font-size:2rem;font-weight:700;color:var(--reed);letter-spacing:0.15em}
+.liveness-instruction{font-size:0.78rem;color:rgba(245,240,230,0.5);max-width:200px;line-height:1.5}
+
+/* OTP Input */
+.otp-row{display:flex;gap:0.6rem;justify-content:center;margin:1.2rem 0}
+.otp-digit{width:52px;height:60px;border:1.5px solid var(--sand);border-radius:12px;text-align:center;font-size:1.5rem;font-weight:700;font-family:'Space Mono',monospace;color:var(--forest);background:white;outline:none;transition:all 0.2s}
+.otp-digit:focus{border-color:var(--moss);box-shadow:0 0 0 3px rgba(42,92,46,0.12)}
+
+/* BVN field */
+.bvn-row{display:flex;gap:0.5rem;align-items:flex-end}
+.bvn-row .f-input{letter-spacing:0.15em;font-family:'Space Mono',monospace;font-size:1rem}
+.bvn-verify-btn{background:var(--forest);color:white;border:none;padding:0.75rem 1.2rem;border-radius:10px;font-weight:700;font-size:0.85rem;white-space:nowrap;flex-shrink:0;transition:all 0.2s}
+.bvn-verify-btn:hover{background:var(--clay)}
+
+/* Trust score badge */
+.trust-badge{display:inline-flex;align-items:center;gap:0.5rem;padding:0.4rem 1rem;border-radius:50px;font-weight:700;font-size:0.78rem}
+.tb-unverified{background:rgba(200,120,32,0.12);color:var(--warn);border:1px solid rgba(200,120,32,0.25)}
+.tb-basic{background:rgba(42,92,46,0.12);color:var(--moss);border:1px solid rgba(42,92,46,0.25)}
+.tb-verified{background:rgba(42,92,46,0.15);color:var(--ok);border:1px solid rgba(42,92,46,0.3)}
+.tb-full{background:linear-gradient(135deg,rgba(27,58,30,0.2),rgba(140,72,188,0.15));color:var(--forest);border:1px solid rgba(42,92,46,0.4)}
+
+/* ── ESCROW SYSTEM ── */
+.escrow-wrap{max-width:900px;margin:0 auto;padding:3rem 2rem}
+.escrow-flow{display:grid;grid-template-columns:repeat(5,1fr);position:relative;margin-bottom:3rem}
+.escrow-flow::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--e-pending),var(--e-funded),var(--e-inspect),var(--e-confirmed),var(--e-released));opacity:0.3;z-index:0}
+.ef-step{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+.ef-dot{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:0.7rem;border:2px solid transparent;transition:all 0.3s}
+.ef-label{font-size:0.72rem;font-weight:700;text-align:center;color:var(--smoke);max-width:70px}
+.ef-time{font-size:0.62rem;color:var(--ash);margin-top:0.2rem}
+
+/* Escrow transaction card */
+.escrow-card{background:white;border-radius:20px;border:1.5px solid var(--mist);overflow:hidden;margin-bottom:1.5rem;box-shadow:0 3px 16px rgba(12,26,13,0.07)}
+.ec-header{padding:1.5rem 1.8rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--mist)}
+.ec-ref{font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--smoke)}
+.ec-state-badge{padding:0.3rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:700}
+.ec-body{padding:1.8rem}
+.ec-amount{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:700;color:var(--forest);line-height:1;margin-bottom:0.4rem}
+.ec-listing{font-size:0.9rem;font-weight:600;color:var(--ink);margin-bottom:0.2rem}
+.ec-parties{display:flex;gap:2rem;margin-top:1.2rem}
+.ec-party{display:flex;align-items:center;gap:0.6rem}
+.ec-party-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:white;flex-shrink:0}
+.ec-party-role{font-size:0.62rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em}
+.ec-party-name{font-size:0.85rem;font-weight:700;color:var(--ink)}
+.ec-timeline{display:flex;flex-direction:column;gap:0}
+.ect-item{display:flex;gap:1rem;align-items:flex-start;position:relative;padding-bottom:1rem}
+.ect-item:not(:last-child)::before{content:'';position:absolute;left:16px;top:32px;width:1px;height:calc(100% - 0.5rem);background:var(--mist)}
+.ect-dot{width:32px;height:32px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.85rem;position:relative;z-index:1}
+.ect-done{background:rgba(42,124,56,0.15)}
+.ect-active{background:rgba(192,90,32,0.15);animation:subtlePulse 2s infinite}
+.ect-pending{background:var(--mist)}
+.ect-label{font-size:0.7rem;color:var(--smoke);text-transform:uppercase;letter-spacing:0.06em}
+.ect-text{font-size:0.88rem;font-weight:600;color:var(--ink);margin-top:0.1rem}
+.ect-time{font-size:0.7rem;color:var(--ash)}
+
+/* Escrow initiate form */
+.escrow-form-card{background:white;border-radius:20px;border:1.5px solid var(--mist);overflow:hidden}
+.efc-header{padding:1.5rem 1.8rem;border-bottom:1px solid var(--mist);background:linear-gradient(135deg,var(--forest),#0c1a0d);display:flex;align-items:center;gap:1rem}
+.efc-icon{font-size:2rem}
+.efc-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--bone)}
+.efc-sub{font-size:0.78rem;color:rgba(245,240,230,0.55)}
+.efc-body{padding:1.8rem}
+.fee-breakdown{background:var(--mist);border-radius:12px;padding:1.2rem;margin-bottom:1.2rem}
+.fee-row{display:flex;justify-content:space-between;font-size:0.85rem;padding:0.35rem 0;color:var(--forest)}
+.fee-row.total{font-weight:700;border-top:1px solid var(--sand);padding-top:0.6rem;margin-top:0.2rem}
+.fee-row.free-label{color:var(--ok)}
+.free-badge{background:rgba(42,124,56,0.15);color:var(--ok);padding:0.15rem 0.5rem;border-radius:50px;font-size:0.65rem;font-weight:700;margin-left:0.5rem}
+
+/* Escrow protection pillars */
+.protection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem}
+.prot-card{background:white;border:1px solid var(--mist);border-radius:16px;padding:1.4rem;transition:all 0.25s}
+.prot-card:hover{box-shadow:0 8px 24px rgba(12,26,13,0.09);transform:translateY(-2px);border-color:transparent}
+.prot-icon{font-size:1.8rem;margin-bottom:0.8rem}
+.prot-title{font-weight:700;color:var(--forest);margin-bottom:0.35rem;font-size:0.9rem}
+.prot-desc{font-size:0.78rem;color:var(--smoke);line-height:1.65}
+
+/* ── ADMIN PANEL ── */
+.admin-wrap{max-width:1100px;margin:0 auto;padding:2rem}
+.admin-grid{display:grid;grid-template-columns:240px 1fr;gap:1.5rem;min-height:600px}
+.admin-sidebar{background:var(--forest);border-radius:16px;padding:1.5rem 1rem;display:flex;flex-direction:column;gap:0.3rem}
+.admin-nav-label{font-family:'Space Mono',monospace;font-size:0.58rem;color:rgba(245,240,230,0.3);text-transform:uppercase;letter-spacing:0.12em;padding:0.5rem 0.7rem 0.2rem;margin-top:0.5rem}
+.admin-nav-btn{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.8rem;border-radius:9px;border:none;background:none;color:rgba(245,240,230,0.6);font-size:0.85rem;font-weight:500;cursor:pointer;width:100%;text-align:left;transition:all 0.2s}
+.admin-nav-btn:hover{background:rgba(245,240,230,0.08);color:var(--bone)}
+.admin-nav-btn.active{background:rgba(245,240,230,0.12);color:var(--bone);font-weight:700}
+.admin-nav-btn .badge{background:var(--clay);color:white;border-radius:50px;font-size:0.62rem;font-weight:700;padding:0.1rem 0.45rem;margin-left:auto}
+.admin-main{background:white;border-radius:16px;border:1px solid var(--mist);overflow:hidden}
+.admin-main-header{padding:1.4rem 1.8rem;border-bottom:1px solid var(--mist);display:flex;justify-content:space-between;align-items:center}
+.admin-section-title{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--forest)}
+.admin-body{padding:1.5rem 1.8rem}
+
+/* Verification queue */
+.vq-item{display:flex;gap:1rem;align-items:flex-start;padding:1.1rem;border:1.5px solid var(--mist);border-radius:14px;margin-bottom:0.8rem;transition:all 0.2s}
+.vq-item:hover{border-color:var(--sand);box-shadow:0 3px 12px rgba(12,26,13,0.06)}
+.vq-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white;flex-shrink:0}
+.vq-info{flex:1}
+.vq-name{font-weight:700;color:var(--ink);font-size:0.9rem;margin-bottom:0.2rem}
+.vq-role{font-size:0.72rem;color:var(--smoke);margin-bottom:0.5rem}
+.vq-docs{display:flex;gap:0.4rem;flex-wrap:wrap}
+.vq-doc{background:var(--mist);border-radius:6px;padding:0.2rem 0.55rem;font-size:0.68rem;color:var(--forest);font-weight:600;cursor:pointer;transition:background 0.2s}
+.vq-doc:hover{background:var(--sand)}
+.vq-doc.ok{background:rgba(42,124,56,0.12);color:var(--ok)}
+.vq-doc.warn{background:rgba(200,120,32,0.12);color:var(--warn)}
+.vq-actions{display:flex;gap:0.5rem;flex-direction:column;flex-shrink:0}
+.vq-approve{background:var(--moss);color:white;border:none;padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;transition:background 0.2s;white-space:nowrap}
+.vq-approve:hover{background:var(--ok)}
+.vq-reject{background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2);padding:0.5rem 1rem;border-radius:8px;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.vq-reject:hover{background:var(--err);color:white}
+.vq-time{font-size:0.62rem;color:var(--ash);margin-top:0.3rem}
+.risk-tag{display:inline-flex;align-items:center;gap:0.3rem;padding:0.18rem 0.55rem;border-radius:50px;font-size:0.65rem;font-weight:700}
+.risk-low{background:rgba(42,124,56,0.1);color:var(--ok)}
+.risk-med{background:rgba(200,120,32,0.12);color:var(--warn)}
+.risk-high{background:rgba(200,50,60,0.1);color:var(--err)}
+
+/* Escrow admin table */
+.esc-table{width:100%;border-collapse:collapse}
+.esc-table th{font-size:0.68rem;font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--smoke);padding:0.6rem 0.8rem;border-bottom:2px solid var(--mist);text-align:left}
+.esc-table td{padding:0.8rem;border-bottom:1px solid var(--mist);font-size:0.82rem;color:var(--ink)}
+.esc-table tr:hover td{background:var(--mist)}
+.esc-action-btn{background:var(--mist);border:none;border-radius:7px;padding:0.3rem 0.7rem;font-size:0.72rem;font-weight:600;cursor:pointer;color:var(--forest);transition:all 0.2s}
+.esc-action-btn:hover{background:var(--sand)}
+.esc-action-btn.release{background:rgba(42,124,56,0.12);color:var(--ok)}
+.esc-action-btn.release:hover{background:var(--ok);color:white}
+
+/* Fraud detection */
+.fraud-alert{border-radius:14px;padding:1.1rem 1.3rem;margin-bottom:0.8rem;display:flex;gap:0.8rem;align-items:flex-start}
+.fa-high{background:rgba(200,50,60,0.08);border:1px solid rgba(200,50,60,0.2)}
+.fa-med{background:rgba(200,120,32,0.08);border:1px solid rgba(200,120,32,0.2)}
+.fa-low{background:rgba(42,124,56,0.06);border:1px solid rgba(42,124,56,0.15)}
+.fa-icon{font-size:1.2rem;flex-shrink:0;margin-top:0.1rem}
+.fa-title{font-weight:700;font-size:0.85rem;margin-bottom:0.2rem}
+.fa-high .fa-title{color:var(--err)}
+.fa-med .fa-title{color:var(--warn)}
+.fa-low .fa-title{color:var(--ok)}
+.fa-detail{font-size:0.78rem;color:var(--smoke);line-height:1.5}
+.fa-actions{margin-left:auto;display:flex;gap:0.4rem;flex-shrink:0}
+.fa-btn{border:none;border-radius:7px;padding:0.35rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+.fa-dismiss{background:var(--mist);color:var(--smoke)}
+.fa-review{background:var(--warn);color:white}
+.fa-block{background:var(--err);color:white}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-tile{background:var(--mist);border-radius:12px;padding:1rem 1.2rem}
+.stat-tile-n{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--forest);line-height:1}
+.stat-tile-l{font-size:0.72rem;color:var(--smoke);margin-top:0.15rem}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.7rem 1.5rem;border-radius:10px;border:none;font-size:0.88rem;font-weight:700;transition:all 0.22s;cursor:pointer}
+.btn-primary{background:var(--forest);color:var(--bone)}
+.btn-primary:hover{background:var(--clay);transform:translateY(-1px)}
+.btn-clay{background:var(--clay);color:white}
+.btn-clay:hover{background:var(--copper)}
+.btn-outline{background:transparent;border:1.5px solid var(--forest);color:var(--forest)}
+.btn-outline:hover{background:var(--forest);color:var(--bone)}
+.btn-ghost{background:transparent;color:var(--smoke);border:none;padding:0.5rem;font-size:0.85rem}
+.btn-ghost:hover{color:var(--forest)}
+.btn-sm{padding:0.45rem 0.9rem;font-size:0.78rem;border-radius:8px}
+.btn-full{width:100%;justify-content:center}
+.btn-success{background:var(--ok);color:white}
+.btn-success:hover{background:var(--moss)}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;z-index:1000;background:rgba(12,26,13,0.8);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:1.5rem}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:18px;padding:1.8rem;max-width:460px;width:100%;max-height:88vh;overflow-y:auto;animation:popIn 0.25s ease;box-shadow:0 24px 60px rgba(0,0,0,0.3)}
+.modal-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.3rem}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:var(--forest)}
+.modal-x{background:var(--mist);border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:var(--smoke);cursor:pointer;transition:all 0.2s}
+.modal-x:hover{background:var(--err);color:white}
+
+/* ── TOAST ── */
+.toast-c{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem}
+.toast{background:var(--ink);color:white;padding:0.8rem 1.2rem;border-radius:12px;font-size:0.83rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;align-items:center;gap:0.6rem;max-width:300px;animation:toastIn 0.3s ease}
+.toast.ok{background:var(--moss)}
+.toast.warn{background:var(--warn)}
+.toast.err{background:var(--err)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes scanFrame{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.06);opacity:1}}
+@keyframes subtlePulse{0%,100%{box-shadow:0 0 0 0 rgba(192,90,32,0.3)}50%{box-shadow:0 0 0 6px rgba(192,90,32,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes progress{from{stroke-dashoffset:314}to{stroke-dashoffset:47}}
+.ring-animate .trust-ring-fill{animation:progress 1.5s ease forwards}
+
+/* ── MISC ── */
+.hidden{display:none!important}
+.divider{border:none;border-top:1px solid var(--mist);margin:1.5rem 0}
+.chip{display:inline-flex;align-items:center;gap:0.35rem;padding:0.25rem 0.7rem;border-radius:50px;font-size:0.7rem;font-weight:600}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .tier-grid{grid-template-columns:1fr 1fr}
+  .escrow-flow{grid-template-columns:1fr 1fr;gap:1rem}
+  .escrow-flow::before{display:none}
+  .protection-grid{grid-template-columns:1fr}
+  .admin-grid{grid-template-columns:1fr}
+  .admin-sidebar{flex-direction:row;flex-wrap:wrap;border-radius:12px}
+  .admin-nav-label{display:none}
+  .hero-banner-inner{grid-template-columns:1fr}
+  .trust-score-ring{display:none}
+  .f-row{grid-template-columns:1fr}
+  .stats-bar{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+  .tier-grid{grid-template-columns:1fr}
+  .nav-tabs{display:none}
+  .container{padding:0 1rem}
+  .kyc-wrap,.escrow-wrap,.admin-wrap{padding:2rem 1rem}
+  .stats-bar{grid-template-columns:1fr}
+}
+
+
+/* ═══════════════════════════════════════════════════
+   AFFILIATE PROGRAMME STYLES (merged)
+═══════════════════════════════════════════════════ */
+:root {
+  --flame: var(--clay);
+  --ember: var(--copper);
+  --night: var(--ink);
+  --deep: var(--forest);
+  --ivory: var(--bone);
+  --cream: var(--parchment);
+  --ok: var(--success);
+}
+
+.tiers-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:3rem}
+.tier-card{border-radius:20px;overflow:hidden;border:1.5px solid var(--sand);background:white;transition:all 0.3s;cursor:pointer;position:relative}
+.tier-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(8,14,9,0.12);border-color:transparent}
+.tier-card.featured{border-color:var(--flame);box-shadow:0 0 0 3px rgba(212,78,26,0.1)}
+.tc-header{padding:1.6rem 1.5rem 1.2rem}
+.tc-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.tc-tag{font-family:'IBM Plex Mono',monospace;font-size:0.58rem;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.5rem}
+.tc-name{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--night);margin-bottom:0.3rem}
+.tc-commission-label{font-size:0.7rem;color:var(--smoke);margin-bottom:0.2rem}
+.tc-commission{font-family:'IBM Plex Mono',monospace;font-size:2rem;font-weight:700;line-height:1}
+.tc-per{font-size:0.72rem;color:var(--smoke);font-family:'DM Sans',sans-serif;margin-top:0.2rem}
+.tc-divider{border:none;border-top:1px solid var(--mist);margin:0}
+.tc-body{padding:1.2rem 1.5rem}
+.tc-perks{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1.2rem}
+.tc-perk{display:flex;align-items:flex-start;gap:0.5rem;font-size:0.78rem;color:var(--forest)}
+.tc-perk-icon{flex-shrink:0;font-size:0.85rem;margin-top:1px}
+.featured-ribbon{position:absolute;top:1rem;right:-0.5rem;background:var(--flame);color:white;font-size:0.62rem;font-weight:700;padding:0.2rem 1rem;border-radius:50px}
+
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:3rem}
+.how-card{background:white;border-radius:18px;padding:2rem;border:1px solid var(--sand);transition:all 0.3s;position:relative;overflow:hidden}
+.how-card:hover{box-shadow:0 12px 32px rgba(8,14,9,0.09);transform:translateY(-3px);border-color:transparent}
+.how-card::before{content:attr(data-num);position:absolute;top:-0.5rem;right:1rem;font-family:'Playfair Display',serif;font-size:6rem;font-weight:800;color:rgba(26,58,30,0.05);line-height:1;pointer-events:none}
+.how-icon{font-size:2rem;margin-bottom:1rem}
+.how-title{font-weight:700;font-size:1rem;color:var(--forest);margin-bottom:0.4rem}
+.how-desc{font-size:0.82rem;color:var(--smoke);line-height:1.7}
+
+/* DASHBOARD LAYOUT */
+.dash-layout{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 62px)}
+.dash-sidebar{background:var(--deep);padding:1.8rem 1rem;display:flex;flex-direction:column;gap:0.25rem;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.ds-user-block{display:flex;align-items:center;gap:0.7rem;padding:0.8rem;border-radius:12px;background:rgba(244,238,216,0.06);margin-bottom:1rem}
+.ds-user-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:white;flex-shrink:0}
+.ds-user-name{font-weight:700;font-size:0.85rem;color:var(--ivory)}
+.ds-user-tier{font-size:0.68rem;color:rgba(244,238,216,0.4);margin-top:0.1rem;text-transform:capitalize}
+.ds-tier-badge{display:inline-flex;align-items:center;gap:0.3rem;padding:0.18rem 0.55rem;border-radius:50px;font-size:0.62rem;font-weight:700;margin-top:0.3rem}
+.ds-label{font-family:'IBM Plex Mono',monospace;font-size:0.56rem;color:rgba(244,238,216,0.25);text-transform:uppercase;letter-spacing:0.12em;padding:0.5rem 0.7rem 0.2rem;margin-top:0.5rem}
+.ds-btn{display:flex;align-items:center;gap:0.65rem;padding:0.6rem 0.85rem;border-radius:10px;border:none;background:none;color:rgba(244,238,216,0.55);font-size:0.84rem;font-weight:500;cursor:pointer;width:100%;text-align:left;transition:all 0.2s}
+.ds-btn:hover{background:rgba(244,238,216,0.07);color:var(--ivory)}
+.ds-btn.active{background:rgba(244,238,216,0.11);color:var(--ivory);font-weight:700}
+.ds-btn .ds-icon{font-size:1rem;flex-shrink:0}
+.ds-btn .ds-badge{background:var(--flame);color:white;border-radius:50px;font-size:0.6rem;font-weight:700;padding:0.1rem 0.45rem;margin-left:auto}
+.dash-main{background:var(--mist);padding:2rem;overflow-y:auto}
+
+/* DASHBOARD PANELS */
+.dp-title{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--forest);margin-bottom:0.25rem}
+.dp-sub{font-size:0.82rem;color:var(--smoke);margin-bottom:2rem}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:white;border-radius:14px;padding:1.2rem;border:1px solid var(--sand)}
+.stat-n{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--forest);line-height:1}
+.stat-l{font-size:0.72rem;color:var(--smoke);margin-top:0.2rem}
+.stat-delta{font-size:0.7rem;font-weight:700;margin-top:0.3rem}
+.stat-up{color:var(--ok)}
+.stat-down{color:var(--err)}
+.dash-panel{background:white;border-radius:16px;border:1px solid var(--sand);margin-bottom:1.5rem;overflow:hidden}
+.dash-panel-header{padding:1.3rem 1.6rem;border-bottom:1px solid var(--mist);display:flex;justify-content:space-between;align-items:center}
+.dph-title{font-weight:700;color:var(--forest);font-size:0.95rem}
+.dash-panel-body{padding:1.5rem 1.6rem}
+
+/* REFERRAL CODE CARD */
+.code-card{background:linear-gradient(135deg,var(--forest),var(--deep));border-radius:18px;padding:1.8rem;position:relative;overflow:hidden;margin-bottom:1.5rem}
+.code-card::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(114,196,124,0.08) 1px,transparent 1px);background-size:20px 20px}
+.code-card-label{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;color:rgba(244,238,216,0.4);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.6rem;position:relative;z-index:1}
+.code-display{font-family:'IBM Plex Mono',monospace;font-size:1.8rem;font-weight:700;color:var(--ivory);letter-spacing:0.12em;margin-bottom:0.5rem;position:relative;z-index:1;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.code-copy-btn{background:rgba(244,238,216,0.1);border:1px solid rgba(244,238,216,0.2);color:rgba(244,238,216,0.7);border-radius:8px;padding:0.35rem 0.8rem;font-size:0.75rem;font-weight:700;cursor:pointer;transition:all 0.2s;position:relative;z-index:1}
+.code-copy-btn:hover{background:rgba(244,238,216,0.2);color:var(--ivory)}
+.code-link{font-size:0.78rem;color:rgba(244,238,216,0.45);font-family:'IBM Plex Mono',monospace;position:relative;z-index:1;word-break:break-all;margin-bottom:1rem}
+.code-share-row{display:flex;gap:0.5rem;flex-wrap:wrap;position:relative;z-index:1}
+.share-btn{display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.9rem;border-radius:8px;font-size:0.75rem;font-weight:700;border:none;cursor:pointer;transition:all 0.2s}
+.share-twitter{background:#1da1f2;color:white}
+.share-whatsapp{background:#25d366;color:white}
+.share-instagram{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white}
+.share-facebook{background:#1877f2;color:white}
+.share-copy{background:rgba(244,238,216,0.1);border:1px solid rgba(244,238,216,0.2);color:rgba(244,238,216,0.8)}
+.share-btn:hover{transform:translateY(-1px);filter:brightness(1.1)}
+
+/* COMMISSION TABLE */
+.comm-table{width:100%;border-collapse:collapse}
+.comm-table th{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--smoke);padding:0.6rem 0.8rem;border-bottom:2px solid var(--mist);text-align:left;white-space:nowrap}
+.comm-table td{padding:0.85rem 0.8rem;border-bottom:1px solid var(--mist);font-size:0.83rem;color:var(--night)}
+.comm-table tr:last-child td{border-bottom:none}
+.comm-table tr:hover td{background:rgba(26,58,30,0.03)}
+.comm-amount{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--forest)}
+.comm-pending{color:var(--amber);font-weight:700;font-size:0.72rem}
+.comm-paid{color:var(--ok);font-weight:700;font-size:0.72rem}
+.comm-processing{color:var(--smoke);font-weight:700;font-size:0.72rem}
+
+/* LEADERBOARD */
+.lb-row{display:flex;align-items:center;gap:1rem;padding:0.9rem;border-radius:12px;transition:all 0.2s;margin-bottom:0.4rem}
+.lb-row:hover{background:var(--mist)}
+.lb-rank{font-family:'IBM Plex Mono',monospace;font-size:0.85rem;font-weight:700;width:28px;text-align:center;flex-shrink:0}
+.lb-rank-1{color:var(--gold)}
+.lb-rank-2{color:var(--ash)}
+.lb-rank-3{color:var(--amber)}
+.lb-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.9rem;color:white;flex-shrink:0}
+.lb-name{font-weight:700;font-size:0.88rem;color:var(--night)}
+.lb-meta{font-size:0.72rem;color:var(--smoke)}
+.lb-earnings{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--forest);margin-left:auto;font-size:0.9rem}
+.lb-refs{font-size:0.7rem;color:var(--smoke);text-align:right}
+
+/* WITHDRAW FORM */
+.withdraw-card{background:white;border-radius:16px;border:1px solid var(--sand);padding:1.6rem;margin-bottom:1.5rem}
+.balance-display{background:linear-gradient(135deg,var(--forest),var(--moss));border-radius:14px;padding:1.4rem;margin-bottom:1.2rem;position:relative;overflow:hidden}
+.balance-display::before{content:'';position:absolute;right:-20px;top:-20px;width:120px;height:120px;border-radius:50%;background:rgba(114,196,124,0.1)}
+.bal-label{font-size:0.72rem;color:rgba(244,238,216,0.5);margin-bottom:0.4rem}
+.bal-amount{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;color:var(--ivory);line-height:1}
+.bal-pending{font-size:0.78rem;color:rgba(244,238,216,0.45);margin-top:0.3rem}
+
+/* ADMIN PANEL */
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.ast{background:white;border-radius:12px;padding:1.1rem;border:1px solid var(--sand)}
+.ast-n{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;color:var(--forest);line-height:1}
+.ast-l{font-size:0.7rem;color:var(--smoke);margin-top:0.15rem}
+.aff-row{display:flex;align-items:center;gap:0.8rem;padding:0.9rem;border:1px solid var(--sand);border-radius:12px;margin-bottom:0.6rem;transition:all 0.2s;background:white}
+.aff-row:hover{border-color:var(--sage);box-shadow:0 3px 12px rgba(8,14,9,0.06)}
+.aff-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:0.95rem;flex-shrink:0}
+.aff-name{font-weight:700;font-size:0.88rem;color:var(--night)}
+.aff-meta{font-size:0.72rem;color:var(--smoke);margin-top:0.15rem}
+.aff-code{font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:var(--moss);background:rgba(44,94,50,0.1);padding:0.15rem 0.55rem;border-radius:5px}
+.aff-earnings{margin-left:auto;text-align:right;flex-shrink:0}
+.aff-earn-n{font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:0.88rem;color:var(--forest)}
+.aff-earn-l{font-size:0.68rem;color:var(--smoke)}
+.aff-tier-tag{padding:0.18rem 0.55rem;border-radius:50px;font-size:0.62rem;font-weight:700;margin-left:0.5rem}
+.att-corper{background:rgba(212,78,26,0.12);color:var(--t-corper)}
+.att-influencer{background:rgba(156,58,220,0.12);color:var(--t-influencer)}
+.att-user{background:rgba(44,94,50,0.12);color:var(--t-user)}
+.att-agent{background:rgba(26,74,140,0.12);color:var(--t-agent)}
+.approve-btn{background:rgba(42,128,64,0.1);color:var(--ok);border:1px solid rgba(42,128,64,0.2);border-radius:8px;padding:0.35rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.approve-btn:hover{background:var(--ok);color:white}
+.reject-btn{background:rgba(200,48,48,0.08);color:var(--err);border:1px solid rgba(200,48,48,0.15);border-radius:8px;padding:0.35rem 0.75rem;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-left:0.35rem;white-space:nowrap}
+.reject-btn:hover{background:var(--err);color:white}
+
+/* FORMS */
+.f-group{margin-bottom:1.1rem}
+.f-label{display:block;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--forest);margin-bottom:0.42rem}
+.f-input,.f-select,.f-textarea{width:100%;padding:0.72rem 1rem;border:1.5px solid var(--sand);border-radius:10px;font-family:'DM Sans';font-size:0.88rem;color:var(--night);background:white;outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--moss);box-shadow:0 0 0 3px rgba(44,94,50,0.1)}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem}
+.f-hint{font-size:0.72rem;color:var(--smoke);margin-top:0.3rem}
+.f-err{font-size:0.72rem;color:var(--err);margin-top:0.3rem;display:none}
+.f-err.show{display:block}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;z-index:1000;background:rgba(8,14,9,0.82);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.5rem}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:20px;padding:2rem;max-width:480px;width:100%;max-height:88vh;overflow-y:auto;animation:popIn 0.28s ease;box-shadow:0 28px 70px rgba(0,0,0,0.35)}
+.modal-h{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.4rem}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--forest)}
+.modal-close{background:var(--mist);border:none;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;color:var(--smoke);cursor:pointer;transition:all 0.2s;flex-shrink:0}
+.modal-close:hover{background:var(--err);color:white}
+.modal-tabs{display:flex;gap:0;border:1.5px solid var(--sand);border-radius:10px;padding:3px;margin-bottom:1.3rem}
+.mtab{flex:1;padding:0.48rem;border-radius:8px;border:none;font-family:'DM Sans';font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:var(--smoke);transition:all 0.2s}
+.mtab.active{background:var(--forest);color:white}
+.role-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;margin-bottom:1.1rem}
+.role-card{border:1.5px solid var(--sand);border-radius:12px;padding:0.9rem 0.7rem;text-align:center;cursor:pointer;transition:all 0.2s;background:white}
+.role-card:hover{border-color:var(--moss)}
+.role-card.active{border-color:var(--forest);background:var(--forest)}
+.role-card.active .rc-name{color:white}
+.role-card.active .rc-icon{filter:none}
+.rc-icon{font-size:1.5rem;margin-bottom:0.3rem}
+.rc-name{font-size:0.78rem;font-weight:700;color:var(--forest)}
+.rc-comm{font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:var(--flame);margin-top:0.15rem}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.68rem 1.4rem;border-radius:10px;border:none;font-size:0.86rem;font-weight:700;cursor:pointer;transition:all 0.22s}
+.btn-primary{background:var(--forest);color:var(--ivory)}
+.btn-primary:hover{background:var(--flame);transform:translateY(-1px)}
+.btn-flame{background:var(--flame);color:white}
+.btn-flame:hover{background:var(--ember)}
+.btn-outline{background:transparent;border:1.5px solid var(--forest);color:var(--forest)}
+.btn-outline:hover{background:var(--forest);color:var(--ivory)}
+.btn-ghost{background:transparent;color:var(--smoke);padding:0.5rem;border:none}
+.btn-ghost:hover{color:var(--forest)}
+.btn-sm{padding:0.4rem 0.85rem;font-size:0.77rem;border-radius:8px}
+.btn-full{width:100%;justify-content:center}
+.btn-ok{background:var(--ok);color:white}
+.btn-ok:hover{background:#1e6030}
+
+/* TOAST */
+.toast-c{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none}
+.toast{background:var(--night);color:white;padding:0.78rem 1.2rem;border-radius:12px;font-size:0.82rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.3);display:flex;align-items:center;gap:0.6rem;max-width:300px;animation:toastIn 0.3s ease;pointer-events:all}
+.toast.ok{background:var(--moss)}
+.toast.warn{background:var(--amber)}
+.toast.err{background:var(--err)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(0.94)}to{opacity:1;transform:scale(1)}}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MISC */
+.hidden{display:none!important}
+.divider{border:none;border-top:1px solid var(--sand);margin:1.2rem 0}
+.tag{display:inline-flex;align-items:center;gap:0.3rem;padding:0.22rem 0.65rem;border-radius:50px;font-size:0.68rem;font-weight:700}
+.chip-row{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.8rem}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .tiers-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-inner{grid-template-columns:1fr}
+  .hero-right{display:none}
+  .dash-layout{grid-template-columns:1fr}
+  .dash-sidebar{height:auto;position:static;flex-direction:row;flex-wrap:wrap;padding:1rem;gap:0.3rem}
+  .ds-label{display:none}
+  .ds-user-block{display:none}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .admin-stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .container{padding:0 1.2rem}
+  .tiers-grid{grid-template-columns:1fr}
+  .how-grid{grid-template-columns:1fr}
+  .f-row{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .role-grid{grid-template-columns:repeat(2,1fr)}
+  .ntab span{display:none}
+  .hero-h1{font-size:2.4rem}
+}
+
+
+/* Nav module buttons */
+.nav-module-link {
+  display:inline-flex;align-items:center;gap:0.4rem;
+  padding:0.3rem 0.75rem;border-radius:50px;
+  font-size:0.72rem;font-weight:700;cursor:pointer;
+  transition:all 0.2s;border:none;
+}
+.nav-trust-link { background:rgba(42,124,56,0.12);color:var(--moss); }
+.nav-trust-link:hover { background:var(--moss);color:white; }
+.nav-affiliate-link { background:rgba(194,98,42,0.12);color:var(--clay); }
+.nav-affiliate-link:hover { background:var(--clay);color:white; }
+
+/* Trust nav tabs */
+.trust-nav-tab {
+  padding:0.4rem 1rem;border-radius:8px;border:none;background:rgba(246,241,232,0.08);
+  font-size:0.82rem;font-weight:600;color:rgba(246,241,232,0.6);cursor:pointer;transition:all 0.2s
+}
+.trust-nav-tab:hover { background:rgba(246,241,232,0.15);color:var(--bone); }
+.trust-nav-tab.active { background:rgba(246,241,232,0.2);color:var(--bone);font-weight:700; }
+
+/* Affiliate nav overrides */
+.ntab {
+  padding:0.38rem 0.85rem;border-radius:8px;border:none;background:none;
+  font-size:0.8rem;font-weight:600;color:rgba(244,238,216,0.5);cursor:pointer;transition:all 0.2s
+}
+.ntab:hover { background:rgba(244,238,216,0.08);color:rgba(244,238,216,0.8); }
+.ntab.active { background:rgba(244,238,216,0.18);color:var(--bone); }
+
+/* Modal bg for affiliate (use existing modal-backdrop styles) */
+.modal-bg { 
+  position:fixed;inset:0;z-index:1000;background:rgba(13,26,14,0.75);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:1.5rem;
+}
+.modal-bg.open { display:flex; }
+
+/* Trust page */
+#view-trust .page, #view-affiliate .page {
+  padding-top: 0 !important;
+  overflow-y: auto;
+}
+
+/* Role cards for affiliate */
+.role-card { border:1.5px solid var(--mist);border-radius:12px;padding:0.9rem 0.7rem;text-align:center;cursor:pointer;transition:all 0.2s;background:white; }
+.role-card:hover { border-color:var(--moss); }
+.role-card.active { border-color:var(--forest);background:var(--forest); }
+.role-card.active .rc-name { color:white; }
+.rc-icon { font-size:1.5rem;margin-bottom:0.3rem; }
+.rc-name { font-size:0.78rem;font-weight:700;color:var(--forest); }
+.rc-comm { font-family:'Space Mono',monospace;font-size:0.72rem;color:var(--clay);margin-top:0.15rem; }
+.modal-tabs { display:flex;gap:0;border:1.5px solid var(--mist);border-radius:10px;padding:3px;margin-bottom:1.3rem; }
+.mtab { flex:1;padding:0.48rem;border-radius:8px;border:none;font-size:0.82rem;font-weight:600;cursor:pointer;background:transparent;color:var(--smoke);transition:all 0.2s; }
+.mtab.active { background:var(--forest);color:white; }
+
+@keyframes scanFrame { 0%,100% { transform:scale(1);opacity:0.8; } 50% { transform:scale(1.05);opacity:1; } }
+@keyframes subtlePulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+
+
+/* ═══ AFFILIATE MODULE CSS ═══ */
+.nav-pill{background:linear-gradient(135deg,var(--flame),var(--amber));color:white;padding:0.28rem 0.8rem;border-radius:50px;font-size:0.72rem;font-weight:700;letter-spacing:0.02em}
+.nav-tabs{display:flex;gap:0.25rem}
+.user-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.82rem;color:white;cursor:pointer;transition:transform 0.2s}
+.user-av:hover{transform:scale(1.08)}
+.hero-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 70% 40%,rgba(44,94,50,0.25) 0%,transparent 70%),radial-gradient(ellipse 60% 50% at 20% 70%,rgba(212,150,42,0.1) 0%,transparent 60%);pointer-events:none}
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(114,196,124,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(114,196,124,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(114,196,124,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(114,196,124,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+.hero-inner{max-width:1280px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:1}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:0.6rem;margin-bottom:1.4rem}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);animation:pulseDot 2s infinite}
+.eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);animation:pulseDot 2s infinite}
+.eyebrow-text{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--mint);text-transform:uppercase;letter-spacing:0.18em}
+.eyebrow-text{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--mint);text-transform:uppercase;letter-spacing:0.18em}
+.hero-h1{font-family:'Playfair Display',serif;font-size:clamp(2.6rem,5vw,4.5rem);font-weight:800;color:var(--ivory);line-height:0.95;margin-bottom:1.4rem}
+.hero-ctas{display:flex;gap:0.8rem;flex-wrap:wrap}
+.btn-hero-primary{background:var(--flame);color:white;border:none;padding:0.85rem 2rem;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.25s;display:inline-flex;align-items:center;gap:0.5rem}
+.btn-hero-primary{background:var(--flame);color:white;border:none;padding:0.85rem 2rem;border-radius:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.25s;display:inline-flex;align-items:center;gap:0.5rem}
+.btn-hero-primary:hover{background:#c04010;transform:translateY(-2px);box-shadow:0 8px 24px rgba(212,78,26,0.35)}
+.btn-hero-secondary{background:rgba(244,238,216,0.08);border:1.5px solid rgba(244,238,216,0.2);color:rgba(244,238,216,0.8);padding:0.85rem 1.8rem;border-radius:12px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.25s}
+.btn-hero-secondary:hover{background:rgba(244,238,216,0.14);border-color:rgba(244,238,216,0.4);color:var(--ivory)}
+.tier-preview-card{border-radius:16px;padding:1.2rem 1.4rem;border:1px solid rgba(244,238,216,0.1);background:rgba(244,238,216,0.05);backdrop-filter:blur(8px);cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden}
+.tier-preview-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.3s}
+.tpc-tag{font-family:'IBM Plex Mono',monospace;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem}
+.tpc-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--ivory);margin-bottom:0.25rem}
+.tpc-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--ivory);margin-bottom:0.25rem}
+.tpc-commission{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:700}
+.tpc-commission{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:700}
+.tpc-desc{font-size:0.75rem;color:rgba(244,238,216,0.42);margin-top:0.3rem}
+.tpc-desc{font-size:0.75rem;color:rgba(244,238,216,0.42);margin-top:0.3rem}
+
+.eyebrow{display:flex;align-items:center;gap:0.7rem;margin-bottom:0.75rem}
+.eyebrow-line{width:20px;height:1.5px;background:var(--flame)}
+.eyebrow-line{width:20px;height:1.5px;background:var(--flame)}
+.eyebrow-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--flame);text-transform:uppercase;letter-spacing:0.15em}
+.eyebrow-label{font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--flame);text-transform:uppercase;letter-spacing:0.15em}
+.section-h2{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,3.5vw,2.9rem);font-weight:700;color:var(--forest);line-height:1.05;margin-bottom:0.6rem}
+.section-h2{font-family:'Playfair Display',serif;font-size:clamp(1.9rem,3.5vw,2.9rem);font-weight:700;color:var(--forest);line-height:1.05;margin-bottom:0.6rem}
+.section-h2 em{font-style:italic;color:var(--flame)}
+.section-h2-light{color:var(--ivory)}
+.section-sub{font-size:0.92rem;color:var(--smoke);line-height:1.75;max-width:540px;font-weight:400;margin-top:0.5rem}
+.section-sub{font-size:0.92rem;color:var(--smoke);line-height:1.75;max-width:540px;font-weight:400;margin-top:0.5rem}
+.section-sub-light{color:rgba(244,238,216,0.5)}
+.section-sub-light{color:rgba(244,238,216,0.5)}
+
+
+/* ═══ TRUST MODULE CSS ═══ */
+.hb-label{display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem}
+.hb-label-dot{width:7px;height:7px;border-radius:50%;background:var(--reed);animation:pulse 2s infinite}
+.hb-label-dot{width:7px;height:7px;border-radius:50%;background:var(--reed);animation:pulse 2s infinite}
+.hb-label-text{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--reed);text-transform:uppercase;letter-spacing:0.15em}
+.hb-label-text{font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--reed);text-transform:uppercase;letter-spacing:0.15em}
+.hb-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:var(--bone);line-height:1;margin-bottom:0.8rem}
+.hb-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:var(--bone);line-height:1;margin-bottom:0.8rem}
+.hb-title em{font-style:italic;color:var(--reed)}
+.hb-sub{font-size:0.95rem;color:rgba(245,240,230,0.6);line-height:1.7;max-width:520px;font-weight:300}
+.hb-stats{display:flex;gap:2.5rem;margin-top:2rem}
+.hb-stats{display:flex;gap:2.5rem;margin-top:2rem}
+.hb-stat-n{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--bone);line-height:1}
+.hb-stat-n{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--bone);line-height:1}
+.hb-stat-l{font-size:0.7rem;color:rgba(245,240,230,0.4);margin-top:0.15rem}
+.hb-stat-l{font-size:0.7rem;color:rgba(245,240,230,0.4);margin-top:0.15rem}
+.trust-score-ring{width:120px;height:120px;position:relative;flex-shrink:0}
+.trust-ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.trust-ring-bg{fill:none;stroke:rgba(245,240,230,0.1);stroke-width:8}
+.trust-ring-bg{fill:none;stroke:rgba(245,240,230,0.1);stroke-width:8}
+.trust-ring-fill{fill:none;stroke:var(--reed);stroke-width:8;stroke-linecap:round;stroke-dasharray:314;stroke-dashoffset:47;transition:stroke-dashoffset 1s ease}
+.trust-ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.trust-ring-pct{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--bone);line-height:1}
+.trust-ring-pct{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--bone);line-height:1}
+.trust-ring-lbl{font-size:0.6rem;color:rgba(245,240,230,0.45);text-transform:uppercase;letter-spacing:0.08em}
+.trust-ring-lbl{font-size:0.6rem;color:rgba(245,240,230,0.45);text-transform:uppercase;letter-spacing:0.08em}
+
+
 </style>
 </head>
 <body>
@@ -889,6 +1564,8 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
       <button class="nav-link" onclick="navigate('browse','corper')">
         <span class="nav-corper-badge">🎓 CorperNest</span>
       </button>
+      <button class="nav-link" onclick="navigate('trust')">🛡️ Trust & Safety</button>
+      <button class="nav-link" onclick="navigate('affiliate')">💸 Earn</button>
     </div>
     <div class="nav-right" id="navRight">
       <button class="nav-btn-ghost" onclick="openModal('authModal','login')">Log In</button>
@@ -900,6 +1577,8 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
 <div class="nav-mobile-menu" id="mobileMenu">
   <button class="mobile-nav-link" onclick="navigate('browse');toggleMobileMenu()">Browse Listings</button>
   <button class="mobile-nav-link" onclick="navigate('browse','corper');toggleMobileMenu()">🎓 CorperNest</button>
+  <button class="mobile-nav-link" onclick="navigate('trust');toggleMobileMenu()">🛡️ Trust & Safety</button>
+  <button class="mobile-nav-link" onclick="navigate('affiliate');toggleMobileMenu()">💸 Earn with HouseNest</button>
   <button class="mobile-nav-link" onclick="openModal('authModal','login');toggleMobileMenu()">Log In</button>
   <button class="mobile-nav-link" onclick="openModal('authModal','signup');toggleMobileMenu()">Sign Up Free</button>
 </div>
@@ -1251,6 +1930,550 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
   </div>
 </div>
 
+
+<!-- ── TRUST & SECURITY CENTRE VIEW ─────────────── -->
+<div class="view" id="view-trust">
+  <!-- Trust Internal Nav -->
+  <div style="background:var(--forest);padding:0.7rem 2rem;position:sticky;top:64px;z-index:100;display:flex;gap:0.5rem;align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+      <button class="trust-nav-tab active" id="tnav-overview" onclick="navigateTrust('overview',this)">🛡️ Overview</button>
+      <button class="trust-nav-tab" id="tnav-kyc" onclick="navigateTrust('kyc',this)">🪪 KYC Verification</button>
+      <button class="trust-nav-tab" id="tnav-escrow" onclick="navigateTrust('escrow',this)">🏦 Escrow</button>
+      <button class="trust-nav-tab" id="tnav-admin" onclick="navigateTrust('admin',this)">⚙️ Admin</button>
+    </div>
+    <button class="btn btn-sm" style="background:rgba(246,241,232,0.15);color:var(--bone);border:none;font-size:0.78rem" onclick="navigate('home')">← Back to HouseNest</button>
+  </div>
+  <div style="padding-top:0">
+
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 1: TRUST OVERVIEW
+══════════════════════════════════════════════════ -->
+<div class="view active" id="view-trust-overview">
+
+  <!-- Hero -->
+  <div class="hero-banner">
+    <div class="hero-banner-inner container">
+      <div>
+        <div class="hb-label"><div class="hb-label-dot"></div><span class="hb-label-text">HouseNest Trust & Security Framework</span></div>
+        <h1 class="hb-title">Fraud doesn't stand a chance<br>on <em>HouseNest.</em></h1>
+        <p class="hb-sub">Every landlord, agent, and association on HouseNest passes a multi-layer KYC process before a single listing goes live. Combined with escrow payment protection, we target 90%+ fraud deterrence — the highest standard in Nigerian proptech.</p>
+        <div class="hb-stats">
+          <div><div class="hb-stat-n" id="stat1">0</div><div class="hb-stat-l">Fraud Deterrence Rate</div></div>
+          <div><div class="hb-stat-n" id="stat2">0</div><div class="hb-stat-l">Verification Checks</div></div>
+          <div><div class="hb-stat-n" id="stat3">0</div><div class="hb-stat-l">Escrow Protected</div></div>
+        </div>
+      </div>
+      <div class="trust-score-ring ring-animate" id="trustRing">
+        <svg class="trust-ring-svg" viewBox="0 0 100 100">
+          <circle class="trust-ring-bg" cx="50" cy="50" r="40"/>
+          <circle class="trust-ring-fill" cx="50" cy="50" r="40"/>
+        </svg>
+        <div class="trust-ring-text">
+          <div class="trust-ring-pct">90%</div>
+          <div class="trust-ring-lbl">Trust Score</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KYC Tier cards -->
+  <div class="container" style="padding-top:2.5rem;padding-bottom:1rem">
+    <div style="margin-bottom:0.5rem">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem">
+        <div style="width:18px;height:1.5px;background:var(--clay)"></div>
+        <span style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--clay);text-transform:uppercase;letter-spacing:0.15em">The Four Verification Tiers</span>
+      </div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--forest)">Layered verification. <em style="color:var(--clay)">No shortcuts.</em></h2>
+      <p style="font-size:0.88rem;color:var(--smoke);margin-top:0.5rem;max-width:580px">Each tier stacks on top of the previous. A lister must pass all applicable tiers before their first listing goes live. Failure at any point freezes the account pending manual review.</p>
+    </div>
+    <div class="tier-grid">
+
+      <!-- Tier 1 -->
+      <div class="tier-card active" onclick="navigateTrust('kyc',null);setTimeout(()=>showKycStep(0),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier1)">Tier 01 — All Users</div>
+          <div class="tier-icon-wrap" style="background:rgba(74,124,78,0.12)">📱</div>
+          <div class="tier-name">Basic Identity</div>
+          <div class="tier-desc">Every account — tenant or lister — must pass this immediately on sign-up.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Phone OTP verification</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Email verification link</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>BVN last-4 cross-check</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Duplicate phone/device detection</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(74,124,78,0.12);color:var(--tier1);border:1px solid rgba(74,124,78,0.25)">🛡️ Basic Verified</div>
+        </div>
+      </div>
+
+      <!-- Tier 2 -->
+      <div class="tier-card" onclick="navigateTrust('kyc',null);setTimeout(()=>showKycStep(1),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier2)">Tier 02 — All Listers</div>
+          <div class="tier-icon-wrap" style="background:rgba(192,90,32,0.12)">🪪</div>
+          <div class="tier-name">Personal Identity</div>
+          <div class="tier-desc">Required before the first listing can be published. Cannot be skipped.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>NIN capture + verification</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Government ID upload</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Selfie liveness check</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Face-to-ID photo match</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(192,90,32,0.12);color:var(--tier2);border:1px solid rgba(192,90,32,0.25)">✅ Identity Verified</div>
+        </div>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="tier-card" onclick="navigateTrust('kyc',null);setTimeout(()=>showKycStep(2),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier3)">Tier 03 — Landlords</div>
+          <div class="tier-icon-wrap" style="background:rgba(140,72,188,0.12)">🏠</div>
+          <div class="tier-name">Property Ownership</div>
+          <div class="tier-desc">Proves the person listing a property actually has rights to rent it out.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>C of O or Right of Occupancy</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Utility bill matching address</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Photos with GPS metadata</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Admin phone verification call</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(140,72,188,0.12);color:var(--tier3);border:1px solid rgba(140,72,188,0.25)">🏡 Property Verified</div>
+        </div>
+      </div>
+
+      <!-- Tier 4 -->
+      <div class="tier-card" onclick="navigateTrust('kyc',null);setTimeout(()=>showKycStep(3),100)">
+        <div class="tier-card-top">
+          <div class="tier-number" style="color:var(--tier4)">Tier 04 — Agents & Assoc.</div>
+          <div class="tier-icon-wrap" style="background:rgba(32,80,160,0.12)">🏢</div>
+          <div class="tier-name">Business Registration</div>
+          <div class="tier-desc">Agents and associations prove legitimate business registration in Nigeria.</div>
+        </div>
+        <div class="tier-card-bottom">
+          <div class="tier-checks">
+            <div class="tier-check"><span class="tier-check-icon">✓</span>CAC business registration</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>NIESV/ESVARBON licence</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Association chairman NIN</div>
+            <div class="tier-check"><span class="tier-check-icon">✓</span>Registered office address proof</div>
+          </div>
+          <div class="tier-badge" style="background:rgba(32,80,160,0.12);color:var(--tier4);border:1px solid rgba(32,80,160,0.25)">🏢 Business Verified</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fraud Deterrence Layer -->
+  <div style="background:var(--ink);padding:3rem 0;margin-top:3rem">
+    <div class="container">
+      <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem">
+        <div style="width:18px;height:1.5px;background:var(--reed)"></div>
+        <span style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--reed);text-transform:uppercase;letter-spacing:0.15em">Beyond KYC</span>
+      </div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;color:var(--bone);margin-bottom:0.5rem">The systems that catch what KYC <em style="color:var(--reed)">misses.</em></h2>
+      <p style="font-size:0.85rem;color:rgba(245,240,230,0.45);max-width:560px;margin-bottom:2.5rem;line-height:1.7">KYC confirms identity. These systems detect patterns and behaviours that indicate fraud even from verified accounts.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem" id="deterrenceGrid"></div>
+    </div>
+  </div>
+
+  <!-- Escrow teaser -->
+  <div class="container" style="padding:3rem 2rem">
+    <div style="background:linear-gradient(135deg,var(--forest),#0c1a0d);border-radius:20px;padding:2.5rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--reed);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.7rem">Payment Protection</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:700;color:var(--bone);margin-bottom:0.5rem">Free Escrow. <em style="color:var(--reed)">Always.</em></h3>
+        <p style="font-size:0.85rem;color:rgba(245,240,230,0.5);line-height:1.7;max-width:500px">When a tenant is ready to move in, they deposit rent through HouseNest. We hold it. After inspection and confirmation, we release to the landlord within 2–4 hours. Zero fee. No surprises.</p>
+      </div>
+      <button class="btn btn-clay" style="white-space:nowrap;font-size:0.95rem;padding:0.9rem 1.8rem" onclick="navigateTrust('escrow',null)">See How Escrow Works →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 2: KYC FLOW
+══════════════════════════════════════════════════ -->
+<div class="view" id="view-trust-kyc">
+  <div class="kyc-wrap">
+    <div style="margin-bottom:2rem">
+      <h1 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:700;color:var(--forest)">Get Verified to List</h1>
+      <p style="color:var(--smoke);font-size:0.88rem;margin-top:0.4rem">Complete your verification to publish listings. Each step makes HouseNest safer for everyone.</p>
+    </div>
+
+    <!-- Progress -->
+    <div class="kyc-progress" id="kycProgress">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="kyc-step done" id="kstep-0"><div class="kyc-step-dot">✓</div><div class="kyc-step-label">Phone & Email</div></div>
+      <div class="kyc-step current" id="kstep-1"><div class="kyc-step-dot">2</div><div class="kyc-step-label">Identity</div></div>
+      <div class="kyc-step pending" id="kstep-2"><div class="kyc-step-dot">3</div><div class="kyc-step-label">Property Docs</div></div>
+      <div class="kyc-step pending" id="kstep-3"><div class="kyc-step-dot">4</div><div class="kyc-step-label">Liveness</div></div>
+      <div class="kyc-step pending" id="kstep-4"><div class="kyc-step-dot">5</div><div class="kyc-step-label">Review</div></div>
+    </div>
+
+    <!-- Step panels -->
+    <div id="kycPanels"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 3: ESCROW
+══════════════════════════════════════════════════ -->
+<div class="view" id="view-trust-escrow">
+  <div class="hero-banner" style="padding:2.5rem 2rem">
+    <div class="container" style="position:relative;z-index:1">
+      <div class="hb-label"><div class="hb-label-dot"></div><span class="hb-label-text">HouseNest Escrow Service</span></div>
+      <h1 class="hb-title" style="font-size:2.5rem">Your rent is safe <em>until you're home.</em></h1>
+      <p class="hb-sub">We hold your payment. You inspect. You confirm. We release in 2–4 hours. If anything goes wrong, we mediate. Always free. Always fast.</p>
+    </div>
+  </div>
+
+  <div class="escrow-wrap">
+
+    <!-- Flow steps -->
+    <div style="margin-bottom:1rem">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:700;color:var(--forest);margin-bottom:0.4rem">How the escrow flow works</h2>
+      <p style="font-size:0.83rem;color:var(--smoke)">From payment to keys — every step is tracked and protected.</p>
+    </div>
+    <div class="escrow-flow" id="escrowFlow"></div>
+
+    <!-- Protection pillars -->
+    <div class="protection-grid" id="protectionGrid"></div>
+
+    <hr class="divider">
+
+    <!-- Live escrow transaction demo -->
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--forest);margin-bottom:0.3rem">Live Transaction</h2>
+    <p style="font-size:0.82rem;color:var(--smoke);margin-bottom:1.5rem">See a real escrow transaction in progress — interactive demo below.</p>
+
+    <div class="escrow-card" id="liveTxCard"></div>
+
+    <hr class="divider">
+
+    <!-- Initiate escrow form -->
+    <div class="escrow-form-card">
+      <div class="efc-header">
+        <div class="efc-icon">🏦</div>
+        <div>
+          <div class="efc-title">Initiate Escrow Payment</div>
+          <div class="efc-sub">Tenant deposits rent · HouseNest holds securely · Released on your confirmation</div>
+        </div>
+      </div>
+      <div class="efc-body">
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Listing Reference</label>
+            <input class="f-input" id="escRef" placeholder="e.g. HN-OND-2025-0041" value="HN-OND-2025-0041">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Rental Amount (₦)</label>
+            <input class="f-input" id="escAmount" type="number" placeholder="120000" value="120000">
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Tenant Full Name</label>
+            <input class="f-input" id="escTenant" placeholder="Ngozi Okafor" value="Ngozi Okafor">
+          </div>
+          <div class="f-group">
+            <label class="f-label">Landlord Full Name</label>
+            <input class="f-input" id="escLandlord" placeholder="Mr. Bello Abdullahi" value="Mr. Bello Abdullahi">
+          </div>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Property Address</label>
+          <input class="f-input" id="escAddr" placeholder="14B Adewole Estate, Akure, Ondo State" value="14B Adewole Estate, Akure, Ondo State">
+        </div>
+        <div class="fee-breakdown">
+          <div class="fee-row"><span>Rental Amount</span><span>₦<span id="feeAmount">120,000</span></span></div>
+          <div class="fee-row"><span>HouseNest Escrow Fee</span><span class="free-badge">FREE</span></div>
+          <div class="fee-row"><span>Payment Processing</span><span style="color:var(--ok);font-size:0.78rem">Absorbed by HouseNest</span></div>
+          <div class="fee-row total"><span>Total Tenant Pays</span><span>₦<span id="feeTotal">120,000</span></span></div>
+        </div>
+        <p style="font-size:0.75rem;color:var(--smoke);line-height:1.6;margin-bottom:1.2rem">In production this connects to <strong>Paystack</strong> or <strong>Flutterwave</strong>. Funds are held in a dedicated HouseNest trust account and released only on tenant confirmation or after the 48-hour window. See our <a href="#" style="color:var(--clay)">Escrow Terms</a>.</p>
+        <button class="btn btn-primary btn-full" style="font-size:0.95rem;padding:0.9rem" onclick="initiateEscrow()">🏦 Initiate Escrow Transaction</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     VIEW 4: ADMIN CENTRE
+══════════════════════════════════════════════════ -->
+<div class="view" id="view-trust-admin">
+  <div class="hero-banner" style="padding:2rem">
+    <div class="container" style="position:relative;z-index:1">
+      <div class="hb-label"><div class="hb-label-dot"></div><span class="hb-label-text">HouseNest Admin · Trust Operations</span></div>
+      <h1 class="hb-title" style="font-size:2rem">Trust Operations <em>Centre</em></h1>
+    </div>
+  </div>
+  <div class="admin-wrap">
+    <div class="admin-grid">
+      <div class="admin-sidebar">
+        <div class="admin-nav-label">Verification</div>
+        <button class="admin-nav-btn active" onclick="trustShowAdminPanel('queue',this)"><span>📋</span>KYC Queue <span class="badge" id="queueBadge">4</span></button>
+        <button class="admin-nav-btn" onclick="trustShowAdminPanel('fraud',this)"><span>🚨</span>Fraud Alerts <span class="badge" id="fraudBadge">2</span></button>
+        <button class="admin-nav-btn" onclick="trustShowAdminPanel('verified',this)"><span>✅</span>Verified Users</button>
+        <div class="admin-nav-label">Escrow</div>
+        <button class="admin-nav-btn" onclick="trustShowAdminPanel('escrow-admin',this)"><span>🏦</span>Transactions <span class="badge" id="escBadge">3</span></button>
+        <button class="admin-nav-btn" onclick="trustShowAdminPanel('escrow-disputes',this)"><span>⚖️</span>Disputes</button>
+        <div class="admin-nav-label">Reports</div>
+        <button class="admin-nav-btn" onclick="trustShowAdminPanel('blacklist',this)"><span>🚫</span>Blacklist</button>
+        <button class="admin-nav-btn" onclick="trustShowAdminPanel('stats',this)"><span>📊</span>Statistics</button>
+      </div>
+      <div class="admin-main">
+        <div class="admin-main-header">
+          <div class="admin-section-title" id="adminTitle">KYC Verification Queue</div>
+          <button class="btn btn-sm btn-outline" onclick="trustShowAdminPanel('queue',null)">↻ Refresh</button>
+        </div>
+        <div class="admin-body" id="adminBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  </div>
+</div>
+
+
+
+<!-- ── AFFILIATE PROGRAMME VIEW ───────────────────── -->
+<div class="view" id="view-affiliate">
+  <!-- Affiliate Internal Nav -->
+  <div style="background:var(--ink);padding:0.7rem 2rem;position:sticky;top:64px;z-index:100;display:flex;gap:0.5rem;align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center">
+      <button class="ntab active" onclick="navigateAff('home',this)">🏠 Programme</button>
+      <button class="ntab" onclick="navigateAff('join',this)">✦ Join Now</button>
+      <button class="ntab" onclick="navigateAff('dashboard',this)">📊 Dashboard</button>
+      <button class="ntab" onclick="navigateAff('admin',this)">⚙️ Admin</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.6rem">
+      <div id="affGuestNav" style="display:flex;gap:0.5rem">
+        <button class="nav-btn-ghost" style="font-size:0.8rem;padding:0.3rem 0.8rem" onclick="openAffModal('affAuthModal','login')">Log In</button>
+        <button class="nav-btn-solid" style="font-size:0.8rem;padding:0.3rem 0.8rem" onclick="openAffModal('affAuthModal','signup')">Join Free</button>
+      </div>
+      <div id="affUserNav" style="display:none;align-items:center;gap:0.5rem">
+        <div id="affUserAv" style="width:32px;height:32px;border-radius:50%;background:var(--clay);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;color:white;cursor:pointer" onclick="navigateAff('dashboard',null)" title="My Dashboard"></div>
+        <button style="background:rgba(244,238,216,0.1);color:rgba(244,238,216,0.6);border:1px solid rgba(244,238,216,0.15);padding:0.3rem 0.8rem;border-radius:6px;font-size:0.78rem;cursor:pointer" onclick="affLogout()">Log Out</button>
+      </div>
+      <button class="btn btn-sm" style="background:rgba(244,238,216,0.08);color:rgba(244,238,216,0.5);border:1px solid rgba(244,238,216,0.1);font-size:0.72rem" onclick="navigate('home')">← HouseNest</button>
+    </div>
+  </div>
+  <div class="page" style="padding-top:0">
+
+
+<!-- ════════════════════ HOME / PROGRAMME INFO ════════════════════ -->
+<div class="view active" id="view-aff-home">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-mesh"></div>
+    <div class="hero-grid-bg"></div>
+    <div class="hero-inner container">
+      <div>
+        <div class="hero-eyebrow"><span class="eyebrow-dot"></span><span class="eyebrow-text">HouseNest Affiliate Programme · Southwest Nigeria</span></div>
+        <h1 class="hero-h1">Earn real money<br><em>every time</em> someone<br><span class="flame-word">finds a home.</span></h1>
+        <p class="hero-sub">Share your unique referral code. When a tenant signs a lease or a landlord lists a property through your link, you earn commission — automatically, instantly tracked, paid to your bank account.</p>
+        <div class="hero-ctas">
+          <button class="btn-hero-primary" onclick="openAffModal('affAuthModal','signup')">Get My Referral Code →</button>
+          <button class="btn-hero-secondary" onclick="document.getElementById('tiers-section').scrollIntoView({behavior:'smooth'})">See Commission Rates</button>
+        </div>
+      </div>
+      <div class="hero-right" id="heroPreviews"></div>
+    </div>
+  </section>
+
+  <!-- Tiers -->
+  <section class="section container" id="tiers-section">
+    <div class="eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-label">Commission Tiers</span></div>
+    <h2 class="section-h2">Four tiers. <em>One programme.</em></h2>
+    <p class="section-sub">Your tier determines your commission rate and the tools available to you. NYSC corpers earn the highest rate — because they're on the ground, in the camps, talking to hundreds of prospective tenants every day.</p>
+    <div class="tiers-grid" id="tiersGrid"></div>
+  </section>
+
+  <!-- How it works -->
+  <section class="section section-alt container">
+    <div class="eyebrow"><div class="eyebrow-line"></div><span class="eyebrow-label">How It Works</span></div>
+    <h2 class="section-h2">Three steps to <em>earning.</em></h2>
+    <div class="how-grid">
+      <div class="how-card" data-num="01">
+        <div class="how-icon">🪪</div>
+        <div class="how-title">Sign Up & Choose Your Tier</div>
+        <div class="how-desc">Create your HouseNest affiliate account. Select your role — NYSC Corper, Social Media Influencer, Registered Agent, or General User. Your tier is verified and your unique code is generated instantly.</div>
+      </div>
+      <div class="how-card" data-num="02">
+        <div class="how-icon">📤</div>
+        <div class="how-title">Share Your Code Everywhere</div>
+        <div class="how-desc">Drop your unique link on Twitter, WhatsApp, Instagram Stories, Facebook groups, TikTok — or hand your code to a corper at camp orientation. Every method is tracked. Every referral counts.</div>
+      </div>
+      <div class="how-card" data-num="03">
+        <div class="how-icon">💸</div>
+        <div class="how-title">Get Paid to Your Bank Account</div>
+        <div class="how-desc">Commissions accrue in real time. Withdraw any time you reach ₦2,000 minimum. Paid via Paystack to any Nigerian bank account within 24 hours of withdrawal request.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- What earns commission -->
+  <section class="section section-dark">
+    <div class="container">
+      <div class="eyebrow"><div class="eyebrow-line" style="background:var(--mint)"></div><span class="eyebrow-label" style="color:var(--mint)">What Earns You Money</span></div>
+      <h2 class="section-h2 section-h2-light">Every referral that converts <em style="color:var(--mint)">pays you.</em></h2>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.5rem" id="earnsGrid"></div>
+    </div>
+  </section>
+
+  <!-- Influencer CTA -->
+  <section class="section container">
+    <div style="background:linear-gradient(135deg,#1a3a1e,#080e09);border-radius:24px;padding:3rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;position:relative;overflow:hidden">
+      <div style="position:absolute;right:-40px;bottom:-40px;width:200px;height:200px;border-radius:50%;background:rgba(212,78,26,0.08)"></div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--mint);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.8rem">For Influencers with 5,000+ Followers</div>
+        <h3 style="font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--ivory);line-height:1.1;margin-bottom:0.8rem">Big audience?<br><em style="color:var(--flame)">Big commissions.</em></h3>
+        <p style="font-size:0.85rem;color:rgba(244,238,216,0.5);line-height:1.7">If you have an engaged audience on Twitter/X, Instagram, TikTok, or Facebook — HouseNest is one of the most natural sponsorships you can run. Your audience is moving, relocating, starting fresh. Help them find a home.</p>
+      </div>
+      <div style="background:rgba(244,238,216,0.05);border:1px solid rgba(244,238,216,0.1);border-radius:16px;padding:1.6rem">
+        <div style="font-size:0.72rem;color:rgba(244,238,216,0.35);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;font-family:'IBM Plex Mono',monospace">Sample Earnings — Influencer Tier</div>
+        <div id="earningsCalc"></div>
+        <button class="btn btn-flame btn-full" style="margin-top:1.2rem;font-size:0.9rem" onclick="openAffModal('affAuthModal','signup')">Apply as Influencer →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- NYSC corper callout -->
+  <section style="background:linear-gradient(135deg,var(--flame),var(--ember));padding:4rem 0">
+    <div class="container" style="text-align:center">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.18em;margin-bottom:1rem">Highest Commission Tier</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:800;color:white;margin-bottom:0.8rem">Corpers earn <em>20% commission.</em></h2>
+      <p style="font-size:1rem;color:rgba(255,255,255,0.7);max-width:540px;margin:0 auto 2rem;line-height:1.7">You're at camp with 200–1,000 other corpers who all need somewhere to live. You know the area. You have the credibility. Every corper who signs a lease through your code earns you ₦24,000 on a ₦120,000 house.</p>
+      <button class="btn" style="background:white;color:var(--flame);font-size:1rem;padding:0.9rem 2.5rem;border-radius:50px" onclick="openAffModal('affAuthModal','signup')">Get Your Corper Code →</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="background:var(--night);padding:3rem 0 2rem">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2rem">
+        <div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--ivory);margin-bottom:0.7rem">House<span style="color:var(--flame)">Nest</span> Affiliates</div>
+          <p style="font-size:0.8rem;color:rgba(244,238,216,0.3);line-height:1.7;max-width:260px">Nigeria's highest-paying property referral programme. Serving Ondo, Ekiti, Oyo, Osun and Kwara states.</p>
+        </div>
+        <div><div style="color:var(--ivory);font-weight:700;font-size:0.85rem;margin-bottom:0.8rem">Programme</div>
+          <div style="display:flex;flex-direction:column;gap:0.45rem">
+            <a onclick="document.getElementById('tiers-section').scrollIntoView({behavior:'smooth'})" style="font-size:0.8rem;color:rgba(244,238,216,0.35);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='rgba(244,238,216,0.7)'" onmouseout="this.style.color='rgba(244,238,216,0.35)'">Commission Tiers</a>
+            <a onclick="openAffModal('affAuthModal','signup')" style="font-size:0.8rem;color:rgba(244,238,216,0.35);cursor:pointer;transition:color 0.2s" onmouseover="this.style.color='rgba(244,238,216,0.7)'" onmouseout="this.style.color='rgba(244,238,216,0.35)'">Join Now</a>
+            <a href="#" style="font-size:0.8rem;color:rgba(244,238,216,0.35)">Terms & Conditions</a>
+          </div>
+        </div>
+        <div><div style="color:var(--ivory);font-weight:700;font-size:0.85rem;margin-bottom:0.8rem">Support</div>
+          <div style="display:flex;flex-direction:column;gap:0.45rem">
+            <a href="/cdn-cgi/l/email-protection#c9a8afafa0a5a0a8bdacba89a1a6bcbaaca7acbabde7a7ae" style="font-size:0.8rem;color:rgba(244,238,216,0.35)"><span class="__cf_email__" data-cfemail="bedfd8d8d7d2d7dfcadbcdfed6d1cbcddbd0dbcdca90d0d9">[email&#160;protected]</span></a>
+            <a href="#" style="font-size:0.8rem;color:rgba(244,238,216,0.35)">WhatsApp Support</a>
+            <a href="#" style="font-size:0.8rem;color:rgba(244,238,216,0.35)">FAQ</a>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(244,238,216,0.06);padding-top:1.5rem;font-size:0.72rem;color:rgba(244,238,216,0.18)">
+        © 2025 HouseNest Technology Limited. Affiliate programme terms apply. Commissions paid within 24 hours of withdrawal request via Paystack.
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════════ JOIN / SIGN UP ════════════════════ -->
+<div class="view" id="view-aff-join">
+  <div style="max-width:600px;margin:4rem auto;padding:0 2rem">
+    <div style="text-align:center;margin-bottom:2.5rem">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--flame);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:0.7rem">Start Earning Today</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--forest)">Join the HouseNest<br>Affiliate Programme</h1>
+    </div>
+    <!-- Reuse signup form from modal -->
+    <div class="dash-panel">
+      <div class="dash-panel-body" id="joinFormBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ AFFILIATE DASHBOARD ════════════════════ -->
+<div class="view" id="view-aff-dashboard">
+  <div class="dash-layout">
+    <div class="dash-sidebar" id="affDashSidebar"></div>
+    <div class="dash-main" id="affDashMain"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ ADMIN VIEW ════════════════════ -->
+<div class="view" id="view-aff-admin">
+  <div style="padding:2rem;max-width:1100px;margin:0 auto">
+    <div style="margin-bottom:2rem">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:var(--flame);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:0.5rem">Admin Centre</div>
+      <h1 style="font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--forest)">Affiliate Programme Admin</h1>
+    </div>
+    <div id="affAdminBody"></div>
+  </div>
+</div>
+
+
+  </div>
+  <!-- Auth modal for affiliate -->
+  <div class="modal-bg" id="affAuthModal" onclick="if(event.target===this)closeAffModal('affAuthModal')">
+    <div class="modal" style="font-family:'DM Sans',sans-serif">
+      <div class="modal-h">
+        <div class="modal-title" id="affAuthTitle">Join the Programme</div>
+        <button class="modal-close" onclick="closeAffModal('affAuthModal')">✕</button>
+      </div>
+      <div class="modal-tabs">
+        <button class="mtab active" id="aff-mtab-signup" onclick="affSwitchAuthTab('signup')">Sign Up</button>
+        <button class="mtab" id="aff-mtab-login" onclick="affSwitchAuthTab('login')">Log In</button>
+      </div>
+      <div id="affSignupPanel">
+        <div class="f-group">
+          <div class="f-label">I am joining as a...</div>
+          <div class="role-grid" id="affRoleGrid">
+            <div class="role-card active" data-role="corper" onclick="affPickRole(this)"><div class="rc-icon">🎓</div><div class="rc-name">NYSC Corper</div><div class="rc-comm">20% commission</div></div>
+            <div class="role-card" data-role="influencer" onclick="affPickRole(this)"><div class="rc-icon">📱</div><div class="rc-name">Influencer</div><div class="rc-comm">12% commission</div></div>
+            <div class="role-card" data-role="agent" onclick="affPickRole(this)"><div class="rc-icon">🏢</div><div class="rc-name">Agent / Assoc.</div><div class="rc-comm">15% commission</div></div>
+            <div class="role-card" data-role="user" onclick="affPickRole(this)"><div class="rc-icon">🧑</div><div class="rc-name">General User</div><div class="rc-comm">8% commission</div></div>
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-group"><label class="f-label">First Name</label><input class="f-input" id="aff-su-first" placeholder="Ngozi"><div class="f-err" id="aff-su-first-err">Required</div></div>
+          <div class="f-group"><label class="f-label">Last Name</label><input class="f-input" id="aff-su-last" placeholder="Okafor"><div class="f-err" id="aff-su-last-err">Required</div></div>
+        </div>
+        <div class="f-group"><label class="f-label">Email</label><input class="f-input" id="aff-su-email" type="email" placeholder="ngozi@email.com"><div class="f-err" id="aff-su-email-err">Enter a valid email</div></div>
+        <div class="f-group"><label class="f-label">Phone (WhatsApp)</label><input class="f-input" id="aff-su-phone" type="tel" placeholder="08012345678"><div class="f-err" id="aff-su-phone-err">Enter a valid Nigerian number</div></div>
+        <div id="aff-su-nysc-wrap" style="display:block"><div class="f-group"><label class="f-label">NYSC State Code</label><input class="f-input" id="aff-su-nysc" placeholder="e.g. OD/24A/1234"></div></div>
+        <div id="su-influencer-wrap" style="display:none"><div class="f-group"><label class="f-label">Platform</label><select class="f-input" id="aff-su-platform"><option value="">Select platform</option><option>Instagram</option><option>Twitter/X</option><option>TikTok</option><option>Facebook</option><option>YouTube</option></select></div><div class="f-group"><label class="f-label">Profile URL</label><input class="f-input" id="aff-su-profile" placeholder="https://instagram.com/yourhandle"></div></div>
+        <div id="su-agent-wrap" style="display:none"><div class="f-group"><label class="f-label">Business / Association Name</label><input class="f-input" id="aff-su-bizname" placeholder="e.g. Ilorin Landlords Association"></div></div>
+        <div class="f-group"><label class="f-label">Password</label><input class="f-input" id="aff-su-pass" type="password" placeholder="Min. 8 characters"><div class="f-err" id="aff-su-pass-err">Min. 8 characters</div></div>
+        <div class="f-group"><label class="f-label">Confirm Password</label><input class="f-input" id="aff-su-pass2" type="password" placeholder="Repeat password"><div class="f-err" id="aff-su-pass2-err">Passwords do not match</div></div>
+        <button class="btn btn-primary btn-full" style="margin-top:0.5rem" onclick="affHandleSignup()">Create Account & Get My Code →</button>
+      </div>
+      <div id="affLoginPanel" class="hidden">
+        <div class="f-group"><label class="f-label">Email</label><input class="f-input" id="aff-li-email" type="email" placeholder="your@email.com"></div>
+        <div class="f-group"><label class="f-label">Password</label><input class="f-input" id="aff-li-pass" type="password" placeholder="Your password"><div class="f-err" id="aff-li-pass-err">Incorrect email or password</div></div>
+        <button class="btn btn-primary btn-full" style="margin-top:0.5rem" onclick="affHandleLogin()">Log In →</button>
+        <div style="margin-top:1rem;text-align:center;font-size:0.8rem;color:var(--smoke)">No account yet? <span style="color:var(--clay);cursor:pointer;font-weight:700" onclick="affSwitchAuthTab('signup')">Sign up free</span></div>
+      </div>
+    </div>
+  </div>
+  <!-- Withdraw modal -->
+  <div class="modal-bg" id="affWithdrawModal" onclick="if(event.target===this)closeAffModal('affWithdrawModal')">
+    <div class="modal">
+      <div class="modal-h"><div class="modal-title">Withdraw Earnings</div><button class="modal-close" onclick="closeAffModal('affWithdrawModal')">✕</button></div>
+      <div id="affWithdrawBody"></div>
+    </div>
+  </div>
+  <!-- Text modal -->
+  <div class="modal-bg" id="affTextModal" onclick="if(event.target===this)closeAffModal('affTextModal')">
+    <div class="modal"><div class="modal-h"><div class="modal-title" id="affTextModalTitle"></div><button class="modal-close" onclick="closeAffModal('affTextModal')">✕</button></div><div id="affTextModalBody"></div></div>
+  </div>
+</div><!-- /#view-affiliate -->
+
+
 <!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
@@ -1376,13 +2599,14 @@ function navigate(view, filterCat='', filterState='') {
   el.classList.add('active');
   state.currentView = view;
   window.scrollTo(0,0);
-  // Close mobile menu
   document.getElementById('mobileMenu').classList.remove('open');
 
   if (view==='browse') renderBrowse(filterCat, filterState);
   if (view==='dashboard') renderDashboard();
   if (view==='add-listing') renderAddListingForm();
   if (view==='profile') renderProfile();
+  if (view==='trust') { initTrustModule(); setTimeout(()=>navigateTrust('overview', document.getElementById('tnav-overview')),50); }
+  if (view==='affiliate') { initAffiliateModule(); setTimeout(()=>navigateAff('home', document.querySelector('.ntab')),50); }
 }
 
 function scrollToSection(id) {
@@ -2469,6 +3693,1560 @@ function init() {
 
 document.addEventListener('DOMContentLoaded', init);
 window.addEventListener('popstate', ()=>navigate('home'));
+
+// ── TRUST NAVIGATION ────────────────────────────────
+function navigateTrust(id, btn) {
+  // Show/hide trust sub-views
+  const trustView = document.getElementById('view-trust');
+  if (!trustView) return;
+  trustView.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const target = document.getElementById('view-trust-' + id);
+  if (target) {
+    target.classList.add('active');
+    const trustPage = trustView.querySelector('.page');
+    if (trustPage) trustPage.scrollTo(0,0);
+    window.scrollTo(0,0);
+  }
+  if (btn) {
+    trustView.querySelectorAll('.trust-nav-tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  if (id==='kyc') trustRenderKycStep(kycStep);
+  if (id==='escrow') { trustRenderEscrowFlow(); trustRenderProtection(); trustRenderLiveTx(); }
+  if (id==='admin') trustShowAdminPanel('queue', trustView.querySelector('.admin-nav-btn'));
+  if (id==='overview') trustAnimateStats();
+}
+
+// ── AFFILIATE NAVIGATION ─────────────────────────────
+function navigateAff(id, btn) {
+  const affView = document.getElementById('view-affiliate');
+  if (!affView) return;
+  affView.querySelectorAll('.page .view').forEach(v=>v.classList.remove('active'));
+  const target = affView.querySelector('#view-aff-' + id);
+  if (!target) { const t2 = document.getElementById('view-aff-'+id); if(t2) t2.classList.add('active'); }
+  else target.classList.add('active');
+  window.scrollTo(0,0);
+  if (btn) {
+    affView.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  if (id === 'home') affRenderHome();
+  if (id === 'dashboard') { affUpdateNavState(); if (affCurrentUser) affRenderDashboard(); else openAffModal('affAuthModal','signup'); }
+  if (id === 'admin-view' || id === 'admin') { affUpdateNavState(); if (affCurrentUser?.isAdmin) affRenderAdmin(); else openAffModal('affAuthModal','login'); }
+}
+
+// ── AFFILIATE MODAL HELPERS ──────────────────────────
+function openAffModal(id, tab) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('open');
+  document.body.style.overflow='hidden';
+  if (id==='affAuthModal' && tab) affSwitchAuthTab(tab);
+}
+function closeAffModal(id) {
+  document.getElementById(id)?.classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function affSwitchAuthTab(tab) {
+  document.getElementById('aff-mtab-signup')?.classList.toggle('active', tab==='signup');
+  document.getElementById('aff-mtab-login')?.classList.toggle('active', tab==='login');
+  document.getElementById('affSignupPanel')?.classList.toggle('hidden', tab!=='signup');
+  document.getElementById('affLoginPanel')?.classList.toggle('hidden', tab!=='login');
+}
+
+let affCurrentRole = 'corper';
+function affPickRole(el) {
+  document.querySelectorAll('#affRoleGrid .role-card').forEach(r=>r.classList.remove('active'));
+  el.classList.add('active');
+  affCurrentRole = el.dataset.role;
+  affSelectedRole = el.dataset.role;
+  document.getElementById('aff-su-nysc-wrap').style.display = affCurrentRole==='corper' ? 'block' : 'none';
+  const infWrap = document.getElementById('su-influencer-wrap');
+  const agtWrap = document.getElementById('su-agent-wrap');
+  if(infWrap) infWrap.style.display = affCurrentRole==='influencer' ? 'block' : 'none';
+  if(agtWrap) agtWrap.style.display = affCurrentRole==='agent' ? 'block' : 'none';
+}
+
+
+// ════════════════════════════════════════════════════
+// TRUST CENTRE MODULE
+// ════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════
+// APP STATE
+// ══════════════════════════════════════════════════
+const TrustDB = {
+  get:(k,d=[])=>{ try{return JSON.parse(localStorage.getItem('hntrust_'+k))??d}catch{return d} },
+  set:(k,v)=>localStorage.setItem('hntrust_'+k,JSON.stringify(v)),
+};
+
+let kycStep = 1; // current step (0-indexed)
+let kycUploads = {}; // track uploaded docs
+let reviewStars = 0;
+
+// ══════════════════════════════════════════════════
+// OVERVIEW — animate stats & deterrence grid
+// ══════════════════════════════════════════════════
+function trustAnimateStats() {
+  animCount('stat1','90%',0,90,50,'%');
+  animCount('stat2','12',0,12,120,'');
+  animCount('stat3','₦0',0,100,40,'%',true);
+}
+
+function animCount(id, final, from, to, delay, suffix, prefix=false) {
+  const el=document.getElementById(id);
+  if(!el) return;
+  setTimeout(()=>{
+    let n=from;
+    const step=Math.ceil((to-from)/30);
+    const iv=setInterval(()=>{
+      n=Math.min(n+step,to);
+      el.textContent=(prefix?'₦':'')+n+suffix;
+      if(n>=to){el.textContent=final;clearInterval(iv);}
+    },40);
+  },delay);
+}
+
+const DETERRENCE = [
+  {icon:'🔁',title:'Duplicate Detection',desc:'Same phone number, BVN digits, or device fingerprint = immediate account freeze. One person, one account — enforced automatically.'},
+  {icon:'📍',title:'GPS Metadata Verification',desc:'Property photos are checked for embedded GPS coordinates. If the location metadata contradicts the stated address, the listing is flagged.'},
+  {icon:'🏠',title:'Address Deduplication',desc:'The same property address cannot be listed by two different users without triggering a manual review. Prevents ghost listings.'},
+  {icon:'⏳',title:'24-Hour Listing Hold',desc:'Every new listing from a first-time lister sits in a "pending" state for 24 hours while admin reviews. No fraud goes live instantly.'},
+  {icon:'📞',title:'Admin Phone Call',desc:'Before a new landlord\'s first listing is approved, our team calls them on the listed phone number to verify the conversation is real.'},
+  {icon:'🚩',title:'Community Flagging',desc:'Any registered user can report a listing. Three independent flags from different accounts auto-suspends the listing pending review.'},
+  {icon:'🚫',title:'Permanent Blacklist',desc:'Any NIN, BVN, or phone number confirmed as fraudulent is permanently blacklisted across all HouseNest platforms — no second chances.'},
+  {icon:'💰',title:'₦500 Listing Deposit',desc:'A small refundable deposit to publish deters mass fake listing creation. Returned when the listing is taken down by the legitimate landlord.'},
+  {icon:'🤖',title:'AI Pattern Detection',desc:'Machine learning flags accounts whose listing activity matches known fraud patterns — unusual hours, copy-paste descriptions, price anomalies.'},
+];
+
+function trustRenderDeterrenceGrid() {
+  const g=document.getElementById('deterrenceGrid');
+  if(!g) return;
+  g.innerHTML=DETERRENCE.map(d=>`
+  <div style="background:rgba(245,240,230,0.05);border:1px solid rgba(245,240,230,0.08);border-radius:14px;padding:1.2rem;transition:all 0.2s" onmouseover="this.style.background='rgba(245,240,230,0.09)'" onmouseout="this.style.background='rgba(245,240,230,0.05)'">
+    <div style="font-size:1.5rem;margin-bottom:0.7rem">${d.icon}</div>
+    <div style="font-weight:700;color:var(--bone);font-size:0.88rem;margin-bottom:0.35rem">${d.title}</div>
+    <div style="font-size:0.75rem;color:rgba(245,240,230,0.42);line-height:1.6">${d.desc}</div>
+  </div>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+// KYC FLOW
+// ══════════════════════════════════════════════════
+function showKycStep(n) { kycStep=n; trustRenderKycStep(n); }
+
+function trustRenderKycStep(step) {
+  trustUpdateKycProgress(step);
+  const panels = [step0HTML, step1HTML, step2HTML, step3HTML, step4HTML];
+  const fn = panels[step];
+  if (fn) document.getElementById('kycPanels').innerHTML = fn();
+}
+
+function trustUpdateKycProgress(step) {
+  const total=5;
+  const pct = Math.min((step/total)*100,95);
+  document.getElementById('progressFill').style.width=pct+'%';
+  for(let i=0;i<total;i++){
+    const el=document.getElementById('kstep-'+i);
+    if(!el) continue;
+    el.className='kyc-step '+(i<step?'done':i===step?'current':'pending');
+    el.querySelector('.kyc-step-dot').textContent=i<step?'✓':(i+1);
+  }
+}
+
+// Step 0: Phone + BVN (done state shown as example)
+function step0HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(74,124,78,0.12)">📱</div>
+    <div>
+      <div class="kyc-panel-title">Step 1 — Phone & Email</div>
+      <div class="kyc-panel-sub">Verify your phone number and email address. This step is already complete.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div style="display:flex;flex-direction:column;gap:0.8rem">
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:12px">
+        <span style="font-size:1.3rem">📱</span>
+        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">Phone Verified</div><div style="font-size:0.75rem;color:var(--smoke)">08012345678 · OTP confirmed</div></div>
+        <span style="margin-left:auto;color:var(--ok);font-size:1.1rem">✓</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:12px">
+        <span style="font-size:1.3rem">📧</span>
+        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">Email Verified</div><div style="font-size:0.75rem;color:var(--smoke)">ngozi@email.com · Link clicked</div></div>
+        <span style="margin-left:auto;color:var(--ok);font-size:1.1rem">✓</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem 1rem;background:rgba(42,124,56,0.08);border:1px solid rgba(42,124,56,0.2);border-radius:12px">
+        <span style="font-size:1.3rem">🏦</span>
+        <div><div style="font-weight:700;font-size:0.85rem;color:var(--forest)">BVN Last-4 Checked</div><div style="font-size:0.75rem;color:var(--smoke)">···· ···· 4782 · No duplicates</div></div>
+        <span style="margin-left:auto;color:var(--ok);font-size:1.1rem">✓</span>
+      </div>
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <div class="trust-badge tb-basic">✓ Basic Verified</div>
+    <button class="btn btn-primary btn-sm" onclick="showKycStep(1)">Continue to Identity →</button>
+  </div>
+</div>`; }
+
+// Step 1: Government ID + NIN
+function step1HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(192,90,32,0.12)">🪪</div>
+    <div>
+      <div class="kyc-panel-title">Step 2 — Personal Identity</div>
+      <div class="kyc-panel-sub">Upload your NIN and a valid government-issued ID. Required before you can publish any listing.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div class="f-group">
+      <label class="f-label">National Identification Number (NIN)</label>
+      <div class="bvn-row">
+        <input class="f-input" id="ninInput" placeholder="12345678901" maxlength="11" style="letter-spacing:0.12em;font-family:'Space Mono',monospace">
+        <button class="bvn-verify-btn" onclick="verifyNIN()">Verify NIN</button>
+      </div>
+      <div class="f-hint">Your 11-digit NIN from your NIMC slip or NIN card</div>
+      <div class="f-err" id="ninErr">NIN must be exactly 11 digits</div>
+    </div>
+    <div class="f-group">
+      <label class="f-label">ID Type</label>
+      <select class="f-select" id="idType">
+        <option value="">Select your ID type</option>
+        <option>National ID Card (NIN Card)</option>
+        <option>International Passport</option>
+        <option>Driver's Licence</option>
+        <option>Permanent Voter's Card (PVC)</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Upload Government ID (Front)</label>
+      <div class="upload-zone" id="uz-id-front" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleUzDrop(event,'id-front')">
+        <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'id-front')">
+        <div class="uz-default">
+          <div class="uz-icon">🪪</div>
+          <div class="uz-title">Upload ID Front</div>
+          <div class="uz-sub">JPG, PNG or PDF · Max 5MB · Must be clear, unobstructed</div>
+        </div>
+        <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-id-front-name">Uploaded</div></div>
+      </div>
+    </div>
+    <div class="f-row">
+      <div class="f-group">
+        <label class="f-label">Upload ID Back</label>
+        <div class="upload-zone" id="uz-id-back" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleUzDrop(event,'id-back')">
+          <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'id-back')">
+          <div class="uz-default"><div class="uz-icon">🔄</div><div class="uz-title">ID Back</div><div class="uz-sub">If applicable</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-id-back-name">Uploaded</div></div>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Upload Clear Selfie</label>
+        <div class="upload-zone" id="uz-selfie" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleUzDrop(event,'selfie')">
+          <input type="file" accept="image/*" capture="user" onchange="handleUzFile(this,'selfie')">
+          <div class="uz-default"><div class="uz-icon">🤳</div><div class="uz-title">Selfie</div><div class="uz-sub">Face clearly visible, good lighting</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-selfie-name">Uploaded</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:rgba(192,90,32,0.06);border:1px solid rgba(192,90,32,0.15);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:var(--clay);line-height:1.6">
+      <strong>⚠️ Important:</strong> Ensure your ID is not expired, not blurry, and matches your registered name exactly. Mismatched names will be rejected. Documents are encrypted and stored securely — never shared with third parties.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <button class="btn btn-ghost btn-sm" onclick="showKycStep(0)">← Back</button>
+    <button class="btn btn-primary btn-sm" onclick="submitIdentity()">Submit Identity Documents →</button>
+  </div>
+</div>`; }
+
+// Step 2: Property documents
+function step2HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(140,72,188,0.12)">🏠</div>
+    <div>
+      <div class="kyc-panel-title">Step 3 — Property Ownership</div>
+      <div class="kyc-panel-sub">Prove ownership or right to rent out the specific property you're listing. One set per property.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div class="f-group">
+      <label class="f-label">Property Ownership Document Type</label>
+      <select class="f-select" id="propDocType">
+        <option value="">Select document type</option>
+        <option>Certificate of Occupancy (C of O)</option>
+        <option>Right of Occupancy (R of O)</option>
+        <option>Deed of Assignment</option>
+        <option>Landlord Association Letter + Chairman NIN</option>
+        <option>Governor's Consent</option>
+        <option>Registered Survey Plan</option>
+      </select>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Upload Ownership Document</label>
+      <div class="upload-zone" id="uz-prop-doc" ondrop="handleUzDrop(event,'prop-doc')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+        <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'prop-doc')">
+        <div class="uz-default"><div class="uz-icon">📄</div><div class="uz-title">Ownership Document</div><div class="uz-sub">PDF or clear image · All pages if multi-page</div></div>
+        <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-prop-doc-name">Uploaded</div></div>
+      </div>
+    </div>
+    <div class="f-row">
+      <div class="f-group">
+        <label class="f-label">Utility Bill (same address)</label>
+        <div class="upload-zone" id="uz-utility" ondrop="handleUzDrop(event,'utility')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+          <input type="file" accept="image/*,.pdf" onchange="handleUzFile(this,'utility')">
+          <div class="uz-default"><div class="uz-icon">💡</div><div class="uz-title">Utility Bill</div><div class="uz-sub">BEDC/IBEDC/EKEDC · Not older than 3 months</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-utility-name">Uploaded</div></div>
+        </div>
+      </div>
+      <div class="f-group">
+        <label class="f-label">Property Photo (GPS on)</label>
+        <div class="upload-zone" id="uz-prop-photo" ondrop="handleUzDrop(event,'prop-photo')" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')">
+          <input type="file" accept="image/*" capture="environment" onchange="handleUzFile(this,'prop-photo')">
+          <div class="uz-default"><div class="uz-icon">📍</div><div class="uz-title">Property Photo + GPS</div><div class="uz-sub">Enable location on camera app first</div></div>
+          <div class="uz-success"><div class="uz-success-icon">✓</div><div class="uz-success-text" id="uz-prop-photo-name">Uploaded</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="background:rgba(140,72,188,0.06);border:1px solid rgba(140,72,188,0.15);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:#6c2a9c;line-height:1.6">
+      <strong>📍 GPS Note:</strong> Take the property photo with your phone's location services enabled. We cross-reference the GPS coordinates embedded in the photo against your stated address. A mismatch sends the listing to manual review.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <button class="btn btn-ghost btn-sm" onclick="showKycStep(1)">← Back</button>
+    <button class="btn btn-primary btn-sm" onclick="submitPropertyDocs()">Submit Property Documents →</button>
+  </div>
+</div>`; }
+
+// Step 3: Liveness check
+function step3HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(32,80,160,0.12)">👁️</div>
+    <div>
+      <div class="kyc-panel-title">Step 4 — Liveness Check</div>
+      <div class="kyc-panel-sub">Hold up the code shown below to your camera. This proves a real human is behind this account — not a bot or photo spoofing.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div class="liveness-box">
+      <div class="liveness-cam">
+        <div class="liveness-cam-placeholder">
+          <div class="cam-icon">📷</div>
+          <div style="font-size:0.82rem;text-align:center">Camera feed appears here<br><small style="opacity:0.5">Production: uses device camera API</small></div>
+        </div>
+        <div class="liveness-frame"></div>
+      </div>
+      <div class="liveness-code-display">
+        <div>
+          <div style="font-size:0.65rem;color:rgba(245,240,230,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.4rem">Hold up this code to the camera</div>
+          <div class="liveness-code" id="livenessCode">A7 • 3K</div>
+        </div>
+        <div class="liveness-instruction">Write this 4-character code on a piece of paper and hold it up clearly in frame. Our system verifies it's you.</div>
+      </div>
+    </div>
+    <div style="margin-top:1.2rem;display:flex;gap:0.6rem">
+      <button class="btn btn-outline btn-sm" onclick="refreshLivenessCode()">🔄 New Code</button>
+      <button class="btn btn-primary btn-sm" onclick="submitLiveness()" style="flex:1">✓ I've Shown the Code — Verify Me</button>
+    </div>
+    <div style="margin-top:1rem;background:rgba(32,80,160,0.06);border:1px solid rgba(32,80,160,0.15);border-radius:10px;padding:0.9rem;font-size:0.78rem;color:#2050a0;line-height:1.6">
+      <strong>🤖 Why liveness?</strong> Standard ID upload can be spoofed with a photo of someone else's ID. The liveness check with a unique random code proves you're physically present and in possession of your body — not a fraud account using stolen identity.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <button class="btn btn-ghost btn-sm" onclick="showKycStep(2)">← Back</button>
+    <span style="font-size:0.75rem;color:var(--smoke)">Code refreshes every 60 seconds</span>
+  </div>
+</div>`; }
+
+// Step 4: Review & submit
+function step4HTML() { return `
+<div class="kyc-panel">
+  <div class="kyc-panel-header">
+    <div class="kyc-panel-icon" style="background:rgba(42,124,56,0.12)">🎉</div>
+    <div>
+      <div class="kyc-panel-title">Step 5 — Under Review</div>
+      <div class="kyc-panel-sub">Your documents have been submitted. Our verification team reviews within 24 hours.</div>
+    </div>
+  </div>
+  <div class="kyc-panel-body">
+    <div style="text-align:center;padding:1.5rem 0">
+      <div style="font-size:4rem;margin-bottom:1rem">⏳</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:var(--forest);margin-bottom:0.6rem">Documents under review</h3>
+      <p style="font-size:0.85rem;color:var(--smoke);max-width:380px;margin:0 auto;line-height:1.7">A member of our verification team will manually review your documents, cross-check your NIN with NIMC, and call your phone number to confirm. This takes up to 24 hours.</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.6rem;margin-top:1.5rem">
+      ${['NIN submitted · Cross-check with NIMC in progress','Government ID uploaded · Face-match running','Property documents submitted · Address verification in progress','Liveness check completed · Anti-spoofing confirmed'].map((t,i)=>`
+      <div style="display:flex;align-items:center;gap:0.8rem;padding:0.75rem 0.9rem;background:var(--mist);border-radius:10px">
+        <div style="width:28px;height:28px;border-radius:8px;background:${i===3?'rgba(42,124,56,0.15)':'rgba(200,120,32,0.12)'};display:flex;align-items:center;justify-content:center;font-size:0.8rem">${i===3?'✓':'⏳'}</div>
+        <span style="font-size:0.82rem;color:var(--forest)">${t}</span>
+      </div>`).join('')}
+    </div>
+    <div style="margin-top:1.5rem;background:rgba(42,124,56,0.06);border:1px solid rgba(42,124,56,0.15);border-radius:12px;padding:1.1rem;font-size:0.82rem;color:var(--ok);line-height:1.6">
+      <strong>✉️ Next steps:</strong> You'll receive an SMS and email when your account is approved. Once verified, you can immediately publish your first listing. If we need clarification on any document, we'll call you on your registered number.
+    </div>
+  </div>
+  <div class="kyc-panel-footer">
+    <span class="trust-badge tb-basic">⏳ Under Review</span>
+    <button class="btn btn-outline btn-sm" onclick="navigateTrust('overview',document.getElementById('tnav-overview'))">Back to Overview</button>
+  </div>
+</div>`; }
+
+// KYC actions
+function verifyNIN() {
+  const nin = document.getElementById('ninInput')?.value.trim();
+  const err = document.getElementById('ninErr');
+  if (!/^\d{11}$/.test(nin)) { err.classList.add('show'); return; }
+  err.classList.remove('show');
+  toast('success','✅ NIN format valid — cross-checking with NIMC database...');
+  setTimeout(()=>toast('success','✓ NIN verified successfully! No duplicates found.'),2000);
+}
+
+function handleUzFile(input, key) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5*1024*1024) { toast('error','File too large — max 5MB'); return; }
+  kycUploads[key] = file.name;
+  const zone = document.getElementById('uz-'+key);
+  const nameEl = document.getElementById('uz-'+key+'-name');
+  if (zone) zone.classList.add('uploaded');
+  if (nameEl) nameEl.textContent = file.name.length>22 ? file.name.slice(0,20)+'...' : file.name;
+  toast('success','📎 '+file.name+' uploaded');
+}
+
+function handleUzDrop(e, key) {
+  e.preventDefault();
+  const zone = document.getElementById('uz-'+key);
+  zone?.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file) { kycUploads[key]=file.name; zone?.classList.add('uploaded'); toast('success','📎 '+file.name+' uploaded'); }
+}
+
+function submitIdentity() {
+  const nin = document.getElementById('ninInput')?.value;
+  const idType = document.getElementById('idType')?.value;
+  if (!nin || nin.length!==11) { toast('error','Please enter and verify your NIN'); return; }
+  if (!idType) { toast('error','Please select an ID type'); return; }
+  if (!kycUploads['id-front']) { toast('error','Please upload your ID front'); return; }
+  if (!kycUploads['selfie']) { toast('error','Please upload your selfie'); return; }
+  toast('success','✅ Identity documents submitted successfully!');
+  setTimeout(()=>showKycStep(2),800);
+}
+
+function submitPropertyDocs() {
+  if (!document.getElementById('propDocType')?.value) { toast('error','Please select document type'); return; }
+  if (!kycUploads['prop-doc']) { toast('error','Please upload ownership document'); return; }
+  toast('success','✅ Property documents submitted!');
+  setTimeout(()=>showKycStep(3),800);
+}
+
+const LIVENESS_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function trustGenLivenessCode() {
+  const r=()=>LIVENESS_CHARS[Math.floor(Math.random()*LIVENESS_CHARS.length)];
+  return r()+r()+' • '+r()+r();
+}
+function refreshLivenessCode() {
+  const el=document.getElementById('livenessCode');
+  if(el){el.style.opacity='0';setTimeout(()=>{el.textContent=trustGenLivenessCode();el.style.opacity='1';el.style.transition='opacity 0.3s'},200);}
+}
+function submitLiveness() {
+  toast('success','✅ Liveness check submitted — processing...');
+  setTimeout(()=>{ toast('success','✓ Liveness confirmed! Proceeding to review...'); setTimeout(()=>showKycStep(4),600); },1500);
+}
+
+// Auto-refresh liveness code every 60s
+setInterval(()=>{ if(document.getElementById('livenessCode')) refreshLivenessCode(); },60000);
+
+// ══════════════════════════════════════════════════
+// ESCROW FLOW
+// ══════════════════════════════════════════════════
+const ESCROW_STEPS = [
+  {icon:'💳',label:'Tenant Pays',desc:'Tenant deposits rent via Paystack/Flutterwave',time:'Instant',color:'var(--e-pending)',bg:'rgba(200,120,32,0.12)'},
+  {icon:'🏦',label:'Funds Held',desc:'HouseNest holds in trust account',time:'< 5 mins',color:'var(--e-funded)',bg:'rgba(32,80,160,0.12)'},
+  {icon:'🔑',label:'Inspection',desc:'Tenant inspects property — 48hr window',time:'Up to 48hrs',color:'var(--e-inspect)',bg:'rgba(140,72,188,0.12)'},
+  {icon:'✅',label:'Confirmed',desc:'Tenant confirms space is as described',time:'Tenant action',color:'var(--e-confirmed)',bg:'rgba(42,124,56,0.12)'},
+  {icon:'💸',label:'Released',desc:'Funds hit landlord account',time:'2–4 hours',color:'var(--e-released)',bg:'rgba(27,58,30,0.15)'},
+];
+
+function trustRenderEscrowFlow() {
+  const f=document.getElementById('escrowFlow');
+  if(!f) return;
+  f.innerHTML=ESCROW_STEPS.map((s,i)=>`
+  <div class="ef-step">
+    <div class="ef-dot" style="background:${s.bg};border-color:${s.color};color:${s.color}">
+      ${s.icon}
+    </div>
+    <div class="ef-label" style="color:${s.color};font-weight:700">${s.label}</div>
+    <div class="ef-time">${s.time}</div>
+  </div>`).join('');
+}
+
+const PROTECTION = [
+  {icon:'🛡️',title:'Tenant Protection',desc:'If the property doesn\'t match the listing, the tenant raises a dispute within 48 hours. HouseNest mediates. If valid, full refund within 3 working days.'},
+  {icon:'🤝',title:'Landlord Protection',desc:'Funds are committed the moment the tenant deposits. No fake interest, no time-wasters. A tenant who has paid is a tenant who is serious.'},
+  {icon:'⚖️',title:'Dispute Mediation',desc:'Our legal team handles disputes with documented evidence. We aim to resolve in 3–5 working days. Court escalation available for unresolved cases.'},
+];
+
+function trustRenderProtection() {
+  const g=document.getElementById('protectionGrid');
+  if(!g) return;
+  g.innerHTML=PROTECTION.map(p=>`
+  <div class="prot-card">
+    <div class="prot-icon">${p.icon}</div>
+    <div class="prot-title">${p.title}</div>
+    <div class="prot-desc">${p.desc}</div>
+  </div>`).join('');
+}
+
+function trustRenderLiveTx() {
+  document.getElementById('liveTxCard').innerHTML=`
+  <div class="ec-header">
+    <div>
+      <div style="font-weight:700;font-size:0.9rem;color:var(--ink)">Transaction #HN-ESC-2025-0041</div>
+      <div class="ec-ref">Initiated 2 hours ago · Ondo State</div>
+    </div>
+    <div class="ec-state-badge" style="background:rgba(140,72,188,0.12);color:#8c48bc;border:1px solid rgba(140,72,188,0.25)">🔑 Inspection Period</div>
+  </div>
+  <div class="ec-body">
+    <div class="ec-amount">₦120,000</div>
+    <div class="ec-listing">Self-Contain Near FUTA, Akure, Ondo State</div>
+    <div style="font-size:0.78rem;color:var(--smoke)">Annual rent · 1 year tenancy</div>
+    <div class="ec-parties">
+      <div class="ec-party">
+        <div class="ec-party-av" style="background:#2a5c2e">N</div>
+        <div><div class="ec-party-role">Tenant</div><div class="ec-party-name">Ngozi Okafor</div></div>
+      </div>
+      <div style="color:var(--ash);font-size:1.2rem;align-self:center">→</div>
+      <div class="ec-party">
+        <div class="ec-party-av" style="background:#5c3020">B</div>
+        <div><div class="ec-party-role">Landlord</div><div class="ec-party-name">Mr. Bello Abdullahi</div></div>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--mist);margin:1.2rem 0">
+    <div style="font-weight:700;font-size:0.85rem;color:var(--forest);margin-bottom:1rem">Transaction Timeline</div>
+    <div class="ec-timeline">
+      <div class="ect-item"><div class="ect-dot ect-done">💳</div><div><div class="ect-label">Step 1</div><div class="ect-text">Payment Received</div><div class="ect-time">Today 09:14 AM · ₦120,000 via Paystack</div></div></div>
+      <div class="ect-item"><div class="ect-dot ect-done">🏦</div><div><div class="ect-label">Step 2</div><div class="ect-text">Funds Secured in Escrow</div><div class="ect-time">Today 09:19 AM · HouseNest Trust Account</div></div></div>
+      <div class="ect-item"><div class="ect-dot ect-active">🔑</div><div><div class="ect-label">Step 3 — Active now</div><div class="ect-text">Inspection Period (46hrs remaining)</div><div class="ect-time">Tenant must inspect and confirm by Tomorrow 09:14 AM</div></div></div>
+      <div class="ect-item"><div class="ect-dot ect-pending">✅</div><div><div class="ect-label">Step 4 — Pending</div><div class="ect-text">Awaiting Tenant Confirmation</div><div class="ect-time">—</div></div></div>
+      <div class="ect-item" style="padding-bottom:0"><div class="ect-dot ect-pending">💸</div><div><div class="ect-label">Step 5 — Pending</div><div class="ect-text">Funds Release to Landlord</div><div class="ect-time">— (within 2–4hrs of confirmation)</div></div></div>
+    </div>
+  </div>
+  <div style="padding:1.2rem 1.8rem;border-top:1px solid var(--mist);display:flex;gap:0.7rem;flex-wrap:wrap;background:var(--mist)">
+    <button class="btn btn-success btn-sm" onclick="confirmEscrow()">✅ Confirm Move-In & Release Funds</button>
+    <button class="btn btn-sm" style="background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2)" onclick="raiseDispute()">⚠️ Raise a Dispute</button>
+    <button class="btn btn-outline btn-sm" onclick="toast('success','📋 Transaction receipt copied to clipboard')">📋 Copy Reference</button>
+  </div>`;
+}
+
+function confirmEscrow() {
+  toast('success','✅ Move-in confirmed! Releasing ₦120,000 to landlord...');
+  setTimeout(()=>toast('success','💸 ₦120,000 released to Mr. Bello Abdullahi · Arrives within 2–4 hours'),2000);
+  setTimeout(()=>trustRenderLiveTx(),4000);
+}
+
+function raiseDispute() {
+  toast('info','⚠️ Dispute raised. Our legal team will contact you within 24 hours to begin mediation.');
+}
+
+function initiateEscrow() {
+  const amount = parseFloat(document.getElementById('escAmount')?.value)||0;
+  const tenant = document.getElementById('escTenant')?.value.trim();
+  const landlord = document.getElementById('escLandlord')?.value.trim();
+  const addr = document.getElementById('escAddr')?.value.trim();
+  if (!amount||!tenant||!landlord||!addr) { toast('error','Please fill all fields'); return; }
+  toast('success','🏦 Escrow initiated! In production, this opens the Paystack payment modal...');
+  setTimeout(()=>toast('success','💳 Connecting to Paystack — ₦'+amount.toLocaleString()+' to be held in escrow'),1500);
+}
+
+document.getElementById('escAmount')?.addEventListener('input',function(){
+  const v = parseFloat(this.value)||0;
+  document.getElementById('feeAmount').textContent=v.toLocaleString();
+  document.getElementById('feeTotal').textContent=v.toLocaleString();
+});
+
+// ══════════════════════════════════════════════════
+// ADMIN CENTRE
+// ══════════════════════════════════════════════════
+const KYC_QUEUE = [
+  {id:'u1',name:'Adebayo Olusola',role:'Landlord',phone:'08023456789',submitted:'2hrs ago',risk:'low',docs:['NIN ✓','ID Front ✓','Selfie ✓','C of O ✓','Utility Bill ✓'],notes:'Documents look clean. Address matches utility bill. NIN verified.'},
+  {id:'u2',name:'Chisom Eze',role:'Agent',phone:'07034567890',submitted:'4hrs ago',risk:'med',docs:['NIN ✓','ID Front ✓','CAC Cert ⚠️'],notes:'CAC certificate is partially obscured. Needs resubmission of page 2.'},
+  {id:'u3',name:'Fatimah Bello',role:'Landlord',phone:'09056789012',submitted:'6hrs ago',risk:'high',docs:['NIN ✓','ID Front ✓','Selfie ✓','R of O ✓'],notes:'GPS metadata on property photo shows location 8km from stated address. Flagged for call verification.'},
+  {id:'u4',name:'Emeka Nwosu',role:'Association',phone:'08167890123',submitted:'1day ago',risk:'low',docs:['NIN ✓','CAC Cert ✓','Chairman NIN ✓','Association Letter ✓'],notes:'All documents verified. Association has 14 existing members. Clean history.'},
+];
+
+const FRAUD_ALERTS = [
+  {level:'high',icon:'🚨',title:'Duplicate NIN detected',detail:'NIN 12345678901 was used to register 3 accounts (u234, u567, u890) in the past 48 hours. Two accounts from different phone numbers. Likely fraud ring.',id:'fa1'},
+  {level:'med',icon:'⚠️',title:'GPS location mismatch — Listing HN-EKT-0042',detail:'Listed address: "12 GRA Ado-Ekiti". GPS coordinates in property photo: 7.2°N, 5.1°E — which places it in Efon-Alaaye, 45km away. Could be honest error or deliberate misdirection.',id:'fa2'},
+  {level:'low',icon:'ℹ️',title:'New lister submitted 4 listings in 2 hours',detail:'User u1024 (verified landlord) submitted 4 listings within 2 hours of account creation. Unusual speed but documents check out. Monitor first 30 days.',id:'fa3'},
+];
+
+const ESCROW_TXS = [
+  {ref:'HN-ESC-0041',tenant:'Ngozi Okafor',landlord:'Bello Abdullahi',amount:'₦120,000',state:'Inspection',stateColor:'var(--e-inspect)',since:'2hrs ago'},
+  {ref:'HN-ESC-0039',tenant:'Taiwo Adeyemi',landlord:'Chief Olusola',amount:'₦95,000',state:'Confirmed',stateColor:'var(--e-confirmed)',since:'5hrs ago'},
+  {ref:'HN-ESC-0038',tenant:'Musa Garba',landlord:'Mrs. Lawal',amount:'₦180,000',state:'Funded',stateColor:'var(--e-funded)',since:'8hrs ago'},
+];
+
+const VERIFIED_USERS = [
+  {name:'Adebayo Olusola',role:'Landlord',tier:'Property Verified',badge:'tb-verified',since:'3 days ago',listings:2},
+  {name:'Emeka Nwosu',role:'Association',tier:'Business Verified',badge:'tb-full',since:'1 week ago',listings:14},
+  {name:'Ngozi Okafor',role:'Tenant',tier:'Basic Verified',badge:'tb-basic',since:'Today',listings:0},
+];
+
+function trustShowAdminPanel(panel, btn) {
+  if(btn){ document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  const title=document.getElementById('adminTitle');
+  const body=document.getElementById('adminBody');
+
+  if(panel==='queue'){
+    title.textContent='KYC Verification Queue';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">4</div><div class="stat-tile-l">Pending Review</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">2</div><div class="stat-tile-l">High Risk Flags</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">12</div><div class="stat-tile-l">Approved Today</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">1</div><div class="stat-tile-l">Rejected Today</div></div>
+    </div>
+    ${KYC_QUEUE.map(u=>`
+    <div class="vq-item">
+      <div class="vq-avatar" style="background:${u.risk==='high'?'#c8323c':u.risk==='med'?'#c87820':'#2a7c38'}">${u.name[0]}</div>
+      <div class="vq-info">
+        <div class="vq-name">${u.name} <span class="risk-tag risk-${u.risk}" style="margin-left:0.4rem">${u.risk==='high'?'🚨 High Risk':u.risk==='med'?'⚠️ Review':'✓ Low Risk'}</span></div>
+        <div class="vq-role">${u.role} · ${u.phone} · Submitted ${u.submitted}</div>
+        <div class="vq-docs">${u.docs.map(d=>`<span class="vq-doc ${d.includes('✓')?'ok':d.includes('⚠️')?'warn':''}">${d}</span>`).join('')}</div>
+        <div style="font-size:0.72rem;color:var(--smoke);margin-top:0.4rem;font-style:italic">${u.notes}</div>
+      </div>
+      <div class="vq-actions">
+        <button class="vq-approve" onclick="approveKyc('${u.id}','${u.name}')">✓ Approve</button>
+        <button class="vq-reject" onclick="rejectKyc('${u.id}','${u.name}')">✕ Reject</button>
+        <button class="btn btn-sm btn-outline" style="font-size:0.7rem" onclick="reviewDocs('${u.name}','${u.docs}')">View Docs</button>
+      </div>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='fraud'){
+    title.textContent='Fraud Detection Alerts';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">2</div><div class="stat-tile-l">Active Alerts</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">1</div><div class="stat-tile-l">High Priority</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">8</div><div class="stat-tile-l">Blocked This Week</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">3</div><div class="stat-tile-l">On Blacklist</div></div>
+    </div>
+    ${FRAUD_ALERTS.map(a=>`
+    <div class="fraud-alert fa-${a.level}">
+      <div class="fa-icon">${a.icon}</div>
+      <div style="flex:1"><div class="fa-title">${a.title}</div><div class="fa-detail">${a.detail}</div></div>
+      <div class="fa-actions">
+        <button class="fa-btn fa-dismiss" onclick="toast('success','Alert dismissed')">Dismiss</button>
+        ${a.level==='high'?`<button class="fa-btn fa-block" onclick="toast('error','Account blocked and NIN blacklisted')">Block</button>`:`<button class="fa-btn fa-review" onclick="toast('info','Escalated to senior review')">Escalate</button>`}
+      </div>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='verified'){
+    title.textContent='Verified Users';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">28</div><div class="stat-tile-l">Fully Verified</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">14</div><div class="stat-tile-l">Property Verified</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">47</div><div class="stat-tile-l">Basic Verified</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">3</div><div class="stat-tile-l">Pending</div></div>
+    </div>
+    ${VERIFIED_USERS.map(u=>`
+    <div class="vq-item">
+      <div class="vq-avatar" style="background:var(--moss)">${u.name[0]}</div>
+      <div class="vq-info">
+        <div class="vq-name">${u.name}</div>
+        <div class="vq-role">${u.role} · ${u.listings} listing${u.listings!==1?'s':''} · Verified ${u.since}</div>
+      </div>
+      <span class="trust-badge ${u.badge}">${u.tier}</span>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='escrow-admin'){
+    title.textContent='Escrow Transactions';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">₦1.2M</div><div class="stat-tile-l">Currently Held</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">3</div><div class="stat-tile-l">Active Transactions</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">₦8.4M</div><div class="stat-tile-l">Released This Month</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">0</div><div class="stat-tile-l">Overdue Releases</div></div>
+    </div>
+    <table class="esc-table">
+      <thead><tr><th>Reference</th><th>Tenant</th><th>Landlord</th><th>Amount</th><th>Status</th><th>Since</th><th>Action</th></tr></thead>
+      <tbody>
+        ${ESCROW_TXS.map(t=>`<tr>
+          <td style="font-family:'Space Mono',monospace;font-size:0.72rem">${t.ref}</td>
+          <td>${t.tenant}</td>
+          <td>${t.landlord}</td>
+          <td style="font-weight:700">${t.amount}</td>
+          <td><span style="padding:0.18rem 0.55rem;border-radius:50px;font-size:0.65rem;font-weight:700;background:${t.stateColor}22;color:${t.stateColor}">${t.state}</span></td>
+          <td style="color:var(--smoke);font-size:0.78rem">${t.since}</td>
+          <td><button class="esc-action-btn ${t.state==='Confirmed'?'release':''}" onclick="adminRelease('${t.ref}','${t.amount}')">${t.state==='Confirmed'?'Release Funds':'View'}</button></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }
+
+  else if(panel==='escrow-disputes'){
+    title.textContent='Dispute Cases';
+    body.innerHTML=`<div style="text-align:center;padding:3rem">
+      <div style="font-size:3rem;margin-bottom:1rem">⚖️</div>
+      <div style="font-weight:700;color:var(--forest);margin-bottom:0.5rem">No active disputes</div>
+      <p style="font-size:0.85rem;color:var(--smoke)">All current transactions are proceeding normally. Disputed transactions will appear here with full mediation tools.</p>
+    </div>`;
+  }
+
+  else if(panel==='blacklist'){
+    title.textContent='Permanent Blacklist';
+    body.innerHTML=`
+    <div style="background:rgba(200,50,60,0.06);border:1px solid rgba(200,50,60,0.15);border-radius:12px;padding:1.1rem;margin-bottom:1.2rem;font-size:0.82rem;color:var(--err);line-height:1.6">
+      <strong>🚫 Blacklisted identifiers</strong> are permanently banned across all HouseNest platforms. A blacklisted NIN, phone, or BVN cannot be used to create a new account under any circumstances.
+    </div>
+    ${[
+      {type:'NIN',value:'12345●●●●901',reason:'Duplicate fraud ring — 3 fake accounts',date:'Today'},
+      {type:'Phone',value:'0803●●●●899',reason:'Attempted listing of non-existent property — verified by site visit',date:'3 days ago'},
+      {type:'NIN',value:'98765●●●●432',reason:'Fake C of O document submitted — document verified as forged by land registry',date:'1 week ago'},
+    ].map(b=>`
+    <div style="display:flex;align-items:center;gap:1rem;padding:0.9rem;border:1px solid rgba(200,50,60,0.15);border-radius:10px;margin-bottom:0.5rem">
+      <span style="background:rgba(200,50,60,0.1);color:var(--err);padding:0.2rem 0.6rem;border-radius:50px;font-size:0.68rem;font-weight:700;flex-shrink:0">${b.type}</span>
+      <code style="font-size:0.82rem;color:var(--ink)">${b.value}</code>
+      <div style="flex:1;font-size:0.78rem;color:var(--smoke)">${b.reason}</div>
+      <div style="font-size:0.7rem;color:var(--ash);flex-shrink:0">${b.date}</div>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='stats'){
+    title.textContent='Platform Statistics';
+    body.innerHTML=`
+    <div class="stats-bar">
+      <div class="stat-tile"><div class="stat-tile-n">91%</div><div class="stat-tile-l">Fraud Deterrence Rate</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">24hrs</div><div class="stat-tile-l">Avg. Verification Time</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">2.3hrs</div><div class="stat-tile-l">Avg. Escrow Release</div></div>
+      <div class="stat-tile"><div class="stat-tile-n">0</div><div class="stat-tile-l">Unresolved Disputes</div></div>
+    </div>
+    <div style="background:var(--mist);border-radius:12px;padding:1.5rem;text-align:center">
+      <div style="font-size:2rem;margin-bottom:0.8rem">📊</div>
+      <p style="font-size:0.85rem;color:var(--smoke)">Full charts — daily verifications, escrow volume, fraud attempts by state — available in production connected to live data (Chart.js or Recharts).</p>
+    </div>`;
+  }
+}
+
+function approveKyc(id, name) {
+  toast('success','✅ '+name+' approved! Account is now Verified. SMS sent.');
+  document.getElementById('queueBadge').textContent=Math.max(0,parseInt(document.getElementById('queueBadge').textContent)-1);
+}
+
+function rejectKyc(id, name) {
+  toast('error','✕ '+name+' rejected. SMS sent with reason. Documents cleared from server.');
+}
+
+function reviewDocs(name, docs) {
+  document.getElementById('docModalTitle').textContent='Documents — '+name;
+  document.getElementById('docModalBody').innerHTML=`
+  <p style="font-size:0.85rem;color:var(--smoke);margin-bottom:1.2rem">Review each document carefully. Check for clarity, date validity, and that names match the registered account.</p>
+  ${docs.split(',').map(d=>`
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem;background:var(--mist);border-radius:9px;margin-bottom:0.5rem">
+    <span style="font-size:0.85rem;font-weight:600;color:var(--forest)">${d.trim()}</span>
+    <div style="display:flex;gap:0.4rem">
+      <button class="fa-btn fa-dismiss" onclick="toast('success','Document marked as reviewed')">Review</button>
+      ${d.includes('⚠️')?`<button class="fa-btn fa-review" onclick="toast('info','Marked for resubmission — SMS sent to user')">Request Resubmit</button>`:''}
+    </div>
+  </div>`).join('')}
+  <hr style="border:none;border-top:1px solid var(--mist);margin:1rem 0">
+  <div style="display:flex;gap:0.6rem">
+    <button class="btn btn-success btn-sm btn-full" onclick="toast('success','Approved!');closeTrustDocModal()">✓ Approve All</button>
+    <button class="btn btn-sm btn-full" style="background:rgba(200,50,60,0.1);color:var(--err);border:1px solid rgba(200,50,60,0.2)" onclick="toast('error','Rejected');closeTrustDocModal()">✕ Reject</button>
+  </div>`;
+  document.getElementById('docModal').classList.add('open');
+}
+
+function adminRelease(ref, amount) {
+  toast('success','💸 Releasing '+amount+' for transaction '+ref+'...');
+  setTimeout(()=>toast('success','✅ Funds released successfully! Landlord notified via SMS.'),2000);
+}
+
+function closeTrustDocModal() {
+  document.getElementById('docModal').classList.remove('open');
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+// toast handled by main app
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+
+// Trust module init - called when trust view is activated  
+function initTrustModule() {
+  trustRenderDeterrenceGrid();
+  trustAnimateStats();
+  setTimeout(()=>{
+    const el=document.getElementById('livenessCode');
+    if(el) el.textContent=trustGenLivenessCode();
+  },100);
+}
+
+
+
+// ════════════════════════════════════════════════════
+// AFFILIATE PROGRAMME MODULE
+// ════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════
+// DATA & STORAGE
+// ═══════════════════════════════════════════════════
+const AffDB = {
+  get:(k,d)=>{ try{const v=localStorage.getItem('hnaff_'+k); return v!==null?JSON.parse(v):d; }catch{return d;} },
+  set:(k,v)=>localStorage.setItem('hnaff_'+k,JSON.stringify(v)),
+  del:(k)=>localStorage.removeItem('hnaff_'+k),
+};
+const affHashPass = s => btoa(unescape(encodeURIComponent(s+'hn_aff_salt')));
+
+// ── TIER CONFIG ──────────────────────────────────────
+const TIERS = {
+  corper:     { label:'NYSC Corper',    icon:'🎓', rate:0.20, color:'var(--t-corper)',    bg:'rgba(212,78,26,0.10)',   tagClass:'att-corper',    min:5000,  perks:['20% on every tenant referral','15% on every landlord referral','Priority placement in NYSC camp listings','Physical HouseNest corper kit at orientation','WhatsApp support group access','₦5,000 bonus after first 5 conversions'] },
+  influencer: { label:'Influencer',     icon:'📱', rate:0.12, color:'var(--t-influencer)',bg:'rgba(156,58,220,0.10)',  tagClass:'att-influencer', min:2000,  perks:['12% on every tenant referral','10% on every landlord referral','Custom branded referral landing page','Monthly performance report','Dedicated account manager (at 20+ referrals)','HouseNest brand assets & content pack'] },
+  agent:      { label:'Agent / Assoc.', icon:'🏢', rate:0.15, color:'var(--t-agent)',     bg:'rgba(26,74,140,0.10)',   tagClass:'att-agent',      min:2000,  perks:['15% on every tenant referral','12% on every landlord referral','Bulk referral dashboard for team management','Sub-affiliate codes for your team members','Priority listing support for associated landlords','Association page on HouseNest platform'] },
+  user:       { label:'General User',   icon:'🧑', rate:0.08, color:'var(--t-user)',      bg:'rgba(44,94,50,0.10)',    tagClass:'att-user',       min:2000,  perks:['8% on every tenant referral','5% on every landlord referral','Real-time commission tracking','Instant withdrawal to any bank','Referral leaderboard ranking','Upgrade to higher tier anytime'] },
+};
+
+const EARN_ACTIONS = [
+  { icon:'🏠',  title:'Tenant Signs Lease',     desc:'A new tenant signs a tenancy agreement through your referral code',              amounts:{corper:'₦24,000',influencer:'₦14,400',agent:'₦18,000',user:'₦9,600'} },
+  { icon:'🏘️', title:'Landlord Lists Property', desc:'A new landlord publishes their first listing after clicking your referral link', amounts:{corper:'₦4,500',influencer:'₦3,600',agent:'₦4,500',user:'₦2,400'} },
+  { icon:'🔑',  title:'Shortlet Booking',        desc:'A guest books a shortlet through your link (commission on nightly rate)',        amounts:{corper:'₦2,400',influencer:'₦1,440',agent:'₦1,800',user:'₦960'} },
+  { icon:'⭐',  title:'Verified Referral Bonus', desc:'Referree completes full KYC verification within 7 days of signing up',          amounts:{corper:'₦1,000',influencer:'₦500',agent:'₦750',user:'₦250'} },
+  { icon:'🎓',  title:'Corper-to-Corper Bonus',  desc:'Corpers earn extra when they refer another corper in the same NYSC batch',      amounts:{corper:'₦2,000',influencer:'N/A',agent:'N/A',user:'N/A'} },
+  { icon:'🏢',  title:'Association Bulk Deal',   desc:'Agent/Association closes a bulk deal (5+ listings from one landlord)',          amounts:{corper:'N/A',influencer:'N/A',agent:'₦15,000',user:'N/A'} },
+];
+
+// ── SEED DEMO DATA ───────────────────────────────────
+function affSeedData() {
+  if (AffDB.get('seeded', false)) return;
+
+  const demoAffiliates = [
+    { id:'a1', firstName:'Chidi', lastName:'Okonkwo', email:'chidi@demo.ng', phone:'08011111111', role:'corper',     nysc:'OD/24A/0021', code:'CORPER-CHIDI-ODO', status:'active',  earnings:142000, pending:18000, paid:124000, referrals:12, conversions:8,  joinDate:Date.now()-86400000*45, platform:'', profileUrl:'', password:affHashPass('demo') },
+    { id:'a2', firstName:'Temi',  lastName:'Adeyemi',  email:'temi@demo.ng',  phone:'08022222222', role:'influencer', nysc:'',           code:'INFL-TEMI-HN24',   status:'active',  earnings:89000,  pending:8000,  paid:81000,  referrals:28, conversions:19, joinDate:Date.now()-86400000*30, platform:'Instagram', profileUrl:'https://instagram.com/temi', password:affHashPass('demo') },
+    { id:'a3', firstName:'Emeka', lastName:'Nwosu',    email:'emeka@demo.ng', phone:'08033333333', role:'agent',      nysc:'',           code:'AGT-EMEKA-IB001',  status:'active',  earnings:210000, pending:24000, paid:186000, referrals:41, conversions:31, joinDate:Date.now()-86400000*60, platform:'', profileUrl:'', password:affHashPass('demo') },
+    { id:'a4', firstName:'Amaka', lastName:'Eze',      email:'amaka@demo.ng', phone:'08044444444', role:'user',       nysc:'',           code:'USR-AMAKA-HN25',   status:'pending', earnings:12000,  pending:4000,  paid:8000,   referrals:5,  conversions:2,  joinDate:Date.now()-86400000*7,  platform:'', profileUrl:'', password:affHashPass('demo') },
+  ];
+
+  const demoCommissions = [
+    { id:'c1',affiliateId:'a1',action:'Tenant Signed Lease',listing:'Self-Contain, Akure GRA',amount:24000,status:'paid',date:Date.now()-86400000*3 },
+    { id:'c2',affiliateId:'a1',action:'Landlord Listed Property',listing:'Mini Flat, Ondo City',amount:4500,status:'paid',date:Date.now()-86400000*5 },
+    { id:'c3',affiliateId:'a1',action:'Tenant Signed Lease',listing:'Room & Parlour, Ile-Ife',amount:24000,status:'processing',date:Date.now()-86400000*1 },
+    { id:'c4',affiliateId:'a2',action:'Shortlet Booking',listing:'Studio, Ado-Ekiti GRA',amount:1440,status:'paid',date:Date.now()-86400000*2 },
+    { id:'c5',affiliateId:'a2',action:'Tenant Signed Lease',listing:'2-Bed Flat, Ibadan GRA',amount:14400,status:'pending',date:Date.now()-86400000*1 },
+    { id:'c6',affiliateId:'a3',action:'Association Bulk Deal',listing:'5 Listings — Ilorin',amount:15000,status:'paid',date:Date.now()-86400000*4 },
+    { id:'c7',affiliateId:'a3',action:'Tenant Signed Lease',listing:'Bedsitter, Osogbo',amount:18000,status:'processing',date:Date.now()-86400000*0.5 },
+    { id:'c8',affiliateId:'a4',action:'Tenant Signed Lease',listing:'Self-Contain, Akure',amount:9600,status:'pending',date:Date.now()-86400000*2 },
+  ];
+
+  AffDB.set('affiliates', demoAffiliates);
+  AffDB.set('commissions', demoCommissions);
+  AffDB.set('seeded', true);
+}
+
+// ── APP STATE ────────────────────────────────────────
+let affCurrentUser = AffDB.get('affCurrentUser', null);
+let affSelectedRole = 'corper';
+let dashPanel = 'overview';
+
+// ── CODE GENERATION ──────────────────────────────────
+function genCode(role, firstName) {
+  const prefixes = { corper:'CORPER', influencer:'INFL', agent:'AGT', user:'USR' };
+  const prefix = prefixes[role] || 'HN';
+  const name = firstName.toUpperCase().slice(0,5).replace(/[^A-Z]/g,'');
+  const year = new Date().getFullYear().toString().slice(2);
+  const rand = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `${prefix}-${name}-${rand}${year}`;
+}
+
+function getReferralLink(code) {
+  return `https://housenest.ng/ref/${code}`;
+}
+
+// ═══════════════════════════════════════════════════
+// HOME PAGE RENDERING
+// ═══════════════════════════════════════════════════
+function affRenderHome() {
+  renderHeroPreviews();
+  renderTiersGrid();
+  renderEarnsGrid();
+  renderEarningsCalc();
+}
+
+function renderHeroPreviews() {
+  const container = document.getElementById('heroPreviews');
+  if (!container) return;
+  const items = [
+    { role:'corper', name:'Chidi (Ondo State)', refs:12, earned:'₦142,000', badge:'🎓 Corper' },
+    { role:'influencer', name:'Temi (@temiadeyemi)', refs:28, earned:'₦89,000', badge:'📱 Influencer' },
+    { role:'agent', name:'Emeka Properties', refs:41, earned:'₦210,000', badge:'🏢 Agent' },
+  ];
+  container.innerHTML = items.map(u => {
+    const t = TIERS[u.role];
+    return `<div class="tier-preview-card" onclick="openAffModal('affAuthModal','signup')">
+      <div class="tpc-tag" style="color:${t.color}">${u.badge}</div>
+      <div class="tpc-name">${u.name}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:0.4rem">
+        <div><div style="font-size:0.65rem;color:rgba(244,238,216,0.35);margin-bottom:0.2rem">Earned this month</div>
+        <div class="tpc-commission" style="color:${t.color}">${u.earned}</div></div>
+        <div style="text-align:right"><div style="font-size:0.65rem;color:rgba(244,238,216,0.35)">Referrals</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.1rem;color:rgba(244,238,216,0.7)">${u.refs}</div></div>
+      </div>
+      <div class="tpc-desc">${(t.rate*100).toFixed(0)}% commission · ${t.perks[0]}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTiersGrid() {
+  const grid = document.getElementById('tiersGrid');
+  if (!grid) return;
+  grid.innerHTML = Object.entries(TIERS).map(([key, t]) => `
+  <div class="tier-card ${key==='corper'?'featured':''}" onclick="openAffModal('affAuthModal','signup')">
+    ${key==='corper'?'<div class="featured-ribbon">🔥 Highest Rate</div>':''}
+    <div class="tc-header">
+      <div class="tc-icon" style="background:${t.bg}">${t.icon}</div>
+      <div class="tc-tag" style="color:${t.color}">${key==='corper'?'🎓 NYSC Corpers':key==='influencer'?'📱 Social Media Influencers':key==='agent'?'🏢 Agents & Associations':'🧑 General Users'}</div>
+      <div class="tc-name">${t.label}</div>
+      <div class="tc-commission-label">Commission Rate</div>
+      <div class="tc-commission" style="color:${t.color}">${(t.rate*100).toFixed(0)}%</div>
+      <div class="tc-per">per successful referral</div>
+    </div>
+    <hr class="tc-divider">
+    <div class="tc-body">
+      <div class="tc-perks">${t.perks.map(p=>`<div class="tc-perk"><span class="tc-perk-icon" style="color:${t.color}">✓</span>${p}</div>`).join('')}</div>
+      <button class="btn btn-full btn-sm" style="background:${t.bg};color:${t.color};border:1px solid ${t.color}22" onclick="event.stopPropagation();openAffModal('affAuthModal','signup')">Join as ${t.label} →</button>
+    </div>
+  </div>`).join('');
+}
+
+function renderEarnsGrid() {
+  const g = document.getElementById('earnsGrid');
+  if (!g) return;
+  g.innerHTML = EARN_ACTIONS.map(a => `
+  <div style="background:rgba(244,238,216,0.05);border:1px solid rgba(244,238,216,0.08);border-radius:16px;padding:1.4rem;transition:all 0.2s" onmouseover="this.style.background='rgba(244,238,216,0.09)'" onmouseout="this.style.background='rgba(244,238,216,0.05)'">
+    <div style="font-size:1.6rem;margin-bottom:0.8rem">${a.icon}</div>
+    <div style="font-weight:700;color:var(--ivory);font-size:0.92rem;margin-bottom:0.35rem">${a.title}</div>
+    <div style="font-size:0.75rem;color:rgba(244,238,216,0.4);line-height:1.6;margin-bottom:0.9rem">${a.desc}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.3rem">
+      ${Object.entries(a.amounts).map(([role,amt])=>amt!=='N/A'?`<span style="background:${TIERS[role].bg};color:${TIERS[role].color};padding:0.18rem 0.5rem;border-radius:50px;font-size:0.62rem;font-weight:700;font-family:'IBM Plex Mono',monospace">${TIERS[role].icon} ${amt}</span>`:`<span style="background:rgba(244,238,216,0.05);color:rgba(244,238,216,0.2);padding:0.18rem 0.5rem;border-radius:50px;font-size:0.62rem">N/A</span>`).join('')}
+    </div>
+  </div>`).join('');
+}
+
+function renderEarningsCalc() {
+  const el = document.getElementById('earningsCalc');
+  if (!el) return;
+  const items = [
+    {label:'5 tenants / month',perRef:14400,refs:5},
+    {label:'10 tenants / month',perRef:14400,refs:10},
+    {label:'20 tenants / month',perRef:14400,refs:20},
+  ];
+  el.innerHTML = items.map(i => `
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid rgba(244,238,216,0.08)">
+    <span style="font-size:0.8rem;color:rgba(244,238,216,0.55)">${i.label}</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--mint);font-size:0.9rem">₦${(i.perRef*i.refs).toLocaleString()}</span>
+  </div>`).join('');
+}
+
+function clearErr(...ids) { ids.forEach(id=>document.getElementById(id)?.classList.remove('show')); }
+function showErr(id,msg='') { const el=document.getElementById(id); if(el){if(msg)el.textContent=msg; el.classList.add('show');} }
+function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function validPhone(p) { return /^0[789]\d{9}$/.test(p.replace(/\s/g,'')); }
+
+function affHandleSignup() {
+  clearErr('aff-su-first-err','aff-su-last-err','aff-su-email-err','aff-su-phone-err','aff-su-pass-err','aff-su-pass2-err');
+  const first=document.getElementById('aff-su-first').value.trim();
+  const last=document.getElementById('aff-su-last').value.trim();
+  const email=document.getElementById('aff-su-email').value.trim();
+  const phone=document.getElementById('aff-su-phone').value.trim();
+  const pass=document.getElementById('aff-su-pass').value;
+  const pass2=document.getElementById('aff-su-pass2').value;
+  const nysc=document.getElementById('aff-su-nysc')?.value.trim()||'';
+  const platform=document.getElementById('aff-su-platform')?.value.trim()||'';
+  const profileUrl=document.getElementById('aff-su-profile')?.value.trim()||'';
+  const bizname=document.getElementById('aff-su-bizname')?.value.trim()||'';
+
+  let ok=true;
+  if(!first){showErr('aff-su-first-err');ok=false;}
+  if(!last){showErr('aff-su-last-err');ok=false;}
+  if(!validEmail(email)){showErr('aff-su-email-err');ok=false;}
+  if(!validPhone(phone)){showErr('aff-su-phone-err','Enter valid 11-digit Nigerian number');ok=false;}
+  if(pass.length<8){showErr('aff-su-pass-err');ok=false;}
+  if(pass!==pass2){showErr('aff-su-pass2-err');ok=false;}
+  if(!ok) return;
+
+  const affiliates = AffDB.get('affiliates',[]);
+  if(affiliates.find(a=>a.email===email)){showErr('aff-su-email-err','Email already registered');return;}
+
+  const code = genCode(affSelectedRole, first);
+  const newAffiliate = {
+    id:'a'+Date.now(),
+    firstName:first, lastName:last, email, phone,
+    role:affSelectedRole, nysc, platform, profileUrl, bizname,
+    code, status:affSelectedRole==='user'?'active':'pending',
+    earnings:0, pending:0, paid:0, referrals:0, conversions:0,
+    joinDate:Date.now(),
+    password:affHashPass(pass),
+    isAdmin:false,
+  };
+  affiliates.push(newAffiliate);
+  AffDB.set('affiliates', affiliates);
+  currentUser = newAffiliate;
+  AffDB.set('affCurrentUser', newAffiliate);
+  affUpdateNavState();
+  closeAffModal('affAuthModal');
+  navigateAff('dashboard', null);
+  toast('success','🎉 Welcome! Your code is '+code);
+}
+
+function affHandleLogin() {
+  clearErr('li-email-err','aff-li-pass-err');
+  const email=document.getElementById('aff-li-email').value.trim();
+  const pass=document.getElementById('aff-li-pass').value;
+  if(!validEmail(email)){showErr('li-email-err');return;}
+
+  // Admin shortcut
+  if(email==='admin@housenest.ng' && pass==='admin2025') {
+    currentUser = {id:'admin',firstName:'Admin',lastName:'HN',email,role:'admin',isAdmin:true,code:'ADMIN',status:'active',earnings:0,pending:0,paid:0,referrals:0,conversions:0};
+    AffDB.set('affCurrentUser',affCurrentUser);
+    affUpdateNavState();
+    closeAffModal('affAuthModal');
+    navigateAff('admin-view',null);
+    return;
+  }
+
+  const affiliates = AffDB.get('affiliates',[]);
+  const user = affiliates.find(a=>a.email===email);
+  if(!user||user.password!==affHashPass(pass)){showErr('aff-li-pass-err');return;}
+  currentUser=user;
+  AffDB.set('affCurrentUser',user);
+  affUpdateNavState();
+  closeAffModal('affAuthModal');
+  navigateAff('dashboard',null);
+  toast('success','Welcome back, '+user.firstName+'!');
+}
+
+function affLogout() {
+  affCurrentUser=null;
+  AffDB.del('affCurrentUser');
+  affUpdateNavState();
+  navigateAff('home',document.querySelector('.ntab'));
+  toast('success','Logged out successfully');
+}
+
+function affUpdateNavState() {
+  const gu=document.getElementById('affGuestNav');
+  const un=document.getElementById('affUserNav');
+  const av=document.getElementById('affUserAv');
+  if(affCurrentUser) {
+    gu.style.display='none';
+    un.style.display='flex';
+    av.textContent=affCurrentUser.firstName[0]+(affCurrentUser.lastName?affCurrentUser.lastName[0]:'');
+    av.style.background=avatarColor(affCurrentUser.firstName);
+  } else {
+    gu.style.display='flex';
+    un.style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════
+function affRenderDashboard() {
+  if(!affCurrentUser) return;
+  const u = affCurrentUser;
+  const t = TIERS[u.role]||TIERS.user;
+  const commissions = AffDB.get('commissions',[]).filter(c=>c.affiliateId===u.id);
+
+  // Sidebar
+  document.getElementById('affDashSidebar').innerHTML = `
+  <div class="ds-user-block">
+    <div class="ds-user-av" style="background:${avatarColor(u.firstName)}">${u.firstName[0]}${u.lastName?u.lastName[0]:''}</div>
+    <div>
+      <div class="ds-user-name">${u.firstName} ${u.lastName}</div>
+      <div class="ds-user-tier">${t.icon} ${t.label}</div>
+      <div class="ds-tier-badge" style="background:${t.bg};color:${t.color}">${(t.rate*100).toFixed(0)}% commission</div>
+    </div>
+  </div>
+  <div class="ds-label">Main</div>
+  <button class="ds-btn ${dashPanel==='overview'?'active':''}" onclick="switchDashPanel('overview',this)"><span class="ds-icon">📊</span>Overview</button>
+  <button class="ds-btn ${dashPanel==='mycode'?'active':''}" onclick="switchDashPanel('mycode',this)"><span class="ds-icon">🔗</span>My Referral Code</button>
+  <button class="ds-btn ${dashPanel==='commissions'?'active':''}" onclick="switchDashPanel('commissions',this)"><span class="ds-icon">💰</span>Commissions <span class="ds-badge">${commissions.filter(c=>c.status==='pending').length||''}</span></button>
+  <div class="ds-label">Community</div>
+  <button class="ds-btn ${dashPanel==='leaderboard'?'active':''}" onclick="switchDashPanel('leaderboard',this)"><span class="ds-icon">🏆</span>Leaderboard</button>
+  <button class="ds-btn ${dashPanel==='tools'?'active':''}" onclick="switchDashPanel('tools',this)"><span class="ds-icon">🛠️</span>Marketing Tools</button>
+  <div class="ds-label">Account</div>
+  <button class="ds-btn" onclick="switchDashPanel('profile',this)"><span class="ds-icon">👤</span>My Profile</button>
+  <button class="ds-btn" onclick="affLogout()"><span class="ds-icon">🚪</span>Log Out</button>`;
+
+  switchDashPanel(dashPanel, null);
+}
+
+function affSwitchDashPanel(panel, btn) {
+  dashPanel = panel;
+  if(btn){ document.querySelectorAll('.ds-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+  const u = affCurrentUser;
+  const t = TIERS[u.role]||TIERS.user;
+  const commissions = AffDB.get('commissions',[]).filter(c=>c.affiliateId===u.id);
+  const affiliates = AffDB.get('affiliates',[]);
+  const main = document.getElementById('affDashMain');
+
+  if(panel==='overview') {
+    const greeting = ['morning','afternoon','evening'][Math.floor(new Date().getHours()/8.01)];
+    main.innerHTML = `
+    <div class="dp-title">Good ${greeting}, ${u.firstName} 👋</div>
+    <div class="dp-sub">Your referral programme dashboard · Code: <span style="font-family:'IBM Plex Mono',monospace;color:${t.color};font-weight:700">${u.code}</span> ${u.status==='pending'?'<span style="background:rgba(200,120,32,0.12);color:var(--amber);padding:0.15rem 0.5rem;border-radius:50px;font-size:0.7rem;font-weight:700;margin-left:0.5rem">⏳ Pending Approval</span>':''}</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-n">₦${(u.earnings||0).toLocaleString()}</div><div class="stat-l">Total Earned</div><div class="stat-delta stat-up">+₦${(u.pending||0).toLocaleString()} pending</div></div>
+      <div class="stat-card"><div class="stat-n">${u.referrals||0}</div><div class="stat-l">Total Referrals</div></div>
+      <div class="stat-card"><div class="stat-n">${u.conversions||0}</div><div class="stat-l">Conversions</div><div class="stat-delta">${u.referrals>0?((u.conversions/u.referrals)*100).toFixed(0)+'% rate':'—'}</div></div>
+      <div class="stat-card"><div class="stat-n">₦${(u.paid||0).toLocaleString()}</div><div class="stat-l">Paid Out</div></div>
+    </div>
+    <div class="code-card">
+      <div class="code-card-label">Your Unique Referral Code</div>
+      <div class="code-display">
+        <span>${u.code}</span>
+        <button class="code-copy-btn" onclick="copyCode('${u.code}')">📋 Copy Code</button>
+      </div>
+      <div class="code-link">housenest.ng/ref/${u.code}</div>
+      <div class="code-share-row">
+        <button class="share-btn share-twitter" onclick="shareToSocial('twitter','${u.code}')">𝕏 Twitter</button>
+        <button class="share-btn share-whatsapp" onclick="shareToSocial('whatsapp','${u.code}')">💬 WhatsApp</button>
+        <button class="share-btn share-instagram" onclick="shareToSocial('instagram','${u.code}')">📸 Instagram</button>
+        <button class="share-btn share-facebook" onclick="shareToSocial('facebook','${u.code}')">👍 Facebook</button>
+        <button class="share-btn share-copy" onclick="copyLink('${u.code}')">🔗 Copy Link</button>
+      </div>
+    </div>
+    <div class="dash-panel">
+      <div class="dash-panel-header"><div class="dph-title">Recent Activity</div></div>
+      <div class="dash-panel-body">
+        ${commissions.length===0?'<p style="color:var(--smoke);font-size:0.85rem">No activity yet. Share your code to start earning!</p>':
+        `<table class="comm-table"><thead><tr><th>Action</th><th>Listing</th><th>Commission</th><th>Status</th><th>Date</th></tr></thead><tbody>
+        ${commissions.slice(-5).reverse().map(c=>`<tr>
+          <td>${c.action}</td>
+          <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.listing}</td>
+          <td class="comm-amount">₦${c.amount.toLocaleString()}</td>
+          <td><span class="comm-${c.status}">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span></td>
+          <td style="color:var(--smoke);font-size:0.75rem">${timeAgo(c.date)}</td>
+        </tr>`).join('')}
+        </tbody></table>`}
+      </div>
+    </div>
+    ${u.status==='active'?`
+    <div style="display:flex;gap:0.8rem;flex-wrap:wrap">
+      <button class="btn btn-ok" onclick="openWithdrawModal()">💸 Withdraw Earnings</button>
+      <button class="btn btn-outline" onclick="affSwitchDashPanel('mycode',null)">🔗 Share My Code</button>
+    </div>`:'<div style="background:rgba(200,120,32,0.08);border:1px solid rgba(200,120,32,0.2);border-radius:12px;padding:1.2rem;font-size:0.85rem;color:var(--amber)"><strong>⏳ Account Pending:</strong> Your account is awaiting approval by the HouseNest team. We\'ll send you an SMS and email within 24 hours. Once approved, you can start sharing your code.</div>'}`;
+  }
+
+  else if(panel==='mycode') {
+    main.innerHTML = `
+    <div class="dp-title">My Referral Code</div>
+    <div class="dp-sub">Share this code everywhere. Every conversion earns you ${(t.rate*100).toFixed(0)}% commission.</div>
+    <div class="code-card">
+      <div class="code-card-label">Your Unique Code</div>
+      <div class="code-display"><span>${u.code}</span><button class="code-copy-btn" onclick="copyCode('${u.code}')">📋 Copy</button></div>
+      <div class="code-link">${getReferralLink(u.code)}</div>
+      <div class="code-share-row">
+        <button class="share-btn share-twitter" onclick="shareToSocial('twitter','${u.code}')">𝕏 Twitter</button>
+        <button class="share-btn share-whatsapp" onclick="shareToSocial('whatsapp','${u.code}')">💬 WhatsApp</button>
+        <button class="share-btn share-instagram" onclick="shareToSocial('instagram','${u.code}')">📸 Instagram</button>
+        <button class="share-btn share-facebook" onclick="shareToSocial('facebook','${u.code}')">👍 Facebook</button>
+        <button class="share-btn share-copy" onclick="copyLink('${u.code}')">🔗 Copy Link</button>
+      </div>
+    </div>
+    <div class="dash-panel">
+      <div class="dash-panel-header"><div class="dph-title">Suggested Copy for Each Platform</div></div>
+      <div class="dash-panel-body">${renderPlatformCopy(u)}</div>
+    </div>
+    <div class="dash-panel">
+      <div class="dash-panel-header"><div class="dph-title">QR Code</div></div>
+      <div class="dash-panel-body" style="text-align:center;padding:2rem">
+        <div style="width:140px;height:140px;background:var(--mist);border-radius:12px;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:3rem">🔳</div>
+        <p style="font-size:0.82rem;color:var(--smoke)">QR code pointing to your referral link.<br>In production: generated via qr-server.com API.</p>
+        <button class="btn btn-outline btn-sm" style="margin-top:0.8rem" onclick="toast('success','QR code downloaded! (Demo mode)')">⬇️ Download QR Code</button>
+      </div>
+    </div>`;
+  }
+
+  else if(panel==='commissions') {
+    const total = commissions.reduce((s,c)=>s+c.amount,0);
+    const pending = commissions.filter(c=>c.status==='pending').reduce((s,c)=>s+c.amount,0);
+    const paid = commissions.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0);
+    main.innerHTML = `
+    <div class="dp-title">My Commissions</div>
+    <div class="dp-sub">${commissions.length} commission event${commissions.length!==1?'s':''} recorded</div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-n">₦${total.toLocaleString()}</div><div class="stat-l">Total Earned</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--amber)">₦${pending.toLocaleString()}</div><div class="stat-l">Pending</div></div>
+      <div class="stat-card"><div class="stat-n" style="color:var(--ok)">₦${paid.toLocaleString()}</div><div class="stat-l">Paid Out</div></div>
+      <div class="stat-card"><div class="stat-n">${(t.rate*100).toFixed(0)}%</div><div class="stat-l">Your Rate</div></div>
+    </div>
+    <div class="dash-panel">
+      <div class="dash-panel-header">
+        <div class="dph-title">All Commission Events</div>
+        ${commissions.some(c=>c.status==='pending')?`<button class="btn btn-ok btn-sm" onclick="openWithdrawModal()">💸 Withdraw Available</button>`:''}
+      </div>
+      <div class="dash-panel-body">
+        ${commissions.length===0?'<p style="color:var(--smoke);font-size:0.85rem">No commissions yet. Share your code to start earning!</p>':
+        `<table class="comm-table" style="width:100%"><thead><tr><th>Action</th><th>Listing</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>
+        ${[...commissions].reverse().map(c=>`<tr>
+          <td style="font-weight:600">${c.action}</td>
+          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--smoke)">${c.listing}</td>
+          <td class="comm-amount">₦${c.amount.toLocaleString()}</td>
+          <td><span class="comm-${c.status}">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span></td>
+          <td style="color:var(--smoke);font-size:0.75rem;white-space:nowrap">${timeAgo(c.date)}</td>
+        </tr>`).join('')}
+        </tbody></table>`}
+      </div>
+    </div>`;
+  }
+
+  else if(panel==='leaderboard') {
+    const allAff = AffDB.get('affiliates',[]).filter(a=>a.status==='active').sort((a,b)=>(b.earnings||0)-(a.earnings||0));
+    const myRank = allAff.findIndex(a=>a.id===u.id)+1;
+    main.innerHTML = `
+    <div class="dp-title">🏆 Leaderboard</div>
+    <div class="dp-sub">Top earners across all tiers this month${myRank>0?` · You are ranked #${myRank}`:''}</div>
+    <div class="dash-panel"><div class="dash-panel-body">
+      ${allAff.map((a,i)=>{
+        const at=TIERS[a.role]||TIERS.user;
+        return `<div class="lb-row ${a.id===u.id?'':''}">
+          <div class="lb-rank ${i===0?'lb-rank-1':i===1?'lb-rank-2':i===2?'lb-rank-3':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)}</div>
+          <div class="lb-av" style="background:${avatarColor(a.firstName)}">${a.firstName[0]}${a.lastName?a.lastName[0]:''}</div>
+          <div>
+            <div class="lb-name">${a.firstName} ${a.lastName} ${a.id===u.id?'<span style="font-size:0.65rem;background:rgba(44,94,50,0.12);color:var(--moss);padding:0.1rem 0.4rem;border-radius:50px">(You)</span>':''}</div>
+            <div class="lb-meta"><span class="aff-tier-tag ${at.tagClass}">${at.icon} ${at.label}</span></div>
+          </div>
+          <div style="margin-left:auto;text-align:right">
+            <div class="lb-earnings">₦${(a.earnings||0).toLocaleString()}</div>
+            <div class="lb-refs">${a.conversions||0} conversions · ${a.referrals||0} referrals</div>
+          </div>
+        </div>`;}).join('')||'<p style="color:var(--smoke)">No affiliates yet — be the first!</p>'}
+    </div></div>`;
+  }
+
+  else if(panel==='tools') {
+    main.innerHTML = `
+    <div class="dp-title">🛠️ Marketing Tools</div>
+    <div class="dp-sub">Resources to help you convert more referrals</div>
+    ${[
+      {icon:'📝',title:'Ready-Made Caption Templates',desc:'Copy-paste captions for Twitter, Instagram, WhatsApp Status and Facebook tailored to your tier.',action:'getCaptions'},
+      {icon:'🖼️',title:'HouseNest Brand Assets',desc:'Logo, banner images, and colour palette files for use in your posts. Already sized for each platform.',action:'getBranding'},
+      {icon:'📊',title:'Referral Tracking Link',desc:'Your link with UTM parameters so you can track exactly where your referrals are coming from.',action:'getUtm'},
+      {icon:'🎓',title:'NYSC Camp Pitch Script',desc:'A 60-second verbal pitch for corper-to-corper marketing at orientation camp and CDS meetings.',action:'getPitch'},
+    ].map(t=>`
+    <div class="dash-panel" style="margin-bottom:1rem">
+      <div class="dash-panel-body" style="display:flex;align-items:flex-start;gap:1rem">
+        <div style="font-size:1.8rem;flex-shrink:0">${t.icon}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;color:var(--forest);margin-bottom:0.3rem">${t.title}</div>
+          <div style="font-size:0.82rem;color:var(--smoke);line-height:1.6">${t.desc}</div>
+        </div>
+        <button class="btn btn-outline btn-sm" style="flex-shrink:0" onclick="${t.action}('${u.code}','${u.role}')">Get →</button>
+      </div>
+    </div>`).join('')}`;
+  }
+
+  else if(panel==='profile') {
+    main.innerHTML = `
+    <div class="dp-title">My Profile</div>
+    <div class="dp-sub">Update your information</div>
+    <div class="dash-panel"><div class="dash-panel-body">
+      <div class="f-row">
+        <div class="f-group"><label class="f-label">First Name</label><input class="f-input" id="pf-first" value="${u.firstName}"></div>
+        <div class="f-group"><label class="f-label">Last Name</label><input class="f-input" id="pf-last" value="${u.lastName||''}"></div>
+      </div>
+      <div class="f-group"><label class="f-label">Email</label><input class="f-input" id="pf-email" type="email" value="${u.email}"></div>
+      <div class="f-group"><label class="f-label">Phone</label><input class="f-input" id="pf-phone" value="${u.phone||''}"></div>
+      ${u.role==='corper'?`<div class="f-group"><label class="f-label">NYSC Code</label><input class="f-input" id="pf-nysc" value="${u.nysc||''}"></div>`:''}
+      ${u.role==='influencer'?`
+      <div class="f-row">
+        <div class="f-group"><label class="f-label">Platform</label><input class="f-input" id="pf-platform" value="${u.platform||''}"></div>
+        <div class="f-group"><label class="f-label">Profile URL</label><input class="f-input" id="pf-profile" value="${u.profileUrl||''}"></div>
+      </div>`:''}
+      <div class="f-group"><label class="f-label">New Password (leave blank to keep)</label><input class="f-input" id="pf-pass" type="password" placeholder="New password"></div>
+      <button class="btn btn-primary" onclick="affSaveProfile()">Save Changes</button>
+    </div></div>
+    <div class="dash-panel"><div class="dash-panel-body">
+      <div style="font-weight:700;color:var(--forest);margin-bottom:0.8rem">Bank Account for Withdrawals</div>
+      <div class="f-row">
+        <div class="f-group"><label class="f-label">Bank Name</label>
+          <select class="f-select" id="pf-bank"><option value="">Select Bank</option><option>Access Bank</option><option>GTBank</option><option>First Bank</option><option>UBA</option><option>Zenith Bank</option><option>Opay</option><option>Kuda</option></select></div>
+        <div class="f-group"><label class="f-label">Account Number</label><input class="f-input" id="pf-accnum" placeholder="0123456789" maxlength="10" style="font-family:'IBM Plex Mono',monospace"></div>
+      </div>
+      <div class="f-group"><label class="f-label">Account Name</label><input class="f-input" id="pf-accname" placeholder="As it appears on your bank account"></div>
+      <button class="btn btn-outline btn-sm" onclick="toast('success','✅ Bank account saved! Withdrawals will be sent here.')">Save Bank Details</button>
+    </div></div>`;
+  }
+}
+
+// Helpers for marketing tools
+function getCaptions(code, role) {
+  const captions = {
+    corper:`Twitter: "Corpers! 🎓 Tired of searching for decent accommodation after camp? Use my HouseNest code ${code} to find verified, affordable housing in your state of deployment. Zero agent fees, legal agreement included. housenest.ng/ref/${code}"
+
+WhatsApp: "Hey guys 👋 If you're still searching for accommodation, try HouseNest — real verified landlords, no agent nonsense. Use my code ${code} and get direct access to hundreds of listings in your state. Link: housenest.ng/ref/${code}"`,
+    influencer:`Twitter: "Finding a home in a new city shouldn't be stressful 🏡 HouseNest is changing how Nigerians rent — verified landlords, free escrow protection, and ZERO agent fees. Use my link to browse listings in Ondo, Ekiti, Oyo, Osun & Kwara. housenest.ng/ref/${code}"
+
+Instagram caption: "New city, new chapter ✨ Whether you're a corper, student, or relocating for work — HouseNest connects you directly to verified landlords with no agent in between. I've partnered with them and my link is in bio! Code: ${code}"`,
+    agent:`WhatsApp Broadcast: "Looking for accommodation in [STATE]? I've partnered with HouseNest — Nigeria's most trusted rental platform. Browse verified listings, sign agreements online, pay with escrow protection. Use code ${code} or visit housenest.ng/ref/${code}"`,
+    user:`"Looking for a place? Try HouseNest — real listings, real landlords, no agent fees. Use my code ${code}: housenest.ng/ref/${code}"`,
+  };
+  showTextModal('Caption Templates', (captions[role]||captions.user).replace(/\n/g,'<br><br>'));
+}
+
+function getPitch(code) {
+  showTextModal('NYSC Camp 60-Second Pitch', `<em>"Hey, are you still searching for accommodation? Because I found something that completely sorted me out."</em><br><br>
+  <strong>Pause. Let them respond.</strong><br><br>
+  <em>"It's called HouseNest — it's basically a property platform but built specifically for corpers. You can browse verified listings directly in whatever state you've been posted to. No agent, no commission, no wahala. The landlord has already been verified, the agreement is already drafted — you just sign and move in."</em><br><br>
+  <em>"And because I'm also on their affiliate programme, I have a personal code: ${code}. When you sign a lease using that code, I earn a little commission — but it costs you nothing extra. The platform is completely free for tenants."</em><br><br>
+  <em>"Just go to housenest.ng and type in my code when you search. Or I'll send you the link on WhatsApp right now."</em>`);
+}
+function getBranding(code) { showTextModal('Brand Assets', 'In production: ZIP file with HouseNest logo (SVG, PNG), pre-designed Instagram Stories templates, WhatsApp Status banners, and Twitter header images — all with your referral code embedded.<br><br>Colours: Forest Green #1a3a1e · Flame Orange #d44e1a · Ivory #f4eed8<br><br>Download would trigger here in the live platform.'); }
+function getUtm(code) { const link=`https://housenest.ng/?utm_source=affiliate&utm_medium=referral&utm_campaign=${code}&ref=${code}`; navigator.clipboard?.writeText(link); showTextModal('UTM Tracking Link', `<code style="background:var(--mist);padding:0.3rem 0.6rem;border-radius:6px;font-size:0.8rem;word-break:break-all">${link}</code><br><br>This link includes UTM parameters so you can track in Google Analytics exactly which posts or messages are driving your referrals.<br><br>✅ Copied to clipboard!`); }
+
+function showTextModal(title, html) {
+  document.getElementById('authTitle').textContent=title;
+  document.getElementById('signupPanel').innerHTML=`<div style="font-size:0.85rem;color:var(--smoke);line-height:1.75">${html}</div><button class="btn btn-outline btn-sm" style="margin-top:1rem" onclick="closeAffModal('affAuthModal')">Close</button>`;
+  document.getElementById('loginPanel').classList.add('hidden');
+  document.getElementById('mtab-signup').style.display='none';
+  document.getElementById('mtab-login').style.display='none';
+  openAffModal('affAuthModal','signup');
+}
+
+// Profile save
+function affSaveProfile() {
+  const affiliates = AffDB.get('affiliates',[]);
+  const idx = affiliates.findIndex(a=>a.id===affCurrentUser.id);
+  if(idx===-1){toast('error','Error saving');return;}
+  affiliates[idx].firstName = document.getElementById('pf-first')?.value.trim()||affiliates[idx].firstName;
+  affiliates[idx].lastName = document.getElementById('pf-last')?.value.trim()||affiliates[idx].lastName;
+  affiliates[idx].email = document.getElementById('pf-email')?.value.trim()||affiliates[idx].email;
+  affiliates[idx].phone = document.getElementById('pf-phone')?.value.trim()||affiliates[idx].phone;
+  const newPass = document.getElementById('pf-pass')?.value;
+  if(newPass&&newPass.length>=8) affiliates[idx].password=affHashPass(newPass);
+  AffDB.set('affiliates',affiliates);
+  currentUser=affiliates[idx];
+  AffDB.set('affCurrentUser',affCurrentUser);
+  affUpdateNavState();
+  toast('success','✅ Profile updated!');
+}
+
+// Withdraw modal
+function openWithdrawModal() {
+  const u = affCurrentUser;
+  const available = (u.earnings||0)-(u.paid||0);
+  const t = TIERS[u.role]||TIERS.user;
+  document.getElementById('withdrawBody').innerHTML = `
+  <div class="balance-display">
+    <div class="bal-label">Available to Withdraw</div>
+    <div class="bal-amount">₦${available.toLocaleString()}</div>
+    <div class="bal-pending">+₦${(u.pending||0).toLocaleString()} pending clearance</div>
+  </div>
+  <div class="f-group"><label class="f-label">Bank</label>
+    <select class="f-select" id="wd-bank"><option>Access Bank</option><option>GTBank</option><option>First Bank</option><option>UBA</option><option>Zenith Bank</option><option>Opay</option><option>Kuda</option></select></div>
+  <div class="f-group"><label class="f-label">Account Number</label><input class="f-input" id="wd-acc" placeholder="0123456789" maxlength="10" style="font-family:'IBM Plex Mono',monospace"></div>
+  <div class="f-group"><label class="f-label">Account Name</label><input class="f-input" id="wd-name" placeholder="As it appears on your bank"></div>
+  <div class="f-group"><label class="f-label">Amount to Withdraw (₦)</label><input class="f-input" id="wd-amount" type="number" value="${available}" max="${available}"><div class="f-hint">Min. ₦${t.min.toLocaleString()} · Max. ₦${available.toLocaleString()}</div></div>
+  <button class="btn btn-ok btn-full" style="margin-top:0.5rem" onclick="submitWithdraw(${available},${t.min})">Request Withdrawal →</button>
+  <p style="font-size:0.72rem;color:var(--smoke);text-align:center;margin-top:0.7rem">Processed via Paystack · Arrives within 24hrs</p>`;
+  openAffModal('affWithdrawModal');
+}
+
+function submitWithdraw(available, minWithdraw) {
+  const amount = parseFloat(document.getElementById('wd-amount')?.value)||0;
+  const acc = document.getElementById('wd-acc')?.value.trim();
+  const name = document.getElementById('wd-name')?.value.trim();
+  if(!acc||acc.length!==10){toast('error','Enter valid 10-digit account number');return;}
+  if(!name){toast('error','Enter account name');return;}
+  if(amount<minWithdraw){toast('error','Minimum withdrawal is ₦'+minWithdraw.toLocaleString());return;}
+  if(amount>available){toast('error','Amount exceeds available balance');return;}
+
+  // Update user balance
+  const affiliates=AffDB.get('affiliates',[]);
+  const idx=affiliates.findIndex(a=>a.id===affCurrentUser.id);
+  if(idx!==-1){ affiliates[idx].paid=(affiliates[idx].paid||0)+amount; AffDB.set('affiliates',affiliates); currentUser=affiliates[idx]; AffDB.set('affCurrentUser',affCurrentUser); }
+  closeAffModal('affWithdrawModal');
+  toast('success','💸 Withdrawal of ₦'+amount.toLocaleString()+' submitted! Arriving within 24hrs.');
+  affRenderDashboard();
+}
+
+// ═══════════════════════════════════════════════════
+// ADMIN VIEW
+// ═══════════════════════════════════════════════════
+function affRenderAdmin() {
+  const affiliates = AffDB.get('affiliates',[]);
+  const commissions = AffDB.get('commissions',[]);
+  const pending = affiliates.filter(a=>a.status==='pending');
+  const active = affiliates.filter(a=>a.status==='active');
+  const totalPaid = commissions.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0);
+
+  document.getElementById('affAdminBody').innerHTML = `
+  <div class="admin-stats">
+    <div class="ast"><div class="ast-n">${affiliates.length}</div><div class="ast-l">Total Affiliates</div></div>
+    <div class="ast"><div class="ast-n" style="color:var(--amber)">${pending.length}</div><div class="ast-l">Pending Approval</div></div>
+    <div class="ast"><div class="ast-n" style="color:var(--ok)">${active.length}</div><div class="ast-l">Active Affiliates</div></div>
+    <div class="ast"><div class="ast-n">₦${totalPaid.toLocaleString()}</div><div class="ast-l">Total Commissions Paid</div></div>
+  </div>
+
+  <!-- Pending approvals -->
+  ${pending.length>0?`
+  <div class="dash-panel" style="margin-bottom:1.5rem">
+    <div class="dash-panel-header"><div class="dph-title">⏳ Pending Approvals (${pending.length})</div></div>
+    <div class="dash-panel-body">
+      ${pending.map(a=>renderAffRow(a,true)).join('')}
+    </div>
+  </div>`:''}
+
+  <!-- All affiliates -->
+  <div class="dash-panel" style="margin-bottom:1.5rem">
+    <div class="dash-panel-header">
+      <div class="dph-title">All Affiliates</div>
+      <div style="display:flex;gap:0.5rem">
+        <select class="f-select" style="padding:0.3rem 0.6rem;font-size:0.78rem;border-radius:7px" onchange="filterAdminAff(this.value)">
+          <option value="">All Tiers</option>
+          <option value="corper">Corpers</option>
+          <option value="influencer">Influencers</option>
+          <option value="agent">Agents</option>
+          <option value="user">Users</option>
+        </select>
+      </div>
+    </div>
+    <div class="dash-panel-body" id="adminAffList">
+      ${affiliates.map(a=>renderAffRow(a,false)).join('')||'<p style="color:var(--smoke)">No affiliates yet.</p>'}
+    </div>
+  </div>
+
+  <!-- Commission history -->
+  <div class="dash-panel">
+    <div class="dash-panel-header"><div class="dph-title">Recent Commissions</div></div>
+    <div class="dash-panel-body">
+      <table class="comm-table" style="width:100%">
+        <thead><tr><th>Affiliate</th><th>Tier</th><th>Action</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead>
+        <tbody>
+          ${[...commissions].reverse().map(c=>{
+            const aff=affiliates.find(a=>a.id===c.affiliateId);
+            const at=TIERS[aff?.role||'user'];
+            return `<tr>
+              <td style="font-weight:600">${aff?aff.firstName+' '+aff.lastName:'Unknown'}</td>
+              <td><span class="aff-tier-tag ${at.tagClass}">${at.icon} ${at.label}</span></td>
+              <td style="font-size:0.8rem">${c.action}</td>
+              <td class="comm-amount">₦${c.amount.toLocaleString()}</td>
+              <td><span class="comm-${c.status}">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span></td>
+              <td style="color:var(--smoke);font-size:0.75rem">${timeAgo(c.date)}</td>
+              <td>${c.status==='processing'?`<button class="approve-btn" onclick="markCommPaid('${c.id}')">Mark Paid</button>`:'—'}</td>
+            </tr>`;}).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderAffRow(a, showActions) {
+  const t = TIERS[a.role]||TIERS.user;
+  return `<div class="aff-row">
+    <div class="aff-av" style="background:${avatarColor(a.firstName)}">${a.firstName[0]}${a.lastName?a.lastName[0]:''}</div>
+    <div>
+      <div class="aff-name">${a.firstName} ${a.lastName} <span class="aff-tier-tag ${t.tagClass}">${t.icon} ${t.label}</span></div>
+      <div class="aff-meta">${a.email} · ${a.phone} · <span class="aff-code">${a.code}</span> · Joined ${timeAgo(a.joinDate)}</div>
+      ${a.role==='influencer'&&a.platform?`<div style="font-size:0.7rem;color:var(--smoke);margin-top:0.2rem">📱 ${a.platform}: <a href="${a.profileUrl}" target="_blank" rel="noopener" style="color:var(--flame)">${a.profileUrl}</a></div>`:''}
+      ${a.role==='corper'&&a.nysc?`<div style="font-size:0.7rem;color:var(--smoke);margin-top:0.2rem">🎓 NYSC: ${a.nysc}</div>`:''}
+    </div>
+    <div class="aff-earnings">
+      <div class="aff-earn-n">₦${(a.earnings||0).toLocaleString()}</div>
+      <div class="aff-earn-l">${a.conversions||0} conversions · ${a.referrals||0} refs</div>
+    </div>
+    ${showActions?`<div style="display:flex;gap:0.4rem;flex-shrink:0;margin-left:0.5rem">
+      <button class="approve-btn" onclick="approveAffiliate('${a.id}')">✓ Approve</button>
+      <button class="reject-btn" onclick="rejectAffiliate('${a.id}')">✕ Reject</button>
+    </div>`:`<span style="padding:0.2rem 0.6rem;border-radius:50px;font-size:0.65rem;font-weight:700;background:${a.status==='active'?'rgba(42,128,64,0.12)':'rgba(200,120,32,0.12)'};color:${a.status==='active'?'var(--ok)':'var(--amber)'};">${a.status}</span>`}
+  </div>`;
+}
+
+function filterAdminAff(role) {
+  const affiliates = AffDB.get('affiliates',[]);
+  const filtered = role ? affiliates.filter(a=>a.role===role) : affiliates;
+  document.getElementById('adminAffList').innerHTML = filtered.map(a=>renderAffRow(a,false)).join('')||'<p style="color:var(--smoke)">None found.</p>';
+}
+
+function approveAffiliate(id) {
+  const affiliates=AffDB.get('affiliates',[]);
+  const idx=affiliates.findIndex(a=>a.id===id);
+  if(idx!==-1){ affiliates[idx].status='active'; AffDB.set('affiliates',affiliates); }
+  toast('success','✅ Affiliate approved! SMS notification sent.');
+  affRenderAdmin();
+}
+function rejectAffiliate(id) {
+  const affiliates=AffDB.get('affiliates',[]);
+  const idx=affiliates.findIndex(a=>a.id===id);
+  if(idx!==-1){ affiliates[idx].status='rejected'; AffDB.set('affiliates',affiliates); }
+  toast('error','Affiliate rejected. Notification sent.');
+  affRenderAdmin();
+}
+function markCommPaid(id) {
+  const comms=AffDB.get('commissions',[]);
+  const idx=comms.findIndex(c=>c.id===id);
+  if(idx!==-1){ comms[idx].status='paid'; AffDB.set('commissions',comms); }
+  toast('success','Commission marked as paid');
+  affRenderAdmin();
+}
+
+// Platform copy helper
+function renderPlatformCopy(u) {
+  const platforms = [
+    { name:'Twitter / X', icon:'𝕏', copy:`"Still searching for accommodation in [STATE]? 🏡 HouseNest connects you directly to verified landlords — zero agent fees, legal agreement included, escrow payment protection. Use my code ${u.code}: housenest.ng/ref/${u.code} #HouseNest #Nigeria #NYSC"` },
+    { name:'WhatsApp Status', icon:'💬', copy:`"Looking for a home? Use my HouseNest code ${u.code} to find verified listings across Ondo, Ekiti, Oyo, Osun & Kwara. Zero agent fees! housenest.ng/ref/${u.code}"` },
+    { name:'Instagram Caption', icon:'📸', copy:`"New city, new home ✨ Whether you're a corper, student, or relocating for work — HouseNest has verified listings with no agent fees and built-in legal protection. Link in bio! Code: ${u.code}"` },
+    { name:'Facebook Group', icon:'👍', copy:`"Hi everyone! I wanted to share something really useful for anyone looking for accommodation in Southwest Nigeria. HouseNest is a platform that connects you directly to verified landlords — no agent, no commission, with legal tenancy agreements. Use referral code ${u.code} or visit housenest.ng/ref/${u.code}"` },
+  ];
+  return platforms.map(p=>`
+  <div style="margin-bottom:1.2rem">
+    <div style="font-weight:700;font-size:0.82rem;color:var(--forest);margin-bottom:0.4rem">${p.icon} ${p.name}</div>
+    <div style="background:var(--mist);border-radius:10px;padding:0.9rem;font-size:0.8rem;color:var(--forest);line-height:1.65;position:relative">
+      ${p.copy}
+      <button class="code-copy-btn" style="position:absolute;top:0.6rem;right:0.6rem;background:var(--sand);color:var(--forest)" onclick="copyText('${p.copy.replace(/'/g,"\\'")}')">Copy</button>
+    </div>
+  </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// SOCIAL SHARING
+// ═══════════════════════════════════════════════════
+function shareToSocial(platform, code) {
+  const link = getReferralLink(code);
+  const text = `Find verified homes across Ondo, Ekiti, Oyo, Osun & Kwara with HouseNest — zero agent fees, legal agreements, escrow protection. Use my code ${code}!`;
+  const urls = {
+    twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text+' '+link)}`,
+    whatsapp: `https://wa.me/?text=${encodeURIComponent(text+' '+link)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}&quote=${encodeURIComponent(text)}`,
+    instagram: null,
+  };
+  if(platform==='instagram') { copyText(text+'\n'+link); toast('success','📸 Caption copied! Open Instagram and paste in your post or Story.'); return; }
+  if(urls[platform]) { window.open(urls[platform],'_blank','width=600,height=400'); }
+}
+
+function copyCode(code) { copyText(code); }
+function copyLink(code) { copyText(getReferralLink(code)); toast('success','🔗 Referral link copied to clipboard!'); }
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+
+
+
+// Affiliate module init
+function initAffiliateModule() {
+  affSeedData();
+  affUpdateNavState();
+}
+
 </script>
 </body>
 </html>
