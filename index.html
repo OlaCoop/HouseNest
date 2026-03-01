@@ -3220,11 +3220,49 @@ function renderDetailGallery(l) {
 
 function renderDetailContent(l) {
   const reviews = DB.get('reviews',[]).filter(r=>r.listingId===l.id);
+  // Fetch real reviews from Supabase async and refresh after render
+  const isRealUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(l.id);
+  if (isRealUUID) {
+    setTimeout(()=>{
+      SB.select('reviews', `listing_id=eq.${l.id}&order=created_at.desc`).then(sbReviews => {
+        if (!sbReviews || !sbReviews.length) return;
+        const mapped = sbReviews.map(r=>({
+          id:r.id, listingId:r.listing_id, userId:r.user_id,
+          userName:r.user_name, userRole:r.user_role,
+          rating:r.rating, text:r.text,
+        }));
+        // Update review list in DOM
+        const listEl = document.querySelector('#dtp-reviews .review-list');
+        const countEl = document.querySelector('#dtp-reviews .review-count-txt');
+        const scoreEl = document.querySelector('#dtp-reviews .review-big-score');
+        const starsEl = document.querySelector('#dtp-reviews .review-stars-big');
+        const tabBtn  = document.querySelector('.det-tab[onclick*="reviews"]');
+        if (listEl) {
+          listEl.innerHTML = mapped.map(r=>`
+            <div class="review-item">
+              <div class="review-meta">
+                <div class="review-av" style="background:${avatarColor(r.userName||'U')}">${(r.userName||'U')[0]}</div>
+                <div><div class="review-author">${r.userName||'Anonymous'}</div><div class="review-role-tag">${r.userRole||''}</div></div>
+                <div class="review-stars">${starStr(r.rating)}</div>
+              </div>
+              <p class="review-text">"${r.text}"</p>
+            </div>`).join('') || '<p style="color:var(--smoke);font-size:0.85rem">No reviews yet.</p>';
+        }
+        if (mapped.length) {
+          const avg = mapped.reduce((s,r)=>s+r.rating,0)/mapped.length;
+          if (scoreEl) scoreEl.textContent = avg.toFixed(1);
+          if (starsEl) starsEl.innerHTML = starStr(Math.round(avg));
+          if (countEl) countEl.textContent = mapped.length+' review'+(mapped.length!==1?'s':'');
+          if (tabBtn)  tabBtn.textContent  = '⭐ Reviews ('+mapped.length+')';
+        }
+      }).catch(()=>{});
+    }, 300);
+  }
   const avgRating = reviews.length>0 ? reviews.reduce((s,r)=>s+r.rating,0)/reviews.length : l.rating||4.0;
   const mapQ = l.mapQuery || encodeURIComponent(l.address+' '+l.state+' Nigeria');
   const mapSrc = `https://maps.google.com/maps?q=${mapQ}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   const nearby = NEARBY_TEMPLATES[l.state]||NEARBY_TEMPLATES['Ondo'];
-  const landlord = DB.get('users',[]).find(u=>u.id===l.landlordId)||{firstName:'Landlord',lastName:'',role:'landlord'};
+  const landlord = DB.get('users',[]).find(u=>u.id===l.landlordId)||{firstName:'Landlord',lastName:'',role:'landlord',id:l.landlordId};
 
   // Rating bars
   const stars = [5,4,3,2,1];
@@ -3343,7 +3381,7 @@ function renderDetailContent(l) {
       </div>
       <hr class="sidebar-divider">
       <button class="btn btn-primary btn-full mt-2" onclick="requireAuth(()=>handleApply('${l.id}'))">Apply for This Property</button>
-      <button class="btn btn-outline btn-full mt-2" onclick="requireAuth(()=>handleMessage('${l.id}','${landlord.id||'demo-landlord'}'))">💬 Message Landlord</button>
+      <button class="btn btn-outline btn-full mt-2" onclick="requireAuth(()=>handleMessage('${l.id}','${l.landlordId}'))">💬 Message Landlord</button>
       <button class="btn btn-full mt-1" style="background:var(--mist);color:var(--smoke)" onclick="toggleSaveFromDetail('${l.id}')">🤍 Save Listing</button>
     </div>
     <div class="sidebar-card" style="font-size:0.82rem;color:var(--smoke);line-height:1.7">
@@ -3612,27 +3650,10 @@ function switchDashPanel(panel, btn) {
   }
 
   else if (panel==='applications') {
-    // Landlord view: applications for their listings
-    const allUsers = DB.get('users',[]);
-    const applicants = allUsers.flatMap(u=>
-      (u.applications||[]).filter(a=>myListings.find(l=>l.id===a.listingId))
-        .map(a=>({...a,applicant:u}))
-    );
-    content=`<div class="dash-header"><div><div class="dash-welcome">Applications Received</div><div class="dash-sub">${applicants.length} application${applicants.length!==1?'s':''}</div></div></div>
-    <div class="dash-panel">
-    ${applicants.length===0?'<p style="color:var(--smoke);font-size:0.88rem">No applications yet. Share your listings to get tenants.</p>':
-    applicants.map(a=>{
-      const l=listings.find(x=>x.id===a.listingId);
-      return `<div class="dash-listing-row">
-        <div class="dash-listing-thumb" style="background:${avatarColor(a.applicant.firstName)};display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem">${a.applicant.firstName[0]}${a.applicant.lastName[0]}</div>
-        <div class="dash-listing-info">
-          <div class="dash-listing-name">${a.applicant.firstName} ${a.applicant.lastName} <span style="font-size:0.72rem;padding:0.15rem 0.4rem;border-radius:4px;background:var(--mist);color:var(--smoke)">${a.applicant.role}</span></div>
-          <div class="dash-listing-meta">${l?l.name:a.listingId} · ${a.applicant.phone} · Applied ${timeAgo(a.appliedAt)}</div>
-        </div>
-        <span class="dash-listing-status status-pending">${a.status}</span>
-      </div>`;}).join('')}
-    </div>`;
+    renderApplicationsPanel(myListings);
+    return;
   }
+
 
   else if (panel==='agreements') {
     // Load accepted applications and generate agreements
@@ -3726,6 +3747,84 @@ function switchDashPanel(panel, btn) {
   }
 
   document.getElementById('dashMain').innerHTML = content || '<div class="dash-header"><div class="dash-welcome">Coming soon</div></div>';
+}
+
+// ── APPLICATIONS PANEL ───────────────────────────────
+async function renderApplicationsPanel(myListings) {
+  const main = document.getElementById('dashMain');
+  main.innerHTML = `
+  <div class="dash-header">
+    <div>
+      <div class="dash-welcome">Applications Received</div>
+      <div class="dash-sub" id="apps-sub">Loading...</div>
+    </div>
+  </div>
+  <div id="appsBody"><div style="text-align:center;padding:2rem;color:var(--smoke)">⏳ Loading...</div></div>`;
+
+  try {
+    const listingIds = myListings.map(l=>l.id)
+      .filter(id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id));
+
+    let apps = [];
+    if (listingIds.length > 0) {
+      apps = await SB.selectAuth('applications',
+        'listing_id=in.('+listingIds.join(',')+')'+'&order=applied_at.desc');
+    }
+
+    const subEl = document.getElementById('apps-sub');
+    if (subEl) subEl.textContent = apps.length+' application'+(apps.length!==1?'s':'')+' received';
+
+    if (apps.length === 0) {
+      document.getElementById('appsBody').innerHTML =
+        '<div class="dash-panel"><p style="color:var(--smoke);font-size:0.88rem">No applications yet. Share your listings to attract tenants.</p></div>';
+      return;
+    }
+
+    const tenantIds = [...new Set(apps.map(a=>a.tenant_id))];
+    const tenants = await SB.select('users',
+      'id=in.('+tenantIds.join(',')+')'+'&select=id,first_name,last_name,email,phone,role');
+    const tm = {};
+    tenants.forEach(t=>tm[t.id]=t);
+
+    document.getElementById('appsBody').innerHTML = '<div class="dash-panel">' +
+      apps.map(app=>{
+        const lst = myListings.find(l=>l.id===app.listing_id);
+        const ten = tm[app.tenant_id]||{};
+        const name = ten.first_name ? ten.first_name+' '+ten.last_name : 'Unknown Tenant';
+        return '<div class="dash-listing-row" style="flex-wrap:wrap;gap:0.5rem">'+
+          '<div class="dash-listing-thumb" style="background:'+avatarColor(ten.first_name||'T')+';display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--bone);border-radius:10px;flex-shrink:0">'+(ten.first_name||'?')[0]+'</div>'+
+          '<div class="dash-listing-info" style="flex:1;min-width:150px">'+
+            '<div class="dash-listing-name">'+name+'<span style="font-size:0.7rem;background:rgba(246,241,232,0.08);padding:0.15rem 0.4rem;border-radius:4px;margin-left:0.3rem;color:var(--smoke)">'+(ten.role||'tenant')+'</span></div>'+
+            '<div class="dash-listing-meta">'+(lst?lst.name:'Listing')+' · '+(ten.phone||ten.email||'No contact')+' · Applied '+timeAgo(new Date(app.applied_at).getTime())+'</div>'+
+          '</div>'+
+          '<div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0">'+
+            '<span class="dash-listing-status status-'+app.status+'">'+app.status+'</span>'+
+            (app.status==='pending'?
+              '<button class="btn btn-sm" style="background:rgba(42,124,56,0.15);color:var(--ok);border:1px solid rgba(42,124,56,0.3);font-size:0.72rem" onclick="updateApplication(&quot;'+app.id+'&quot;,&quot;accepted&quot;,this)">✓ Accept</button>'+
+              '<button class="btn btn-sm" style="background:rgba(200,50,60,0.08);color:var(--err);border:1px solid rgba(200,50,60,0.2);font-size:0.72rem" onclick="updateApplication(&quot;'+app.id+'&quot;,&quot;rejected&quot;,this)">✕ Decline</button>':'')+
+          '</div>'+
+        '</div>';
+      }).join('')+'</div>';
+  } catch(e) {
+    console.error('Applications load error:', e);
+    const el = document.getElementById('appsBody');
+    if(el) el.innerHTML = '<div class="dash-panel"><p style="color:var(--smoke)">Failed to load. Please try again.</p></div>';
+  }
+}
+
+async function updateApplication(appId, status, btn) {
+  if(btn) btn.disabled = true;
+  try {
+    await SB.updateAuth('applications', {status}, 'id=eq.'+appId);
+    toast('success', status==='accepted'?'✅ Application accepted!':'✕ Application declined.');
+    const u = state.currentUser;
+    const myListings = getListings().filter(l=>l.landlordId===u.id);
+    renderApplicationsPanel(myListings);
+  } catch(e) {
+    console.error('Update application:', e);
+    toast('error','Failed to update. Please try again.');
+    if(btn) btn.disabled = false;
+  }
 }
 
 // ── AGREEMENTS PANEL ─────────────────────────────────
@@ -5981,17 +6080,17 @@ function affRenderDashboard() {
     </div>
   </div>
   <div class="ds-label">Main</div>
-  <button class="ds-btn ${dashPanel==='overview'?'active':''}" onclick="switchDashPanel('overview',this)"><span class="ds-icon">📊</span>Overview</button>
-  <button class="ds-btn ${dashPanel==='mycode'?'active':''}" onclick="switchDashPanel('mycode',this)"><span class="ds-icon">🔗</span>My Referral Code</button>
-  <button class="ds-btn ${dashPanel==='commissions'?'active':''}" onclick="switchDashPanel('commissions',this)"><span class="ds-icon">💰</span>Commissions <span class="ds-badge">${commissions.filter(c=>c.status==='pending').length||''}</span></button>
+  <button class="ds-btn ${dashPanel==='overview'?'active':''}" onclick="affSwitchDashPanel('overview',this)"><span class="ds-icon">📊</span>Overview</button>
+  <button class="ds-btn ${dashPanel==='mycode'?'active':''}" onclick="affSwitchDashPanel('mycode',this)"><span class="ds-icon">🔗</span>My Referral Code</button>
+  <button class="ds-btn ${dashPanel==='commissions'?'active':''}" onclick="affSwitchDashPanel('commissions',this)"><span class="ds-icon">💰</span>Commissions <span class="ds-badge">${commissions.filter(c=>c.status==='pending').length||''}</span></button>
   <div class="ds-label">Community</div>
-  <button class="ds-btn ${dashPanel==='leaderboard'?'active':''}" onclick="switchDashPanel('leaderboard',this)"><span class="ds-icon">🏆</span>Leaderboard</button>
-  <button class="ds-btn ${dashPanel==='tools'?'active':''}" onclick="switchDashPanel('tools',this)"><span class="ds-icon">🛠️</span>Marketing Tools</button>
+  <button class="ds-btn ${dashPanel==='leaderboard'?'active':''}" onclick="affSwitchDashPanel('leaderboard',this)"><span class="ds-icon">🏆</span>Leaderboard</button>
+  <button class="ds-btn ${dashPanel==='tools'?'active':''}" onclick="affSwitchDashPanel('tools',this)"><span class="ds-icon">🛠️</span>Marketing Tools</button>
   <div class="ds-label">Account</div>
-  <button class="ds-btn" onclick="switchDashPanel('profile',this)"><span class="ds-icon">👤</span>My Profile</button>
+  <button class="ds-btn" onclick="affSwitchDashPanel('profile',this)"><span class="ds-icon">👤</span>My Profile</button>
   <button class="ds-btn" onclick="affLogout()"><span class="ds-icon">🚪</span>Log Out</button>`;
 
-  switchDashPanel(dashPanel, null);
+  affSwitchDashPanel(dashPanel, null);
 }
 
 function affSwitchDashPanel(panel, btn) {
