@@ -2511,6 +2511,35 @@ footer { background:var(--ink); padding:4rem 0 2rem; }
 // SUPABASE + CLOUDINARY INTEGRATION
 // ════════════════════════════════════════════════════════
 const SUPA_URL  = 'https://pojelgiyybdfyowbdlam.supabase.co';
+
+// ── Token refresh helper ──────────────────────────────
+async function refreshSessionIfNeeded() {
+  const session = SB.getSession();
+  if (!session?.refresh_token) return null;
+  try {
+    const r = await fetch(`${SUPA_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: {'apikey': SUPA_ANON, 'Content-Type': 'application/json'},
+      body: JSON.stringify({refresh_token: session.refresh_token})
+    });
+    if (!r.ok) { SB.clearSession(); return null; }
+    const newSession = await r.json();
+    if (newSession.access_token) { SB.setSession(newSession); return newSession.access_token; }
+  } catch(e) { console.error('Token refresh failed:', e); }
+  return null;
+}
+async function getValidToken() {
+  const session = SB.getSession();
+  if (!session?.access_token) return SUPA_ANON;
+  try {
+    const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+    if (payload.exp * 1000 - Date.now() < 60000) {
+      const newToken = await refreshSessionIfNeeded();
+      return newToken || session.access_token;
+    }
+  } catch(e) {}
+  return session.access_token;
+}
 const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvamVsZ2l5eWJkZnlvd2JkbGFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzODM1NjIsImV4cCI6MjA4Nzk1OTU2Mn0.yxBB5KUHHGhbdTCHOsk6-6NL9ETvZN9cKN5aQO9lOBU';
 const CLOUD_NAME   = 'dchsz8yc8';
 const CLOUD_PRESET_LISTINGS = 'housenest_listings';
@@ -2585,7 +2614,7 @@ const SB = {
 
   // Auth-aware select (uses session token for RLS)
   async selectAuth(table, query='') {
-    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const token = await getValidToken();
     const h = {...SB.headers, 'Authorization':'Bearer '+token};
     const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {headers:h});
     if (!r.ok) { console.error('SB.selectAuth error', table, await r.text()); return []; }
@@ -2593,7 +2622,7 @@ const SB = {
   },
 
   async insertAuth(table, data) {
-    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const token = await getValidToken();
     const h = {...SB.headers, 'Authorization':'Bearer '+token};
     const r = await fetch(`${SUPA_URL}/rest/v1/${table}`, {
       method:'POST', headers:h, body:JSON.stringify(data)
@@ -2604,7 +2633,7 @@ const SB = {
   },
 
   async updateAuth(table, data, query) {
-    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const token = await getValidToken();
     const h = {...SB.headers, 'Authorization':'Bearer '+token};
     const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {
       method:'PATCH', headers:h, body:JSON.stringify(data)
@@ -2615,7 +2644,7 @@ const SB = {
   },
 
   async deleteAuth(table, query) {
-    const token = SB.getSession()?.access_token || SUPA_ANON;
+    const token = await getValidToken();
     const h = {...SB.headers, 'Authorization':'Bearer '+token};
     const r = await fetch(`${SUPA_URL}/rest/v1/${table}?${query}`, {
       method:'DELETE', headers:h
@@ -2835,7 +2864,9 @@ async function handleLogin() {
       showFieldError('loginPassErr', authData.error?.message || 'Incorrect email or password');
       return;
     }
-    SB.setSession(authData);
+    // Supabase may return session nested or at root level
+    const sessionToStore = authData.session || authData;
+    SB.setSession(sessionToStore);
 
     // Fetch user profile from our users table
     const users = await SB.selectAuth('users', `email=eq.${encodeURIComponent(email)}&limit=1`);
@@ -2934,9 +2965,9 @@ async function handleSignup() {
       return;
     }
 
-    // Email confirmation is off — session available immediately
-    if (authData.session) SB.setSession(authData.session);
-    else if (authData.access_token) SB.setSession(authData);
+    // Email confirmation is off — store whatever session Supabase returned
+    const sessionData = authData.session || (authData.access_token ? authData : null);
+    if (sessionData) SB.setSession(sessionData);
 
     // 2. Insert profile row (trigger may have already done this, so we upsert)
     const userData = {
@@ -2956,8 +2987,9 @@ async function handleSignup() {
     }
 
     if (!dbUser) {
-      toast('error','Account created but profile setup failed. Please log in to continue.');
-      return;
+      // Trigger will create profile on login — build minimal object so signup completes
+      dbUser = { id: authId, auth_id: authId, first_name: first, last_name: last,
+        email, phone, role: selectedRole, is_admin: false, is_verified: false, kyc_verified: false };
     }
 
     const user = mapUserFromDB(dbUser);
@@ -3497,9 +3529,8 @@ function toggleSaveFromDetail(id) { toggleSave({stopPropagation:()=>{}},id); }
 
 async function handleApply(listingId) {
   try {
-    const session = SB.getSession();
-    if (!session?.access_token) { openModal('authModal','login'); return; }
-    const token = session.access_token;
+    const token = await getValidToken();
+    if (token === SUPA_ANON) { openModal('authModal','login'); return; }
     const headers = {...SB.headers, 'Authorization':'Bearer '+token};
     const r = await fetch(`${SUPA_URL}/rest/v1/applications`, {
       method:'POST', headers,
@@ -3568,7 +3599,7 @@ function renderDashboard() {
     <div class="dash-nav-label">Menu</div>
     ${navItems.map((n,i)=>`<button class="dash-nav-item ${i===0?'active':''}" data-panel="${n.view}" onclick="switchDashPanel('${n.view}',this)"><span class="dash-icon">${n.icon}</span>${n.label}</button>`).join('')}
     <div style="flex:1"></div>
-    ${!u.isAffiliate ? `<button class="dash-nav-item" style="margin-bottom:0.3rem;background:rgba(212,78,26,0.08);border:1px solid rgba(212,78,26,0.15)" onclick="navigate('earn')"><span class="dash-icon">💰</span>Earn with HouseNest</button>` : ''}
+    ${!u.isAffiliate ? `<button class="dash-nav-item" style="margin-bottom:0.3rem;background:rgba(212,78,26,0.08);border:1px solid rgba(212,78,26,0.15)" onclick="navigate('affiliate')"><span class="dash-icon">💰</span>Earn with HouseNest</button>` : ''}
     <button class="dash-nav-item" style="margin-top:auto" onclick="handleLogout()"><span class="dash-icon">🚪</span>Log Out</button>`;
 
   switchDashPanel(navItems[0].view, document.querySelector('.dash-nav-item'));
@@ -3613,7 +3644,7 @@ function switchDashPanel(panel, btn) {
         <button class="btn btn-icon" onclick="event.stopPropagation();deleteListing('${l.id}')" title="Delete listing" style="color:var(--clay)">🗑️</button>
       </div>`).join('')}
     </div>`:
-    `<div class="dash-header"><div><div class="dash-welcome">${greeting} ${u.firstName} 👋</div><div class="dash-sub">Find your perfect home across 5 states.</div></div></div>
+    `<div class="dash-header"><div><div class="dash-welcome">Find Your Next Home 🏠</div><div class="dash-sub">Browse available listings across Southwest Nigeria</div></div></div>
     <div class="dash-panel">
       <div class="dash-section-title">Quick Search</div>
       <div style="display:flex;gap:0.7rem;flex-wrap:wrap">
@@ -3635,20 +3666,9 @@ function switchDashPanel(panel, btn) {
   }
 
   else if (panel==='my-applications') {
-    const apps = u.applications||[];
-    content=`<div class="dash-header"><div><div class="dash-welcome">My Applications</div><div class="dash-sub">${apps.length} application${apps.length!==1?'s':''}</div></div></div>
-    <div class="dash-panel">
-    ${apps.length===0?'<p style="color:var(--smoke);font-size:0.88rem">You haven\'t applied to any properties yet.</p>':
-    apps.map(a=>{
-      const l=listings.find(x=>x.id===a.listingId);
-      return l?`<div class="dash-listing-row" onclick="openListing('${l.id}')">
-        <div class="dash-listing-thumb ${l.imgClass}">${l.images?.length?`<img src="${l.images[0]}" alt="">`:l.emoji}</div>
-        <div class="dash-listing-info"><div class="dash-listing-name">${l.name}</div><div class="dash-listing-meta">${l.city}, ${l.state} · Applied ${timeAgo(a.appliedAt)}</div></div>
-        <span class="dash-listing-status status-pending">${a.status}</span>
-      </div>`:'';}).join('')}
-    </div>`;
+    renderMyApplicationsPanel();
+    return;
   }
-
   else if (panel==='applications') {
     renderApplicationsPanel(myListings);
     return;
@@ -3665,7 +3685,8 @@ function switchDashPanel(panel, btn) {
   else if (panel==='analytics') {
     // Render immediately with local data, then refresh from Supabase
     const baseContent = () => {
-      const totalReviews = reviews.filter(r=>myListings.find(l=>l.id===r.listingId)).length;
+      // Sum review counts from listing objects (updated from Supabase)
+      const totalReviews = myListings.reduce((s,l)=>s+(l.reviewCount||0),0);
       const avgRating = myListings.length ? (myListings.reduce((s,l)=>s+(l.rating||0),0)/myListings.length).toFixed(1) : '—';
       return `<div class="dash-header"><div><div class="dash-welcome">Analytics</div><div class="dash-sub">Performance overview for your listings</div></div></div>
       <div class="dash-stats">
@@ -3721,20 +3742,9 @@ function switchDashPanel(panel, btn) {
 
 
   else if (panel==='my-reviews') {
-    const myReviews = reviews.filter(r=>r.userId===u.id);
-    content=`<div class="dash-header"><div><div class="dash-welcome">My Reviews</div><div class="dash-sub">${myReviews.length} review${myReviews.length!==1?'s':''} written</div></div></div>
-    <div class="dash-panel">
-    ${myReviews.length===0?'<p style="color:var(--smoke);font-size:0.88rem">You haven\'t written any reviews yet.</p>':
-    myReviews.map(r=>{
-      const l=listings.find(x=>x.id===r.listingId);
-      return `<div style="padding:1rem 0;border-bottom:1px solid var(--mist)">
-        <div style="font-weight:700;color:var(--forest);margin-bottom:0.3rem">${l?l.name:r.listingId}</div>
-        <div style="color:var(--ochre);font-size:0.85rem">${starStr(r.rating)} <span style="color:var(--smoke);font-size:0.72rem">${timeAgo(r.createdAt)}</span></div>
-        <div style="font-size:0.85rem;color:var(--smoke);margin-top:0.4rem">"${r.text}"</div>
-      </div>`;}).join('')}
-    </div>`;
+    renderMyReviewsPanel();
+    return;
   }
-
   else if (panel==='profile-dash') { navigate('profile'); return; }
 
   else if (panel==='admin-panel') {
@@ -4116,9 +4126,105 @@ async function renderAdminPanel() {
   }
 }
 
-// ── ADD LISTING FORM ─────────────────────────────────
-let uploadedImages = [];
-let rulesArr = ['No smoking','No parties after 10PM'];
+// ── MY REVIEWS PANEL (Supabase) ──────────────────────
+async function renderMyReviewsPanel() {
+  const main = document.getElementById('dashMain');
+  const u = state.currentUser;
+  main.innerHTML = `
+  <div class="dash-header">
+    <div><div class="dash-welcome">My Reviews</div>
+    <div class="dash-sub" id="rev-sub">Loading...</div></div>
+  </div>
+  <div id="revBody"><div style="text-align:center;padding:2rem;color:var(--smoke)">⏳ Loading...</div></div>`;
+
+  try {
+    const reviews = await SB.selectAuth('reviews',
+      `user_id=eq.${u.id}&order=created_at.desc`);
+    const subEl = document.getElementById('rev-sub');
+    if(subEl) subEl.textContent = reviews.length + ' review' + (reviews.length!==1?'s':'') + ' written';
+    const listings = getListings();
+    document.getElementById('revBody').innerHTML = reviews.length === 0
+      ? '<div class="dash-panel"><p style="color:var(--smoke);font-size:0.88rem">You haven\'t written any reviews yet.</p></div>'
+      : '<div class="dash-panel">' + reviews.map(r=>{
+          const l = listings.find(x=>x.id===r.listing_id);
+          return '<div style="padding:1rem 0;border-bottom:1px solid var(--mist)">' +
+            '<div style="font-weight:700;color:var(--forest);margin-bottom:0.3rem">' + (l?l.name:r.listing_id) + '</div>' +
+            '<div style="color:var(--ochre);font-size:0.85rem">' + starStr(r.rating) + ' <span style="color:var(--smoke);font-size:0.75rem;margin-left:0.4rem">' + timeAgo(new Date(r.created_at).getTime()) + '</span></div>' +
+            '<div style="font-size:0.85rem;color:var(--smoke);margin-top:0.4rem">"' + r.text + '"</div>' +
+          '</div>';
+        }).join('') + '</div>';
+  } catch(e) {
+    console.error('My reviews error:', e);
+    const el = document.getElementById('revBody');
+    if(el) el.innerHTML = '<div class="dash-panel"><p style="color:var(--smoke)">Failed to load reviews.</p></div>';
+  }
+}
+
+// ── MY APPLICATIONS PANEL (Supabase) ─────────────────
+async function renderMyApplicationsPanel() {
+  const main = document.getElementById('dashMain');
+  const u = state.currentUser;
+  main.innerHTML = `
+  <div class="dash-header">
+    <div><div class="dash-welcome">My Applications</div>
+    <div class="dash-sub" id="myapp-sub">Loading...</div></div>
+  </div>
+  <div id="myAppBody"><div style="text-align:center;padding:2rem;color:var(--smoke)">⏳ Loading...</div></div>`;
+
+  try {
+    const apps = await SB.selectAuth('applications',
+      `tenant_id=eq.${u.id}&order=applied_at.desc`);
+    const subEl = document.getElementById('myapp-sub');
+    if(subEl) subEl.textContent = apps.length + ' application' + (apps.length!==1?'s':'') + ' submitted';
+    const listings = getListings();
+    document.getElementById('myAppBody').innerHTML = apps.length === 0
+      ? '<div class="dash-panel"><p style="color:var(--smoke);font-size:0.88rem">You haven\'t applied to any properties yet.</p></div>'
+      : '<div class="dash-panel">' + apps.map(app=>{
+          const l = listings.find(x=>x.id===app.listing_id);
+          return l ? '<div class="dash-listing-row" onclick="openListing(&quot;'+l.id+'&quot;)" style="cursor:pointer">' +
+            '<div class="dash-listing-thumb '+l.imgClass+'">'+(l.images?.length?'<img src="'+l.images[0]+'" alt="">':l.emoji||'🏠')+'</div>' +
+            '<div class="dash-listing-info">' +
+              '<div class="dash-listing-name">'+l.name+'</div>' +
+              '<div class="dash-listing-meta">'+l.city+', '+l.state+' · ₦'+l.price.toLocaleString()+'/'+l.period+' · Applied '+timeAgo(new Date(app.applied_at).getTime())+'</div>' +
+            '</div>' +
+            '<span class="dash-listing-status status-'+app.status+'">'+app.status+'</span>' +
+          '</div>' : '';
+        }).join('') + '</div>';
+  } catch(e) {
+    console.error('My applications error:', e);
+    const el = document.getElementById('myAppBody');
+    if(el) el.innerHTML = '<div class="dash-panel"><p style="color:var(--smoke)">Failed to load applications.</p></div>';
+  }
+}
+
+// ── MARKETING TOOL ACTIONS ────────────────────────────
+function getCaption(code, role) {
+  const captions = {
+    corper: `Looking for housing as a corper in Southwest Nigeria? 🏡\n\nHouseNest connects NYSC members with verified, affordable accommodations near your PPA.\n\n✅ Corper-verified landlords\n✅ Escrow-protected payments\n✅ Zero agent fees\n\nUse my referral code: ${code}\nhttps://housenest.netlify.app`,
+    influencer: `Tired of housing wahala? 😩 Let me put you on 🏡\n\nHouseNest is where landlords and tenants meet safely — verified listings, protected payments, no stress.\n\nSign up with my code: ${code}\nhttps://housenest.netlify.app`,
+    agent: `Attention property seekers in Southwest Nigeria 📣\n\nHouseNest is the platform for verified housing. Landlords, tenants, corpers — everyone welcome.\n\nRegister here: https://housenest.netlify.app\nRef code: ${code}`,
+    user: `Found a great housing platform! 🏠\n\nHouseNest has verified listings, escrow payments and great support. Check it out:\nhttps://housenest.netlify.app (Code: ${code})`,
+  };
+  const text = captions[role] || captions.user;
+  navigator.clipboard?.writeText(text).catch(()=>{});
+  showTextModal('Caption Templates', text);
+}
+
+function getTrackingLink(code) {
+  const link = `https://housenest.netlify.app?ref=${code}&utm_source=affiliate&utm_medium=referral&utm_campaign=${code}`;
+  navigator.clipboard?.writeText(link).catch(()=>{});
+  showTextModal('Your Tracking Link', link);
+}
+
+function getPitchScript(code) {
+  const script = `"Hey, are you looking for a place to stay? HouseNest is a platform that connects corpers and students with verified landlords across Southwest Nigeria. No agent fees, payments are escrow-protected so you can't get scammed, and all landlords are vetted. You can sign up at housenest.netlify.app — use my code ${code} when you register and we both benefit. Takes 2 minutes."`;
+  showTextModal('Camp Pitch Script (60 seconds)', script);
+}
+
+function getBrandAsset(code) {
+  showTextModal('Brand Assets', 'Brand kit coming soon. In the meantime, use this referral link in your bio:\nhttps://housenest.netlify.app?ref='+code+'\n\nBrand colours:\n• Forest Green: #2a5c30\n• Bone White: #f6f1e8\n• Clay Orange: #d44e1a\n• Ochre: #c87820');
+}
+
 
 function renderAddListingForm() {
   uploadedImages=[];
@@ -4363,8 +4469,38 @@ async function saveListing() {
   };
   try {
     if(btn) btn.disabled=true;
-    const saved = await SB.insertAuth('listings', dbListing);
-    if(saved) {
+    // Ensure landlord_id is the users.id (UUID), not auth_id
+    const userId = state.currentUser.id;
+    dbListing.landlord_id = userId;
+
+    const token = await getValidToken();
+    const saveRes = await fetch(`${SUPA_URL}/rest/v1/listings`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_ANON,
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+      },
+      body: JSON.stringify(dbListing)
+    });
+    if (!saveRes.ok) {
+      const errText = await saveRes.text();
+      console.error('Save listing error:', errText);
+      // Parse for useful message
+      let errMsg = 'Failed to save listing.';
+      try {
+        const errJson = JSON.parse(errText);
+        if (errJson.message?.includes('security policy')) errMsg = 'Session expired. Please log out and back in.';
+        else if (errJson.message?.includes('violates foreign key')) errMsg = 'Account not fully set up. Please log out and log back in.';
+        else if (errJson.message) errMsg = errJson.message;
+      } catch(pe) {}
+      toast('error', errMsg);
+      return;
+    }
+    const savedArr = await saveRes.json();
+    const saved = Array.isArray(savedArr) ? savedArr[0] : savedArr;
+    if(saved && saved.id) {
       _listingsCache.push(mapListingFromDB(saved));
       DB.set('listings', _listingsCache);
     }
@@ -4372,7 +4508,7 @@ async function saveListing() {
     navigate('dashboard');
   } catch(e) {
     console.error('Save listing error:', e);
-    toast('error','Failed to save listing. Please try again.');
+    toast('error','Failed to save listing. Please check your connection.');
   } finally {
     if(btn) btn.disabled=false;
   }
@@ -4544,9 +4680,8 @@ async function handleMessage(listingId, landlordId) {
       return;
     }
     // Create thread with explicit auth token
-    const session = SB.getSession();
-    if (!session?.access_token) { openModal('authModal','login'); return; }
-    const token = session.access_token;
+    const token = await getValidToken();
+    if (token === SUPA_ANON) { openModal('authModal','login'); return; }
     const authHeaders = {...SB.headers, 'Authorization':'Bearer '+token};
 
     const threadRes = await fetch(`${SUPA_URL}/rest/v1/message_threads`, {
@@ -5376,10 +5511,16 @@ const VERIFIED_USERS = [
 
 function trustShowAdminPanel(panel, btn) {
   if(btn){ document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
-  // Merge real KYC submissions with demo data for queue panel
+  const ab = document.getElementById('adminBody');
+  if(!ab) return;
+
+  // Show immediately with current data
+  ab.innerHTML = buildAdminBody(panel);
+
+  // For queue panel, also fetch real submissions from Supabase and merge
   if(panel==='queue') {
-    // Load real submissions from Supabase async then re-render
     SB.select('kyc_submissions', 'status=eq.pending&order=submitted_at.asc').then(realSubs => {
+      if (!realSubs || !realSubs.length) return;
       const merged = [...KYC_QUEUE, ...realSubs.map(s=>({
         id: s.user_id,
         name: s.user_name || 'Unknown',
@@ -5388,20 +5529,38 @@ function trustShowAdminPanel(panel, btn) {
         submitted: s.submitted_at ? timeAgo(new Date(s.submitted_at).getTime()) : 'just now',
         risk: s.liveness_photo_url ? 'low' : 'med',
         docs: s.docs_list || ['NIN ✓'],
+        notes: s.rejection_reason || '',
         isReal: true,
       })).filter(s=>!KYC_QUEUE.find(k=>k.id===s.id))];
       const orig = [...KYC_QUEUE];
       KYC_QUEUE.length=0; merged.forEach(m=>KYC_QUEUE.push(m));
-      const ab = document.getElementById('adminBody');
-      if(ab) { const result = buildAdminBody_queue(); if(result) ab.innerHTML=result; }
+      if(ab) ab.innerHTML = buildAdminBody('queue');
       KYC_QUEUE.length=0; orig.forEach(m=>KYC_QUEUE.push(m));
-    }).catch(()=>{});
-        // Show immediately with demo data while Supabase loads
-    if(ab) ab.innerHTML = buildAdminBody(panel);
-    return;
+    }).catch(e=>console.error('KYC fetch error', e));
   }
-  const ab = document.getElementById('adminBody');
-  if(ab) ab.innerHTML = buildAdminBody(panel);
+
+  // For verified users, transactions, disputes — fetch real data from Supabase
+  if(panel==='verified') {
+    SB.select('users','kyc_verified=eq.true&select=id,first_name,last_name,email,role,created_at&order=created_at.desc&limit=50').then(users=>{
+      if(!users.length) return;
+      const title = document.getElementById('adminTitle');
+      if(title) title.textContent = 'Verified Users ('+users.length+' total)';
+      const realSection = '<div class="stats-bar"><div class="stat-tile"><div class="stat-tile-n">'+users.length+'</div><div class="stat-tile-l">KYC Verified</div></div></div>' +
+        '<div class="dash-panel" style="margin-top:1rem"><div class="dash-panel-body">' +
+        users.map(u=>'<div style="display:flex;align-items:center;gap:0.8rem;padding:0.65rem 0;border-bottom:1px solid var(--mist)"><div style="width:32px;height:32px;border-radius:50%;background:'+avatarColor(u.first_name||'U')+';display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--bone);font-size:0.85rem;flex-shrink:0">'+(u.first_name||'?')[0]+'</div><div><div style="font-size:0.85rem;font-weight:600;color:var(--bone)">'+u.first_name+' '+u.last_name+'</div><div style="font-size:0.72rem;color:var(--smoke)">'+u.email+' · '+u.role+' · Verified '+timeAgo(new Date(u.created_at).getTime())+'</div></div><span style="margin-left:auto;font-size:0.72rem;padding:0.2rem 0.5rem;background:rgba(42,124,56,0.15);color:var(--ok);border-radius:4px">✓ KYC</span></div>').join('') +
+        '</div></div>';
+      if(ab) ab.innerHTML = realSection;
+    }).catch(()=>{});
+  }
+
+  if(panel==='transactions') {
+    SB.select('applications','status=eq.accepted&select=id,listing_id,tenant_id,applied_at&order=applied_at.desc&limit=50').then(apps=>{
+      const title = document.getElementById('adminTitle');
+      if(title) title.textContent = 'Transactions ('+apps.length+' accepted leases)';
+      if(!apps.length) { if(ab) ab.innerHTML='<div class="dash-panel"><p style="color:var(--smoke)">No completed transactions yet.</p></div>'; return; }
+      if(ab) ab.innerHTML = '<div class="stats-bar"><div class="stat-tile"><div class="stat-tile-n">'+apps.length+'</div><div class="stat-tile-l">Accepted Leases</div></div><div class="stat-tile"><div class="stat-tile-n">₦'+((apps.length*22500)/1000).toFixed(0)+'K</div><div class="stat-tile-l">Est. Platform Revenue</div></div></div><div class="dash-panel" style="margin-top:1rem"><p style="color:var(--smoke);font-size:0.85rem">'+apps.length+' accepted lease applications. Full payment processing available after Paystack integration.</p></div>';
+    }).catch(()=>{});
+  }
 }
 
 function buildAdminBody(panel) {
@@ -5750,9 +5909,13 @@ const EARN_ACTIONS = [
 
 // ── SEED DEMO DATA ───────────────────────────────────
 function affSeedData() {
+  // Don't seed fake affiliate accounts — leaderboard shows real users only
+  // Demo commissions only seeded for admin testing
   if (AffDB.get('seeded', false)) return;
 
-  const demoAffiliates = [
+  const demoAffiliates = []; // No fake users seeded in production
+
+  const demoAffiliates_UNUSED = [
     { id:'a1', firstName:'Chidi', lastName:'Okonkwo', email:'chidi@demo.ng', phone:'08011111111', role:'corper',     nysc:'OD/24A/0021', code:'CORPER-CHIDI-ODO', status:'active',  earnings:142000, pending:18000, paid:124000, referrals:12, conversions:8,  joinDate:Date.now()-86400000*45, platform:'', profileUrl:'', password:affHashPass('demo') },
     { id:'a2', firstName:'Temi',  lastName:'Adeyemi',  email:'temi@demo.ng',  phone:'08022222222', role:'influencer', nysc:'',           code:'INFL-TEMI-HN24',   status:'active',  earnings:89000,  pending:8000,  paid:81000,  referrals:28, conversions:19, joinDate:Date.now()-86400000*30, platform:'Instagram', profileUrl:'https://instagram.com/temi', password:affHashPass('demo') },
     { id:'a3', firstName:'Emeka', lastName:'Nwosu',    email:'emeka@demo.ng', phone:'08033333333', role:'agent',      nysc:'',           code:'AGT-EMEKA-IB001',  status:'active',  earnings:210000, pending:24000, paid:186000, referrals:41, conversions:31, joinDate:Date.now()-86400000*60, platform:'', profileUrl:'', password:affHashPass('demo') },
@@ -5770,7 +5933,7 @@ function affSeedData() {
     { id:'c8',affiliateId:'a4',action:'Tenant Signed Lease',listing:'Self-Contain, Akure',amount:9600,status:'pending',date:Date.now()-86400000*2 },
   ];
 
-  AffDB.set('affiliates', demoAffiliates);
+  // AffDB.set('affiliates', demoAffiliates); // disabled — no fake users
   AffDB.set('commissions', demoCommissions);
   AffDB.set('seeded', true);
 }
@@ -6242,10 +6405,10 @@ function affSwitchDashPanel(panel, btn) {
     <div class="dp-title">🛠️ Marketing Tools</div>
     <div class="dp-sub">Resources to help you convert more referrals</div>
     ${[
-      {icon:'📝',title:'Ready-Made Caption Templates',desc:'Copy-paste captions for Twitter, Instagram, WhatsApp Status and Facebook tailored to your tier.',action:'getCaptions'},
-      {icon:'🖼️',title:'HouseNest Brand Assets',desc:'Logo, banner images, and colour palette files for use in your posts. Already sized for each platform.',action:'getBranding'},
-      {icon:'📊',title:'Referral Tracking Link',desc:'Your link with UTM parameters so you can track exactly where your referrals are coming from.',action:'getUtm'},
-      {icon:'🎓',title:'NYSC Camp Pitch Script',desc:'A 60-second verbal pitch for corper-to-corper marketing at orientation camp and CDS meetings.',action:'getPitch'},
+      {icon:'📝',title:'Ready-Made Caption Templates',desc:'Copy-paste captions for Twitter, Instagram, WhatsApp & Facebook.',action:'getCaption'},
+      {icon:'🖼️',title:'HouseNest Brand Assets',desc:'Logo, banners and colour palette for use in your content.',action:'getBrandAsset'},
+      {icon:'📊',title:'Referral Tracking Link',desc:'Your unique link with UTM parameters to track where conversions come from.',action:'getTrackingLink'},
+      {icon:'🎓',title:'NYSC Camp Pitch Script',desc:'A 60-second verbal pitch for corper-to-corper marketing at orientation camps.',action:'getPitchScript'},
     ].map(t=>`
     <div class="dash-panel" style="margin-bottom:1rem">
       <div class="dash-panel-body" style="display:flex;align-items:flex-start;gap:1rem">
